@@ -25,7 +25,9 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
     public function execute($data)
     {
         $stripeSettings = $this->settingsService->getSetting('payments', 'stripe');
-
+        // TODO: Add manual capture option on stripe payment setting
+        // $manualCapture = $stripeSettings['manualCapture'];
+        $manualCapture = true;
         Stripe::setApiKey(
             $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
         );
@@ -40,8 +42,7 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
                 'confirmation_method' => 'manual',
                 'confirm'             => true,
             ];
-
-            if ($stripeSettings['manualCapture']) {
+            if ($manualCapture) {
                 $stripeData['capture_method'] = 'manual';
             }
 
@@ -71,7 +72,7 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
                 'requiresAction'            => true,
                 'paymentIntentClientSecret' => $intent->client_secret
             ];
-        } else if ($intent && ($intent->status === 'succeeded' || ($stripeSettings['manualCapture'] && $intent->status === 'requires_capture'))) {
+        } else if ($intent && ($intent->status === 'succeeded' || ($manualCapture && $intent->status === 'requires_capture'))) {
             $response = [
                 'paymentSuccessful' => true
             ];
