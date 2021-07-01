@@ -67,12 +67,13 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
 
         $response = null;
 
-        if ($intent && ($intent->status === 'requires_action' || $intent->status === 'requires_source_action') && $intent->next_action->type === 'use_stripe_sdk') {
+        if ($intent && ($intent->status === PaymentIntent::STATUS_REQUIRES_ACTION || $intent->status === PaymentIntent::STATUS_REQUIRES_SOURCE_ACTION) 
+          && $intent->next_action->type === 'use_stripe_sdk') {
             $response = [
                 'requiresAction'            => true,
                 'paymentIntentClientSecret' => $intent->client_secret
             ];
-        } else if ($intent && ($intent->status === 'succeeded' || ($manualCapture && $intent->status === 'requires_capture'))) {
+        } else if ($intent && ($intent->status === PaymentIntent::STATUS_SUCCEEDED || ($manualCapture && $intent->status === PaymentIntent::STATUS_REQUIRES_CAPTURE))) {
             $response = [
                 'paymentSuccessful' => true,
                 'paymentIntentId' => $intent->id,

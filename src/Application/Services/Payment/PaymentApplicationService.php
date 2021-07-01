@@ -30,6 +30,7 @@ use AmeliaBooking\Infrastructure\Services\Payment\CurrencyService;
 use AmeliaBooking\Infrastructure\Services\Payment\PayPalService;
 use AmeliaBooking\Infrastructure\Services\Payment\StripeService;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
+use AmeliaStripe\PaymentIntent;
 use Exception;
 use Slim\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
@@ -277,6 +278,36 @@ class PaymentApplicationService
         }
 
         return false;
+    }
+
+    /**
+     * @param Payment $payment
+     * @return bool
+     */
+    public function processPaymentCapture($payment) 
+    {
+      $paymentData = $payment->getData()->getValue();
+      $gateway = $payment->getGateway()->getName();
+      if (!$paymentData || empty($paymentData)) {
+         return false;
+      }
+      $intentData = json_decode($paymentData);
+      switch ($gateway) {
+        case 'stripe':           
+          if ($intentData['paymentStatus'] === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+            /** @var PaymentIntent $intent */    
+            $intent = new PaymentIntent($intentData['paymentIntentId']);
+            $intent->capture();
+          }
+          return true;
+        case 'payPal':
+          // TODO: Implement for paypal
+          return true;
+        case 'onSite':
+        case 'wc':
+        case 'mollie':
+          return true;
+      }
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace AmeliaBooking\Application\Services\Booking;
 
-use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\TimeSlot\TimeSlotService;
 use AmeliaBooking\Domain\Collection\Collection;
@@ -23,7 +22,6 @@ use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentStatus;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
-use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
