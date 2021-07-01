@@ -74,7 +74,9 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
             ];
         } else if ($intent && ($intent->status === 'succeeded' || ($manualCapture && $intent->status === 'requires_capture'))) {
             $response = [
-                'paymentSuccessful' => true
+                'paymentSuccessful' => true,
+                'paymentIntentId' => $intent->id,
+                'paymentStatus' => $intent->status
             ];
         } else {
             $response = [

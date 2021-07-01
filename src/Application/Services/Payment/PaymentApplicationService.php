@@ -247,6 +247,15 @@ class PaymentApplicationService
                     return false;
                 }
 
+                if (isset($response['paymentIntentId'])) {
+                  $result->setData(
+                      [
+                          'paymentIntentId' => $response['paymentIntentId'],
+                          'paymentStatus' => $response['paymentStatus']
+                      ]
+                  );
+                }
+
                 return true;
 
             case ('onSite'):

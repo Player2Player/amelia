@@ -54,6 +54,7 @@ use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\Services\Recaptcha\RecaptchaService;
 use AmeliaBooking\Infrastructure\WP\EventListeners\Booking\Appointment\BookingAddedEventHandler;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
+use AmeliaBooking\Domain\ValueObjects\String\PaymentData;
 use DateTime;
 use Exception;
 use Interop\Container\Exception\ContainerException;
@@ -183,6 +184,8 @@ abstract class AbstractReservationService implements ReservationServiceInterface
 
         /** @var CustomerBookingRepository $customerBookingRepository */
         $customerBookingRepository = $this->container->get('domain.booking.appointment.repository');
+        /** @var PaymentRepository $paymentRepository */
+        $paymentRepository = $this->container->get('domain.payment.repository');
 
         $customerBookingRepository->beginTransaction();
 
@@ -199,6 +202,17 @@ abstract class AbstractReservationService implements ReservationServiceInterface
 
         $paymentCompleted = empty($data['bookings'][0]['packageCustomerService']['id']) ?
             $paymentAS->processPayment($result, $data['payment'], $reservation, new BookingType($type)) : true;
+
+        
+        // set payment data returning for the payment gateway
+        $intentId = isset($result->getData()['paymentIntentId']) ? $result->getData()['paymentIntentId'] : null;
+        if ($intentId) {
+          /** @var Payment $payment */
+          $payment = $reservation->getBooking()->getPayments()->getItems()[0];
+          $paymentData = array('paymentIntentId' => $intentId, 'paymentStatus' => $result->getData()['paymentStatus']);
+          $payment->setData(new PaymentData(json_encode($paymentData)));
+          $paymentRepository->update($payment->getId()->getValue(), $payment);
+        }
 
         if (!$paymentCompleted || $result->getResult() === CommandResult::RESULT_ERROR) {
             $customerBookingRepository->rollback();
