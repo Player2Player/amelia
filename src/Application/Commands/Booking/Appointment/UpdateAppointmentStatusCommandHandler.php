@@ -97,11 +97,15 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
         }
 
         $oldAppointmentArray = $appointment->toArray();
-        $payments = array();
+        $payments = [];
         /** @var CustomerBooking $booking */        
         foreach ($appointment->getBookings()->getItems() as $booking) {
             $booking->setStatus(new BookingStatus($requestedStatus));
-            array_push($payments, $booking->getPayments()->getItems()[0]);            
+            foreach($booking->getPayments()->getItems() as $key => $payment) {
+              if (!array_key_exists($key, $payments)) {
+                $payments += [ $key => $payment];
+              }
+            }                        
         }
 
         $appointment->setStatus(new BookingStatus($requestedStatus));
@@ -114,8 +118,8 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
 
             if ($oldStatus === BookingStatus::PENDING && $requestedStatus === BookingStatus::APPROVED) {
               /** @var Payment $payment */ 
-              foreach($payments as $payment){
-                $paymentAS->processPaymentCapture($payment);    
+              foreach($payments as $payment) {
+                $paymentAS->processPaymentCapture($payment);
               }
             }
 
