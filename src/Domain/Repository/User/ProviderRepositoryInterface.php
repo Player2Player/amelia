@@ -32,4 +32,6 @@ interface ProviderRepositoryInterface extends BaseRepositoryInterface
      * @return mixed
      */
     public function getCount($criteria);
+
+    public function getAllWithServicesByCriteria($criteria);
 }

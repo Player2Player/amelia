@@ -237,6 +237,9 @@ class Plugin
             add_shortcode('ameliaevents', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\EventsShortcodeService', 'shortcodeHandler'));
             add_shortcode('ameliacustomerpanel', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CabinetCustomerShortcodeService', 'shortcodeHandler'));
             add_shortcode('ameliaemployeepanel', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CabinetEmployeeShortcodeService', 'shortcodeHandler'));
+
+            // custom p2p shortcodes added
+            add_shortcode('p2pcoaches', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachesCatalogShortcodeService', 'shortcodeHandler'));
         }
 
         if (defined('ELEMENTOR_VERSION')) {
@@ -334,6 +337,17 @@ class Plugin
             Infrastructure\WP\InstallActions\DeleteDatabaseHook::delete();
         }
     }
+
+    public static function registerQueryVars($vars) {
+      $vars[] = 'location';
+      $vars[] = 'category';
+      return $vars;
+    }
+
+    public static function coachesRewriteTagRules() {
+      add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', 'index.php?page_id=5133&location=$matches[1]&category=$matches[2]', 'top');
+    }
+
 }
 
 /** Redirect For Outlook Calendar */
@@ -370,3 +384,8 @@ add_action('in_plugin_update_message-' . AMELIA_PLUGIN_SLUG, array('AmeliaBookin
 
 /** Add error message on plugin update if plugin is not activated */
 add_filter('upgrader_pre_download', array('AmeliaBooking\Infrastructure\WP\InstallActions\AutoUpdateHook', 'addMessageOnUpdate'), 10, 4);
+
+/** Register custom query vars for getting coaches by location or activity */
+add_filter( 'query_vars', array('AmeliaBooking\Plugin', 'registerQueryVars'));
+
+add_action('init', array('AmeliaBooking\Plugin','coachesRewriteTagRules'), 10, 0);
