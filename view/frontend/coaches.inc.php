@@ -11,32 +11,54 @@
   <div class="et_pb_module et_pb_portfolio_0 et_pb_bg_layout_light et_pb_portfolio_grid clearfix">
     <div class="et_pb_ajax_pagination_container">
       <div class="et_pb_portfolio_grid_items">
-        <?php foreach($data['coaches'] as $id => $item) { ?>         
+        <?php 
+          $genericCoachImage = 'https://player2player.com/wp-content/uploads/2021/07/coach-icon-png-4.png';
+          foreach($data['coaches'] as $id => $item) { 
+        ?>         
         <div id="post-<?php echo $id?>" class="et_pb_portfolio_item et_pb_grid_item">
-          <?php $fullName = "{$item->getFirstName()->getValue()} {$item->getLastName()->getValue()}" ?>
-          <a href="https://staging.player2player.com/project/aidan-albright/"
+          <?php 
+            $fullName = "{$item->getFirstName()->getValue()} {$item->getLastName()->getValue()}";
+            $picture  =  $item->getPicture() ? $item->getPicture()->getFullPath() : $genericCoachImage;
+            $profileUrl = "/coach/{$item->getSlug()->getValue()}";
+            $categories = [];
+            foreach($item->getServiceList()->getItems() as $service) {
+              $categoryId = $service->getCategoryId()->getValue();          
+              if (!array_key_exists($categoryId, $categories)) {
+                $categories[$categoryId] = $service->getCategory()->getName()->getValue();
+              }
+            }            
+            $countCategories = count($categories);
+        ?>
+          <a href="<?php echo $profileUrl ?>"
               title="<?php echo $fullName ?>">
             <span class="et_portfolio_image">
               <img loading="lazy"
-                    src="https://staging.player2player.com/wp-content/uploads/2020/10/Aiden-Albright-2-400x284.png"
+                    src="<?php echo $picture ?>"
                     alt="<?php echo $fullName ?>"
-                    width="400"
-                    height="284"
-                    srcset="https://staging.player2player.com/wp-content/uploads/2020/10/Aiden-Albright-2.png 479w, https://staging.player2player.com/wp-content/uploads/2020/10/Aiden-Albright-2-400x284.png 480w"
-                    sizes="(max-width:479px) 479px, 100vw">
+                    style="width: 222px !important; height: 158px !important; object-fit: cover !important;"
+              >
               <span class="et_overlay"/>
             </span>
           </a>
           <h2 class="et_pb_module_header">
-            <a href="https://staging.player2player.com/project/aidan-albright/"
+            <a href="<?php echo $profileUrl ?>"
                 title="<?php echo $fullName ?>"><?php echo $fullName ?></a>
           </h2>
-          <p class="post-meta">
-            <a href="https://staging.player2player.com/project_category/football-lt/"
-                title="Football">Football</a>,<a href="https://staging.player2player.com/project_category/soccer-lt/"
-                title="Soccer">Soccer</a>,<a href="https://staging.player2player.com/project_category/track-lt/"
-                title="Track">Track</a>
-          </p>
+          <?php if (!$data['category'] && $countCategories > 0) { ?>
+            <p class="post-meta">
+              <?php
+                $i=1;
+                foreach($categories as $category) {
+                  $cat = ucfirst(strtolower($category));
+              ?>              
+              <a href=""
+                  title="<?php echo $cat ?>"><?php echo $cat ?></a><?php echo $i < $countCategories ? ',' : '' ?>
+              <?php
+                  $i += 1;
+                }
+              ?>
+            </p>
+          <?php } ?>
         </div>
         <?php } ?>
       </div>

@@ -529,6 +529,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 s.color AS service_color,
                 s.status AS service_status,
                 s.categoryId AS service_categoryId,
+                c.name AS service_categoryName,
                 s.duration AS service_duration,
                 s.bringingAnyone AS service_bringingAnyone,
                 s.show AS service_show,
@@ -547,6 +548,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
             LEFT JOIN {$this->providerServicesTable} st ON st.userId = u.id
             LEFT JOIN {$this->serviceTable} s ON s.id = st.serviceId
+            LEFT JOIN {$this->categoryTable} c ON c.id = s.categoryId
             WHERE u.type = :type $where
             ORDER BY u.slug"
           );
@@ -1796,6 +1798,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 'color'            => $row['service_color'],
                 'status'           => $row['service_status'],
                 'categoryId'       => (int)$row['service_categoryId'],
+                'categoryName'     => isset($row['service_categoryName']) ? $row['service_categoryName'] : null,  
                 'duration'         => $row['service_duration'],
                 'bringingAnyone'   => $row['service_bringingAnyone'],
                 'show'             => isset($row['service_show']) ? $row['service_show'] : null,

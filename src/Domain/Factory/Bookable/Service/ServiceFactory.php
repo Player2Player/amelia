@@ -8,6 +8,7 @@ namespace AmeliaBooking\Domain\Factory\Bookable\Service;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Entity\Bookable\Service\Category;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Gallery\GalleryImage;
@@ -59,6 +60,14 @@ class ServiceFactory
 
         if (isset($data['id'])) {
             $service->setId(new Id($data['id']));
+        }
+
+        if (isset($data['categoryName'])) {
+          $service->setCategory(new Category(
+            new Status(Status::VISIBLE),
+            new Name($data['categoryName']),
+            new PositiveInteger(1)
+          ));
         }
 
         if (isset($data['description'])) {
