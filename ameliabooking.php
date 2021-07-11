@@ -240,6 +240,7 @@ class Plugin
 
             // custom p2p shortcodes added
             add_shortcode('p2pcoaches', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachesCatalogShortcodeService', 'shortcodeHandler'));
+            add_shortcode('p2pcoach', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachProfileShortcodeService', 'shortcodeHandler'));
         }
 
         if (defined('ELEMENTOR_VERSION')) {
@@ -341,11 +342,13 @@ class Plugin
     public static function registerQueryVars($vars) {
       $vars[] = 'location';
       $vars[] = 'category';
+      $vars[] = 'coachSlug';
       return $vars;
     }
 
     public static function coachesRewriteTagRules() {
       add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', 'index.php?page_id=5133&location=$matches[1]&category=$matches[2]', 'top');
+      add_rewrite_rule('^coach/([^/]*)/?', 'index.php?page_id=5152&coachSlug=$matches[1]', 'top');
     }
 
 }
@@ -388,4 +391,5 @@ add_filter('upgrader_pre_download', array('AmeliaBooking\Infrastructure\WP\Insta
 /** Register custom query vars for getting coaches by location or activity */
 add_filter( 'query_vars', array('AmeliaBooking\Plugin', 'registerQueryVars'));
 
+/** Register rewrite rules for p2p coaches and coach profile pages */
 add_action('init', array('AmeliaBooking\Plugin','coachesRewriteTagRules'), 10, 0);

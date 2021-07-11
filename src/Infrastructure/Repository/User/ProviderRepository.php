@@ -487,6 +487,86 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         return $providers;
     }
 
+    public function getProfile($slug)
+    {
+      try {
+
+        $params[':type'] = AbstractUser::USER_ROLE_PROVIDER;
+        $params[':slug'] = $slug;
+
+        $statement = $this->connection->prepare(
+            "SELECT
+                u.id AS user_id,
+                u.slug as user_slug,
+                u.status AS user_status,
+                u.externalId AS external_id,
+                u.firstName AS user_firstName,
+                u.lastName AS user_lastName,
+                u.email AS user_email,
+                u.note AS note,
+                u.phone AS phone,
+                u.pictureFullPath AS picture_full_path,
+                u.pictureThumbPath AS picture_thumb_path,
+                u.zoomUserId AS user_zoom_user_id,
+                lt.locationId AS user_locationId,
+                st.serviceId AS service_id,
+                st.price AS service_price,
+                st.minCapacity AS service_minCapacity,
+                st.maxCapacity AS service_maxCapacity,
+                s.name AS service_name,
+                s.description AS service_description,
+                s.color AS service_color,
+                s.status AS service_status,
+                s.categoryId AS service_categoryId,
+                c.name AS service_categoryName,
+                c.slug AS service_categorySlug,
+                s.duration AS service_duration,
+                s.bringingAnyone AS service_bringingAnyone,
+                s.show AS service_show,
+                s.aggregatedPrice AS service_aggregatedPrice,
+                s.pictureFullPath AS service_picture_full,
+                s.pictureThumbPath AS service_picture_thumb,
+                s.recurringCycle AS service_recurringCycle,
+                s.recurringSub AS service_recurringSub,
+                s.recurringPayment AS service_recurringPayment,
+                s.settings AS service_settings,
+                s.translations AS service_translations,
+                s.deposit AS service_deposit,
+                s.depositPayment AS service_depositPayment,
+                s.depositPerPerson AS service_depositPerPerson
+            FROM {$this->table} u
+            LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
+            LEFT JOIN {$this->providerServicesTable} st ON st.userId = u.id
+            LEFT JOIN {$this->serviceTable} s ON s.id = st.serviceId
+            LEFT JOIN {$this->categoryTable} c ON c.id = s.categoryId
+            WHERE u.type = :type AND u.slug = :slug
+            ORDER BY u.slug"
+          );
+
+          
+          $statement->execute($params);
+
+          $providerRows = [];
+          $serviceRows = [];
+          $providerServiceRows = [];
+
+          while ($row = $statement->fetch()) {
+            $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
+          }
+
+          $providers = ProviderFactory::createCollection($providerRows, $serviceRows, $providerServiceRows);
+
+          if (!$providers->length()) {
+              return new Collection();
+          }
+          
+          return $providers;
+
+        } catch (\Exception $e) {           
+            throw new QueryExecutionException('Unable to find by slug in ' . __CLASS__, $e->getCode(), $e);
+        }      
+    }
+
     public function getAllWithServicesByCriteria($criteria){
       try {
 

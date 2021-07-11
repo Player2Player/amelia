@@ -34,4 +34,6 @@ interface ProviderRepositoryInterface extends BaseRepositoryInterface
     public function getCount($criteria);
 
     public function getAllWithServicesByCriteria($criteria);
+
+    public function getProfile($slug);
 }
