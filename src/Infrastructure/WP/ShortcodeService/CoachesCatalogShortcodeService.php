@@ -2,6 +2,7 @@
 
 namespace AmeliaBooking\Infrastructure\WP\ShortcodeService;
 
+use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\CategoryRepository;
@@ -35,6 +36,10 @@ class CoachesCatalogShortcodeService
         $atts
       );
 
+      if (empty($atts['location'])) {
+        self::force404();
+      }
+
       $data = self::getData($atts);
 
       ob_start();
@@ -55,22 +60,37 @@ class CoachesCatalogShortcodeService
       $locationRepository = self::$container->get('domain.locations.repository');
       /** @var CategoryRepository @categoryRepository */
       $categoryRepository = self::$container->get('domain.bookable.category.repository');
-      /** @var Location @location */
-      $location = $locationRepository->getBySlug($locationSlug);
-      
-      $categoryId = null;
-      $result['category'] = null;
-      if (!empty($categorySlug)) {
-        $category = $categoryRepository->getBySlug($categorySlug);
-        $result['category'] = $category->toArray();
-        $categoryId = $result['category']['id'];
+
+      try {
+        /** @var Location @location */
+        $location = $locationRepository->getBySlug($locationSlug);        
+        $categoryId = null;
+        $result['category'] = null;
+        if (!empty($categorySlug)) {
+          $category = $categoryRepository->getBySlug($categorySlug);
+          if (!$category || empty($category)) {
+            self::force404();
+          }  
+          $result['category'] = $category->toArray();
+          $categoryId = $result['category']['id'];
+        }
+        $result['location'] = $location->toArray();    
+        $locationId = $result['location']['id'];
+        $criteria = array('location' => $locationId, 'category' => $categoryId);
+        $coaches = $providerRepository->getAllWithServicesByCriteria($criteria);
+        $result['coaches'] = $coaches->getItems();
       }
-      $result['location'] = $location->toArray();    
-      $locationId = $result['location']['id'];
-      $criteria = array('location' => $locationId, 'category' => $categoryId);
-      $coaches = $providerRepository->getAllWithServicesByCriteria($criteria);
-      $result['coaches'] = $coaches->getItems();
+      catch(NotFoundException $exc) {
+        self::force404();
+      }
       return $result;
+    }
+
+    protected static function force404() {
+      status_header(404);
+      nocache_headers();
+      include( get_query_template( '404' ) );
+      die();
     }
 
 }

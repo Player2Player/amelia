@@ -31,6 +31,7 @@ use AmeliaBooking\Domain\ValueObjects\Priority;
 use AmeliaBooking\Domain\ValueObjects\String\Color;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class ServiceFactory
@@ -63,11 +64,13 @@ class ServiceFactory
         }
 
         if (isset($data['categoryName'])) {
-          $service->setCategory(new Category(
+          $cat = new Category(
             new Status(Status::VISIBLE),
             new Name($data['categoryName']),
             new PositiveInteger(1)
-          ));
+          );
+          $cat->setSlug(new Slug($data['categorySlug']));
+          $service->setCategory($cat);
         }
 
         if (isset($data['description'])) {
