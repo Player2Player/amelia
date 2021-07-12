@@ -11,6 +11,7 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class Location
@@ -21,6 +22,9 @@ class Location
 {
     /** @var Id */
     private $id;
+
+    /** @var Slug */
+    private $slug;
 
     /** @var Status */
     private $status;
@@ -80,6 +84,22 @@ class Location
     public function setId(Id $id)
     {
         $this->id = $id;
+    }
+    
+    /**
+     * @param Slug $slug
+     */
+    public function setSlug(Slug $slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return Slug
+     */
+    public function getSlug()
+    {
+        return $this->slug;
     }
 
     /**

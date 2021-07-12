@@ -5,8 +5,8 @@ namespace AmeliaBooking\Infrastructure\WP\ShortcodeService;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
-use AmeliaBooking\Infrastructure\Repository\Bookable\Service\CategoryRepository;
 use AmeliaBooking\Domain\Entity\Location\Location;
+use AmeliaBooking\Domain\Entity\User\Provider;
 use Slim\App;
 
 /**
@@ -39,50 +39,52 @@ class CoachProfileShortcodeService
         self::force404();
       }
 
-      // $data = self::getData($atts);
+      $data = self::getData($atts);
 
       ob_start();
       include AMELIA_PATH . '/view/frontend/coach.inc.php';
       $html = ob_get_contents();
       ob_end_clean();
-
       return $html;
     }
 
     protected static function getData($atts) {
       $result = [];
-      $locationSlug = $atts['location'];
-      $categorySlug = $atts['category'];
+      $providerSlug = $atts['coachSlug'];
       /** @var ProviderRepository $providerRepository */      
       $providerRepository = self::$container->get('domain.users.providers.repository');
       /** @var LocationRepository $locationRepository */
       $locationRepository = self::$container->get('domain.locations.repository');
-      /** @var CategoryRepository @categoryRepository */
-      $categoryRepository = self::$container->get('domain.bookable.category.repository');
-
       try {
+        $genericCoachImage = 'https://player2player.com/wp-content/uploads/2021/07/coach-icon-png-4.png';
+        /** @var Provider @coach */
+        $coach = $providerRepository->getProfile($providerSlug);      
         /** @var Location @location */
-        $location = $locationRepository->getBySlug($locationSlug);        
-        $categoryId = null;
-        $result['category'] = null;
-        if (!empty($categorySlug)) {
-          $category = $categoryRepository->getBySlug($categorySlug);
-          if (!$category || empty($category)) {
-            self::force404();
-          }  
-          $result['category'] = $category->toArray();
-          $categoryId = $result['category']['id'];
+        $location = $locationRepository->getById($coach->getLocationId()->getValue());
+        $result['id'] = $coach->getId()->getValue();
+        $result['fullName'] = "{$coach->getFirstName()->getValue()} {$coach->getLastName()->getValue()}";
+        $result['picture'] = $coach->getPicture() ? $coach->getPicture()->getFullPath() : $genericCoachImage;
+        $result['location'] = $location;
+        $result['notes'] = $coach->getNote() ? $coach->getNote()->getValue() : '';
+        $categories = [];
+        foreach($coach->getServiceList()->getItems() as $service) {
+          $serviceId = $service->getId()->getValue();          
+          $categoryId = $service->getCategoryId()->getValue(); 
+          if (!array_key_exists($categoryId, $categories)) {
+            $categories[$categoryId] = [];
+            $categories[$categoryId]['category'] = $service->getCategory();
+            $categories[$categoryId]['services'] = [];
+          }
+          if (!array_key_exists($serviceId, $categories[$categoryId]['services'])) {
+            $categories[$categoryId]['services'][$serviceId] = $service->getName()->getValue();
+          }
         }
-        $result['location'] = $location->toArray();    
-        $locationId = $result['location']['id'];
-        $criteria = array('location' => $locationId, 'category' => $categoryId);
-        $coaches = $providerRepository->getAllWithServicesByCriteria($criteria);
-        $result['coaches'] = $coaches->getItems();
-      }
+        $result['categories'] = $categories;
+      }      
       catch(NotFoundException $exc) {
         self::force404();
       }
-      return $result;
+      return $result;    
     }
 
     protected static function force404() {

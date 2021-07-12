@@ -2,8 +2,12 @@
 	<div class="et_pb_column et_pb_column_4_4 et_pb_column_0  et_pb_css_mix_blend_mode_passthrough et-last-child">
 		<div class="et_pb_module et_pb_text et_pb_text_0  et_pb_text_align_left et_pb_bg_layout_light">
 			<div class="et_pb_text_inner">
-				<h1 style="text-align: center;">Drew Archer</h1>
-				<h2 style="text-align: center;">LAKE TRAVIS</h2>
+				<h1 style="text-align: center;"><?php echo $data['fullName'] ?></h1>
+				<h2 style="text-align: center;">
+          <a href="/coaches/<?php echo $data['location']->getSlug()->getValue() ?>" >
+            <?php echo $data['location']->getName()->getValue() ?>
+          </a>          
+        </h2>
 			</div>
 		</div>
 		<!-- .et_pb_text -->
@@ -16,27 +20,69 @@
 		<div class="et_pb_module et_pb_image et_pb_image_0">
 			<span class="et_pb_image_wrap ">
 				<img loading="lazy"
-					 src="https://4e1ibi2en565131rnd1bea06-wpengine.netdna-ssl.com/wp-content/uploads/2020/07/Drew-Archer-2.png"
-					 alt=""
-					 title="Drew Archer (2)"
-					 height="auto"
-					 width="auto"
-					 srcset="https://staging.player2player.com/wp-content/uploads/2020/07/Drew-Archer-2.png 450w, https://staging.player2player.com/wp-content/uploads/2020/07/Drew-Archer-2-300x214.png 300w, https://staging.player2player.com/wp-content/uploads/2020/07/Drew-Archer-2-400x284.png 400w"
-					 sizes="(max-width: 450px) 100vw, 450px"
-					 class="wp-image-4313"/>
+					 src="<?php echo $data['picture'] ?>"
+					 alt="<?php echo $data['fullName'] ?>"
+					 title="<?php echo $data['fullName'] ?>"
+           style="width: 222px !important; height: 158px !important; object-fit: cover !important;"
+					 />
 		</div>
 		<div class="et_pb_module et_pb_text et_pb_text_1  et_pb_text_align_left et_pb_bg_layout_light">
 			<div class="et_pb_text_inner">
-				<h3>Coaching Activities</h3>
-				<p>Football, Fishing</p>
-				<h3>Positions</h3>
-				<p>Center, long snapper, defensive back</p>
+        <?php 
+          $countCategories = count($data['categories']);
+          $locationSlug = $data['location']->getSlug()->getValue();          
+        ?>
+				<h3>Coaching categories</h3>
+        <p>
+          <?php 
+            if ($countCategories > 0) {
+              $i=1;
+              foreach($data['categories'] as $category) {    
+                $catInfo = $category['category'];
+                $cat = ucfirst(strtolower($catInfo->getName()->getValue()));
+                $catUrl = "/coaches/$locationSlug/{$catInfo->getSlug()->getValue()}";
+          ?>
+          <a style="color: #666;" href="<?php echo $catUrl ?>"
+             title="<?php echo $cat ?>"><?php echo $cat ?></a><?php echo $i < $countCategories ? ', ' : '' ?>
+          <?php
+                $i+= 1;
+            }
+          }
+          ?>
+        </p>
+				<h3>Services</h3>
+        <?php 
+          if ($countCategories > 0) {
+            $i = 1;
+            foreach($data['categories'] as $category) {    
+              $catInfo = $category['category'];
+              $services = $category['services'];
+              $cat = ucfirst(strtolower($catInfo->getName()->getValue()));
+              $catUrl = "/coaches/$locationSlug/{$catInfo->getSlug()->getValue()}";
+        ?>
+        <p>
+          <a href="<?php echo $catUrl ?>"
+             title="<?php echo $cat ?>"><?php echo $cat ?>:
+          </a>
+          <br/>
+        <?php
+              $i+= 1;
+              $j = 1;
+              $countServices = count($services);
+              foreach($services as $service) {
+                echo $service, $j < $countServices ? ', ' : '';
+                $j+= 1;
+              } // end for
+        ?>
+        </p>
+        <?php      
+            } // end for  
+          } // end if        
+        ?>
 				<h3>Key accomplishments</h3>
 				<p>
-					<span data-sheets-value="{&quot;1&quot;:2,&quot;2&quot;:&quot;Has great experience coaching and working with children. Has been a football coach at a summer camp for the past few years and is able to coach all ages. Plays football for Lake Travis and has experience in playing center, defensive back, and long snapper. &quot;}"
-						  data-sheets-userformat="{&quot;2&quot;:14977,&quot;3&quot;:{&quot;1&quot;:0},&quot;10&quot;:0,&quot;12&quot;:0,&quot;14&quot;:{&quot;1&quot;:2,&quot;2&quot;:4408131},&quot;15&quot;:&quot;Raleway&quot;,&quot;16&quot;:10}">Has great experience coaching and working with children. Has been a football coach at a summer camp for the past few years and is able to coach all ages. Plays football for Lake Travis and has experience in playing center, defensive back, and long snapper. </span>
+          <?php echo $data['notes'] ?>
 				</p>
-				<p>&nbsp;</p>
 			</div>
 		</div>
 		<!-- .et_pb_text -->
@@ -46,7 +92,7 @@
 		<div class="et_pb_module et_pb_text et_pb_text_2  et_pb_text_align_left et_pb_bg_layout_light">
 			<div class="et_pb_text_inner">
 				<h1 style="text-align: center;">Book A Lesson</h1>
-				[ameliabooking]
+				<?php echo do_shortcode( "[ameliabooking employee='{$data['id']}']" ) ?>
 			</div>
 		</div>
 		<!-- .et_pb_text -->

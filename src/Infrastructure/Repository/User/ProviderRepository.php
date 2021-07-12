@@ -487,6 +487,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         return $providers;
     }
 
+    /**
+     * @return Provider
+     */
     public function getProfile($slug)
     {
       try {
@@ -557,10 +560,10 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
           $providers = ProviderFactory::createCollection($providerRows, $serviceRows, $providerServiceRows);
 
           if (!$providers->length()) {
-              return new Collection();
+              return null;
           }
           
-          return $providers;
+          return reset($providers->getItems());
 
         } catch (\Exception $e) {           
             throw new QueryExecutionException('Unable to find by slug in ' . __CLASS__, $e->getCode(), $e);
