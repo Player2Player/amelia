@@ -2,6 +2,7 @@
 
 namespace AmeliaBooking\Infrastructure\Repository\User;
 
+use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Schedule\Period;
@@ -556,12 +557,12 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
           while ($row = $statement->fetch()) {
             $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
           }
+          
+          if (count($providerRows) === 0) {            
+            return null;
+          }
 
           $providers = ProviderFactory::createCollection($providerRows, $serviceRows, $providerServiceRows);
-
-          if (!$providers->length()) {
-              return null;
-          }
           
           return reset($providers->getItems());
 

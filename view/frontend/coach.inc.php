@@ -23,7 +23,7 @@
 					 src="<?php echo $data['picture'] ?>"
 					 alt="<?php echo $data['fullName'] ?>"
 					 title="<?php echo $data['fullName'] ?>"
-           style="width: 222px !important; height: 158px !important; object-fit: cover !important;"
+           style="width: 200px !important; height: 200px !important; object-fit: cover !important; border-radius: 50%;"
 					 />
 		</div>
 		<div class="et_pb_module et_pb_text et_pb_text_1  et_pb_text_align_left et_pb_bg_layout_light">

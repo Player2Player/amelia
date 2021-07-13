@@ -54,11 +54,14 @@ class CoachProfileShortcodeService
       /** @var ProviderRepository $providerRepository */      
       $providerRepository = self::$container->get('domain.users.providers.repository');
       /** @var LocationRepository $locationRepository */
-      $locationRepository = self::$container->get('domain.locations.repository');
+      $locationRepository = self::$container->get('domain.locations.repository');      
       try {
         $genericCoachImage = 'https://player2player.com/wp-content/uploads/2021/07/coach-icon-png-4.png';
-        /** @var Provider @coach */
-        $coach = $providerRepository->getProfile($providerSlug);      
+        /** @var Provider @coach */        
+        $coach = $providerRepository->getProfile($providerSlug);
+        if (!$coach) {
+          throw new NotFoundException();
+        }
         /** @var Location @location */
         $location = $locationRepository->getById($coach->getLocationId()->getValue());
         $result['id'] = $coach->getId()->getValue();
@@ -80,8 +83,8 @@ class CoachProfileShortcodeService
           }
         }
         $result['categories'] = $categories;
-      }      
-      catch(NotFoundException $exc) {
+      } 
+      catch(NotFoundException $exc) {        
         self::force404();
       }
       return $result;    
