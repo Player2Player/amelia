@@ -241,6 +241,7 @@ class Plugin
             // custom p2p shortcodes added
             add_shortcode('p2pcoaches', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachesCatalogShortcodeService', 'shortcodeHandler'));
             add_shortcode('p2pcoach', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachProfileShortcodeService', 'shortcodeHandler'));
+            add_shortcode('p2psports', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\SportsCatalogShortcodeService', 'shortcodeHandler'));
         }
 
         if (defined('ELEMENTOR_VERSION')) {
@@ -346,9 +347,13 @@ class Plugin
       return $vars;
     }
 
+    /**
+     * Custom rewrite rules for custom p2p pages
+     */
     public static function coachesRewriteTagRules() {
       add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', 'index.php?page_id=5133&location=$matches[1]&category=$matches[2]', 'top');
       add_rewrite_rule('^coach/([^/]*)/?', 'index.php?page_id=5152&coachSlug=$matches[1]', 'top');
+      add_rewrite_rule('^sports/([^/]*)/?', 'index.php?page_id=5174&location=$matches[1]', 'top');
     }
 
 }
