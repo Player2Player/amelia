@@ -351,9 +351,11 @@ class Plugin
      * Custom rewrite rules for custom p2p pages
      */
     public static function coachesRewriteTagRules() {
-      add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', 'index.php?page_id=5133&location=$matches[1]&category=$matches[2]', 'top');
-      add_rewrite_rule('^coach/([^/]*)/?', 'index.php?page_id=5152&coachSlug=$matches[1]', 'top');
-      add_rewrite_rule('^sports/([^/]*)/?', 'index.php?page_id=5174&location=$matches[1]', 'top');
+      $options = json_decode(get_option('p2p_settings'));
+      $tpl = $options->templates;
+      add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', "index.php?page_id={$tpl->coaches}&location=\$matches[1]&category=\$matches[2]", 'top');
+      add_rewrite_rule('^coach/([^/]*)/?', "index.php?page_id={$tpl->coach}&coachSlug=\$matches[1]", 'top');
+      add_rewrite_rule('^sports/([^/]*)/?', "index.php?page_id={$tpl->sports}&location=\$matches[1]", 'top');
     }
 
 }

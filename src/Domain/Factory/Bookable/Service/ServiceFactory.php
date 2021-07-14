@@ -63,6 +63,10 @@ class ServiceFactory
             $service->setId(new Id($data['id']));
         }
 
+        if (isset($data['slug'])) {
+          $service->setSlug(new Slug($data['slug']));
+        }
+
         if (isset($data['categoryName'])) {
           $cat = new Category(
             new Status(Status::VISIBLE),

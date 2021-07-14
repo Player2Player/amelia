@@ -197,6 +197,13 @@ class HelperService
                 $entityTranslation[$type][$bookingInfo['locale']] : null;
     }
 
+    public function cleanCustomTemplatesCache() {
+      $options = json_decode(get_option('p2p_settings'));
+      foreach($options->templates as $postId) {
+        clean_post_cache($postId);
+      }
+    }
+
     /**
      * @return array
      */
