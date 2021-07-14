@@ -126,10 +126,10 @@ $entries['application.reservation.appointment.service'] = function ($c) {
  *
  * @param Container $c
  *
- * @return AmeliaBooking\Application\Services\Reservation\AppointmentReservationService
+ * @return AmeliaBooking\Application\Services\Reservation\PackageReservationService
  */
-$entries['application.reservation.appointment.service'] = function ($c) {
-    return new AmeliaBooking\Application\Services\Reservation\AppointmentReservationService($c);
+$entries['application.reservation.package.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Reservation\PackageReservationService($c);
 };
 
 /**
@@ -173,7 +173,7 @@ $entries['application.bookable.service'] = function ($c) {
  * @return AbstractPackageApplicationService
  */
 $entries['application.bookable.package'] = function ($c) {
-    return new AmeliaBooking\Application\Services\Bookable\BasicPackageApplicationService($c);
+    return new AmeliaBooking\Application\Services\Bookable\PackageApplicationService($c);
 };
 
 /**
@@ -269,10 +269,10 @@ $entries['application.placeholder.appointment.service'] = function ($c) {
  *
  * @param Container $c
  *
- * @return \AmeliaBooking\Application\Services\Placeholder\AppointmentPlaceholderService
+ * @return \AmeliaBooking\Application\Services\Placeholder\PackagePlaceholderService
  */
-$entries['application.placeholder.appointment.service'] = function ($c) {
-    return new AmeliaBooking\Application\Services\Placeholder\AppointmentPlaceholderService($c);
+$entries['application.placeholder.package.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Placeholder\PackagePlaceholderService($c);
 };
 
 /**
@@ -383,4 +383,15 @@ $entries['application.zoom.service'] = function ($c) {
  */
 $entries['application.ics.service'] = function ($c) {
     return new AmeliaBooking\Application\Services\Booking\IcsApplicationService($c);
+};
+
+/**
+ * Stash Service
+ *
+ * @param Container $c
+ *
+ * @return AmeliaBooking\Application\Services\Stash\StashApplicationService
+ */
+$entries['application.stash.service'] = function ($c) {
+    return new AmeliaBooking\Application\Services\Stash\StashApplicationService($c);
 };

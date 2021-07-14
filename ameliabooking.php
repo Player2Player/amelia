@@ -3,7 +3,7 @@
 Plugin Name: Amelia
 Plugin URI: https://wpamelia.com/
 Description: Amelia is a simple yet powerful automated booking specialist, working 24/7 to make sure your customers can make appointments and events even while you sleep!
-Version: 3.3
+Version: 4.0.1
 Author: TMS
 Author URI: https://tms-outsource.com/
 Text Domain: wpamelia
@@ -97,7 +97,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '3.3');
+    define('AMELIA_VERSION', '4.0.1');
 }
 
 // Const for site URL
@@ -180,11 +180,11 @@ class Plugin
         $settingsService = new SettingsService(new SettingsStorage());
 
         if (WooCommerceService::isEnabled()) {
-            if ($settingsService->getCategorySettings('payments')['wc']['dashboard']) {
+            if (!empty($settingsService->getCategorySettings('payments')['wc']['dashboard'])) {
                 add_filter('woocommerce_prevent_admin_access', '__return_false');
             }
 
-            if ($settingsService->getCategorySettings('payments')['wc']['enabled']) {
+            if (!empty($settingsService->getCategorySettings('payments')['wc']['enabled'])) {
                 try {
                     WooCommerceService::init($settingsService);
                 } catch (ContainerException $e) {
@@ -237,11 +237,6 @@ class Plugin
             add_shortcode('ameliaevents', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\EventsShortcodeService', 'shortcodeHandler'));
             add_shortcode('ameliacustomerpanel', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CabinetCustomerShortcodeService', 'shortcodeHandler'));
             add_shortcode('ameliaemployeepanel', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CabinetEmployeeShortcodeService', 'shortcodeHandler'));
-
-            // custom p2p shortcodes added
-            add_shortcode('p2pcoaches', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachesCatalogShortcodeService', 'shortcodeHandler'));
-            add_shortcode('p2pcoach', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachProfileShortcodeService', 'shortcodeHandler'));
-            add_shortcode('p2psports', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\SportsCatalogShortcodeService', 'shortcodeHandler'));
         }
 
         if (defined('ELEMENTOR_VERSION')) {
@@ -339,25 +334,6 @@ class Plugin
             Infrastructure\WP\InstallActions\DeleteDatabaseHook::delete();
         }
     }
-
-    public static function registerQueryVars($vars) {
-      $vars[] = 'location';
-      $vars[] = 'category';
-      $vars[] = 'coachSlug';
-      return $vars;
-    }
-
-    /**
-     * Custom rewrite rules for custom p2p pages
-     */
-    public static function coachesRewriteTagRules() {
-      $options = json_decode(get_option('p2p_settings'));
-      $tpl = $options->templates;
-      add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', "index.php?page_id={$tpl->coaches}&location=\$matches[1]&category=\$matches[2]", 'top');
-      add_rewrite_rule('^coach/([^/]*)/?', "index.php?page_id={$tpl->coach}&coachSlug=\$matches[1]", 'top');
-      add_rewrite_rule('^sports/([^/]*)/?', "index.php?page_id={$tpl->sports}&location=\$matches[1]", 'top');
-    }
-
 }
 
 /** Redirect For Outlook Calendar */
@@ -394,9 +370,3 @@ add_action('in_plugin_update_message-' . AMELIA_PLUGIN_SLUG, array('AmeliaBookin
 
 /** Add error message on plugin update if plugin is not activated */
 add_filter('upgrader_pre_download', array('AmeliaBooking\Infrastructure\WP\InstallActions\AutoUpdateHook', 'addMessageOnUpdate'), 10, 4);
-
-/** Register custom query vars for getting coaches by location or activity */
-add_filter( 'query_vars', array('AmeliaBooking\Plugin', 'registerQueryVars'));
-
-/** Register rewrite rules for p2p coaches and coach profile pages */
-add_action('init', array('AmeliaBooking\Plugin','coachesRewriteTagRules'), 10, 0);

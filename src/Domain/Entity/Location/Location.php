@@ -11,7 +11,6 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
-use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class Location
@@ -22,9 +21,6 @@ class Location
 {
     /** @var Id */
     private $id;
-
-    /** @var Slug */
-    private $slug;
 
     /** @var Status */
     private $status;
@@ -51,26 +47,6 @@ class Location
     private $pin;
 
     /**
-     * Location constructor.
-     *
-     * @param Name    $name
-     * @param Address $address
-     * @param Phone   $phone
-     * @param GeoTag  $coordinates
-     */
-    public function __construct(
-        Name $name,
-        Address $address,
-        Phone $phone,
-        GeoTag $coordinates
-    ) {
-        $this->name = $name;
-        $this->address = $address;
-        $this->phone = $phone;
-        $this->coordinates = $coordinates;
-    }
-
-    /**
      * @return Id
      */
     public function getId()
@@ -84,22 +60,6 @@ class Location
     public function setId(Id $id)
     {
         $this->id = $id;
-    }
-    
-    /**
-     * @param Slug $slug
-     */
-    public function setSlug(Slug $slug)
-    {
-        $this->slug = $slug;
-    }
-
-    /**
-     * @return Slug
-     */
-    public function getSlug()
-    {
-        return $this->slug;
     }
 
     /**
@@ -237,7 +197,6 @@ class Location
     {
         return [
             'id'               => null !== $this->getId() ? $this->getId()->getValue() : null,
-            'slug'             => null !== $this->getSlug() ? $this->getSlug()->getValue() : null,
             'status'           => null !== $this->getStatus() ? $this->getStatus()->getValue() : null,
             'name'             => $this->getName()->getValue(),
             'description'      => null !== $this->getDescription() ? $this->getDescription()->getValue() : null,

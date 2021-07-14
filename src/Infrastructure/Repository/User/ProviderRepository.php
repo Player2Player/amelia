@@ -2,7 +2,6 @@
 
 namespace AmeliaBooking\Infrastructure\Repository\User;
 
-use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Schedule\Period;
@@ -66,12 +65,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     protected $serviceTable;
 
     /** @var string */
-    protected $locationTable;
-
-    /** @var string */
-    protected $categoryTable;
-
-    /** @var string */
     protected $providerViewsTable;
 
     /** @var string */
@@ -94,8 +87,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      * @param string     $providerServicesTable
      * @param string     $providerLocationTable
      * @param string     $serviceTable
-     * @param string     $locationTable
-     * @param string     $categoryTable
      * @param string     $providerViewsTable
      * @param string     $providersGoogleCalendarTable
      * @param string     $providersOutlookCalendarTable
@@ -114,8 +105,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $providerServicesTable,
         $providerLocationTable,
         $serviceTable,
-        $locationTable,
-        $categoryTable,
         $providerViewsTable,
         $providersGoogleCalendarTable,
         $providersOutlookCalendarTable
@@ -133,8 +122,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         $this->providerServicesTable = $providerServicesTable;
         $this->providerLocationTable = $providerLocationTable;
         $this->serviceTable = $serviceTable;
-        $this->locationTable = $locationTable;
-        $this->categoryTable = $categoryTable;
         $this->providerViewsTable = $providerViewsTable;
         $this->providersGoogleCalendarTable = $providersGoogleCalendarTable;
         $this->providersOutlookCalendarTable = $providersOutlookCalendarTable;
@@ -486,180 +473,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         }
 
         return $providers;
-    }
-
-    /**
-     * @return Provider
-     */
-    public function getProfile($slug)
-    {
-      try {
-
-        $params[':type'] = AbstractUser::USER_ROLE_PROVIDER;
-        $params[':slug'] = $slug;
-
-        $statement = $this->connection->prepare(
-            "SELECT
-                u.id AS user_id,
-                u.slug as user_slug,
-                u.status AS user_status,
-                u.externalId AS external_id,
-                u.firstName AS user_firstName,
-                u.lastName AS user_lastName,
-                u.email AS user_email,
-                u.note AS note,
-                u.phone AS phone,
-                u.pictureFullPath AS picture_full_path,
-                u.pictureThumbPath AS picture_thumb_path,
-                u.zoomUserId AS user_zoom_user_id,
-                lt.locationId AS user_locationId,
-                st.serviceId AS service_id,
-                st.price AS service_price,
-                st.minCapacity AS service_minCapacity,
-                st.maxCapacity AS service_maxCapacity,
-                s.name AS service_name,
-                s.description AS service_description,
-                s.color AS service_color,
-                s.status AS service_status,
-                s.categoryId AS service_categoryId,
-                c.name AS service_categoryName,
-                c.slug AS service_categorySlug,
-                s.duration AS service_duration,
-                s.bringingAnyone AS service_bringingAnyone,
-                s.show AS service_show,
-                s.aggregatedPrice AS service_aggregatedPrice,
-                s.pictureFullPath AS service_picture_full,
-                s.pictureThumbPath AS service_picture_thumb,
-                s.recurringCycle AS service_recurringCycle,
-                s.recurringSub AS service_recurringSub,
-                s.recurringPayment AS service_recurringPayment,
-                s.settings AS service_settings,
-                s.translations AS service_translations,
-                s.deposit AS service_deposit,
-                s.depositPayment AS service_depositPayment,
-                s.depositPerPerson AS service_depositPerPerson
-            FROM {$this->table} u
-            LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
-            LEFT JOIN {$this->providerServicesTable} st ON st.userId = u.id
-            LEFT JOIN {$this->serviceTable} s ON s.id = st.serviceId
-            LEFT JOIN {$this->categoryTable} c ON c.id = s.categoryId
-            WHERE u.type = :type AND u.slug = :slug
-            ORDER BY u.slug"
-          );
-
-          
-          $statement->execute($params);
-
-          $providerRows = [];
-          $serviceRows = [];
-          $providerServiceRows = [];
-
-          while ($row = $statement->fetch()) {
-            $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
-          }
-          
-          if (count($providerRows) === 0) {            
-            return null;
-          }
-
-          $providers = ProviderFactory::createCollection($providerRows, $serviceRows, $providerServiceRows);
-          
-          return reset($providers->getItems());
-
-        } catch (\Exception $e) {           
-            throw new QueryExecutionException('Unable to find by slug in ' . __CLASS__, $e->getCode(), $e);
-        }      
-    }
-
-    public function getAllWithServicesByCriteria($criteria){
-      try {
-
-        $where = [];
-        $params[':type'] = AbstractUser::USER_ROLE_PROVIDER;
-
-        if ($criteria['location']) {
-          $params[':location'] = $criteria['location'];
-          $where[] = "lt.locationId = :location";
-        }
-
-        if ($criteria['category']) {
-          $params[':category'] = $criteria['category'];
-          $where[] = "s.categoryId = :category";
-        }
-
-        $where = $where ? ' AND ' . implode(' AND ', $where) : '';
-
-        $statement = $this->connection->prepare(
-            "SELECT
-                u.id AS user_id,
-                u.slug as user_slug,
-                u.status AS user_status,
-                u.externalId AS external_id,
-                u.firstName AS user_firstName,
-                u.lastName AS user_lastName,
-                u.email AS user_email,
-                u.note AS note,
-                u.phone AS phone,
-                u.pictureFullPath AS picture_full_path,
-                u.pictureThumbPath AS picture_thumb_path,
-                u.zoomUserId AS user_zoom_user_id,
-                lt.locationId AS user_locationId,
-                st.serviceId AS service_id,
-                st.price AS service_price,
-                st.minCapacity AS service_minCapacity,
-                st.maxCapacity AS service_maxCapacity,
-                s.name AS service_name,
-                s.description AS service_description,
-                s.color AS service_color,
-                s.status AS service_status,
-                s.categoryId AS service_categoryId,
-                c.name AS service_categoryName,
-                c.slug AS service_categorySlug,
-                s.duration AS service_duration,
-                s.bringingAnyone AS service_bringingAnyone,
-                s.show AS service_show,
-                s.aggregatedPrice AS service_aggregatedPrice,
-                s.pictureFullPath AS service_picture_full,
-                s.pictureThumbPath AS service_picture_thumb,
-                s.recurringCycle AS service_recurringCycle,
-                s.recurringSub AS service_recurringSub,
-                s.recurringPayment AS service_recurringPayment,
-                s.settings AS service_settings,
-                s.translations AS service_translations,
-                s.deposit AS service_deposit,
-                s.depositPayment AS service_depositPayment,
-                s.depositPerPerson AS service_depositPerPerson
-            FROM {$this->table} u
-            LEFT JOIN {$this->providerLocationTable} lt ON lt.userId = u.id
-            LEFT JOIN {$this->providerServicesTable} st ON st.userId = u.id
-            LEFT JOIN {$this->serviceTable} s ON s.id = st.serviceId
-            LEFT JOIN {$this->categoryTable} c ON c.id = s.categoryId
-            WHERE u.type = :type $where
-            ORDER BY u.slug"
-          );
-
-          
-          $statement->execute($params);
-
-          $providerRows = [];
-          $serviceRows = [];
-          $providerServiceRows = [];
-
-          while ($row = $statement->fetch()) {
-            $this->parseUserRow($row, $providerRows, $serviceRows, $providerServiceRows);
-          }
-
-          $providers = ProviderFactory::createCollection($providerRows, $serviceRows, $providerServiceRows);
-
-          if (!$providers->length()) {
-              return new Collection();
-          }
-          
-          return $providers;
-
-        } catch (\Exception $e) {           
-            throw new QueryExecutionException('Unable to find by criteria in ' . __CLASS__, $e->getCode(), $e);
-        }
     }
 
     /**
@@ -1335,7 +1148,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
      */
     public function getOnSpecialDay()
     {
-        $currentDateTime = "STR_TO_DATE('" . DateTimeService::getNowDateTime() . "', '%Y-%m-%d %H:%i:%s')";
+        $dateTimeNowString = DateTimeService::getNowDateTime();
+        $currentDateTime = "STR_TO_DATE('" . $dateTimeNowString . "', '%Y-%m-%d %H:%i:%s')";
         $currentDateString = DateTimeService::getNowDate();
 
         $params = [
@@ -1347,6 +1161,8 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 u.id AS user_id,
                 u.firstName AS user_firstName,
                 u.lastName AS user_lastName,
+                sdpt.startTime AS sdp_startTime,
+                sdpt.endTime AS sdp_endTime,
                 IF (
                     {$currentDateTime} >= STR_TO_DATE(CONCAT(DATE_FORMAT(sdt.startDate, '%Y-%m-%d'), ' 00:00:00'), '%Y-%m-%d %H:%i:%s') AND
                     {$currentDateTime} <= DATE_ADD(STR_TO_DATE(CONCAT(DATE_FORMAT(sdt.endDate, '%Y-%m-%d'), ' 00:00:00'), '%Y-%m-%d %H:%i:%s'), INTERVAL 1 DAY) AND
@@ -1359,7 +1175,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
               INNER JOIN {$this->providerSpecialDayTable} sdt ON sdt.userId = u.id
               INNER JOIN {$this->providerSpecialDayPeriodTable} sdpt ON sdpt.specialDayId = sdt.id
               WHERE u.type = :type AND
-              STR_TO_DATE('{$currentDateString}', '%Y-%m-%d') BETWEEN sdt.startDate AND sdt.endDate
+                STR_TO_DATE('{$currentDateString}', '%Y-%m-%d') BETWEEN sdt.startDate AND sdt.endDate
               ");
 
             $statement->execute($params);
@@ -1371,8 +1187,10 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
 
         $result = [];
 
+        $dateTimeNow = DateTimeService::getNowDateTimeObject();
         foreach ($rows as $row) {
-            if (!array_key_exists($row['user_id'], $result)) {
+            $dateTimeEnd = DateTimeService::getCustomDateTimeObject($currentDateString . " " . $row['sdp_endTime']);
+            if (!array_key_exists($row['user_id'], $result) && $dateTimeNow <= $dateTimeEnd) {
                 $result[$row['user_id']] = $row;
             }
         }
@@ -1702,7 +1520,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
     private function parseUserRow($row, &$providerRows, &$serviceRows, &$providerServiceRows)
     {
         $userId = (int)$row['user_id'];
-        $userSlug = isset($row['user_slug']) ? $row['user_slug'] : null;
         $serviceId = isset($row['service_id']) ? (int)$row['service_id'] : null;
         $extraId = isset($row['extra_id']) ? $row['extra_id'] : null;
         $couponId = isset($row['coupon_id']) ? $row['coupon_id'] : null;
@@ -1720,7 +1537,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
         if (!array_key_exists($userId, $providerRows)) {
             $providerRows[$userId] = [
                 'id'               => $userId,
-                'slug'             => $userSlug,
                 'type'             => 'provider',
                 'status'           => isset($row['user_status']) ? $row['user_status'] : null,
                 'externalId'       => isset($row['external_id']) ? $row['external_id'] : null,
@@ -1883,8 +1699,6 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
                 'color'            => $row['service_color'],
                 'status'           => $row['service_status'],
                 'categoryId'       => (int)$row['service_categoryId'],
-                'categoryName'     => isset($row['service_categoryName']) ? $row['service_categoryName'] : null,
-                'categorySlug'     => isset($row['service_categorySlug']) ? $row['service_categorySlug'] : null,  
                 'duration'         => $row['service_duration'],
                 'bringingAnyone'   => $row['service_bringingAnyone'],
                 'show'             => isset($row['service_show']) ? $row['service_show'] : null,

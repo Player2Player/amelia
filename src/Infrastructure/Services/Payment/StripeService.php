@@ -25,9 +25,7 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
     public function execute($data)
     {
         $stripeSettings = $this->settingsService->getSetting('payments', 'stripe');
-        // TODO: Add manual capture option on stripe payment setting
-        // $manualCapture = $stripeSettings['manualCapture'];
-        $manualCapture = true;
+
         Stripe::setApiKey(
             $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
         );
@@ -42,7 +40,8 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
                 'confirmation_method' => 'manual',
                 'confirm'             => true,
             ];
-            if ($manualCapture) {
+
+            if ($stripeSettings['manualCapture']) {
                 $stripeData['capture_method'] = 'manual';
             }
 
@@ -67,17 +66,14 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
 
         $response = null;
 
-        if ($intent && ($intent->status === PaymentIntent::STATUS_REQUIRES_ACTION || $intent->status === PaymentIntent::STATUS_REQUIRES_SOURCE_ACTION) 
-          && $intent->next_action->type === 'use_stripe_sdk') {
+        if ($intent && ($intent->status === 'requires_action' || $intent->status === 'requires_source_action') && $intent->next_action->type === 'use_stripe_sdk') {
             $response = [
                 'requiresAction'            => true,
                 'paymentIntentClientSecret' => $intent->client_secret
             ];
-        } else if ($intent && ($intent->status === PaymentIntent::STATUS_SUCCEEDED || ($manualCapture && $intent->status === PaymentIntent::STATUS_REQUIRES_CAPTURE))) {
+        } else if ($intent && ($intent->status === 'succeeded' || ($stripeSettings['manualCapture'] && $intent->status === 'requires_capture'))) {
             $response = [
-                'paymentSuccessful' => true,
-                'paymentIntentId' => $intent->id,
-                'paymentStatus' => $intent->status
+                'paymentSuccessful' => true
             ];
         } else {
             $response = [

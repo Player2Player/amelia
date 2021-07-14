@@ -18,7 +18,6 @@ use AmeliaBooking\Domain\ValueObjects\String\Cycle;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Domain\ValueObjects\Priority;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
-use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Domain\Entity\Bookable\AbstractBookable;
 use AmeliaBooking\Domain\ValueObjects\Duration;
 use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
@@ -30,9 +29,6 @@ use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
  */
 class Service extends AbstractBookable
 {
-    
-    /** @var Slug */
-    private $slug;
     /** @var  IntegerValue */
     private $minCapacity;
 
@@ -89,56 +85,6 @@ class Service extends AbstractBookable
 
     /** @var  Json */
     protected $translations;
-    /**
-     * Service constructor.
-     *
-     * @param Name             $name
-     * @param Price            $price
-     * @param Status           $status
-     * @param Id               $categoryId
-     * @param IntegerValue     $minCapacity
-     * @param IntegerValue     $maxCapacity
-     * @param PositiveDuration $duration
-     *
-     * @throws InvalidArgumentException
-     */
-    public function __construct(
-        Name $name,
-        Price $price,
-        Status $status,
-        Id $categoryId,
-        IntegerValue $minCapacity,
-        IntegerValue $maxCapacity,
-        PositiveDuration $duration
-    ) {
-
-        if (!$duration->getValue()) {
-            throw new InvalidArgumentException('Duration cannot be zero.');
-        }
-
-        parent::__construct($name, $price);
-        $this->minCapacity = $minCapacity;
-        $this->maxCapacity = $maxCapacity;
-        $this->duration = $duration;
-        $this->categoryId = $categoryId;
-        $this->status = $status;
-    }
-
-    /**
-     * @param Slug $slug
-     */
-    public function setSlug(Slug $slug)
-    {
-        $this->slug = $slug;
-    }
-
-    /**
-     * @return Slug
-     */
-    public function getSlug()
-    {
-        return $this->slug;
-    }
 
     /**
      * @return Id
@@ -452,7 +398,6 @@ class Service extends AbstractBookable
         return array_merge(
             parent::toArray(),
             [
-                'slug'             => $this->getSlug() ? $this->getSlug()->getValue() : null,
                 'minCapacity'      => $this->getMinCapacity() ? $this->getMinCapacity()->getValue() : null,
                 'maxCapacity'      => $this->getMaxCapacity() ? $this->getMaxCapacity()->getValue() : null,
                 'duration'         => $this->getDuration() ? $this->getDuration()->getValue() : null,

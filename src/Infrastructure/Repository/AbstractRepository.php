@@ -69,31 +69,6 @@ class AbstractRepository
     }
 
     /**
-     * @param string $slug
-     *
-     * @return Payment|Coupon|Service|Notification|AbstractUser|Location
-     * @throws NotFoundException
-     * @throws QueryExecutionException
-     */
-    public function getBySlug($slug)
-    {
-        try {
-            $statement = $this->connection->prepare($this->selectQuery() . " WHERE {$this->table}.slug = :slug");
-            $statement->bindParam(':slug', $slug);
-            $statement->execute();
-            $row = $statement->fetch();
-        } catch (\Exception $e) {
-            throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
-        }
-
-        if (!$row) {
-            throw new NotFoundException('Data not found in ' . __CLASS__);
-        }
-
-        return call_user_func([static::FACTORY, 'create'], $row);
-    }
-
-    /**
      * @return Collection
      * @throws InvalidArgumentException
      * @throws QueryExecutionException
@@ -228,13 +203,20 @@ class AbstractRepository
     {
         $params = [
             ":$entityColumnName"  => $entityId,
-            ':value'              => $entityColumnValue === null ? 'NULL' :  $entityColumnValue
         ];
+
+        if ($entityColumnValue !== null) {
+            $updateSql = "`{$entityColumnName}` = :value";
+
+            $params[':value'] = $entityColumnValue;
+        } else {
+            $updateSql = "`{$entityColumnName}` = NULL";
+        }
 
         try {
             $statement = $this->connection->prepare(
                 "UPDATE {$this->table} SET
-                `{$entityColumnName}` = :value
+                {$updateSql}
                 WHERE {$entityColumnName} = :{$entityColumnName}"
             );
 

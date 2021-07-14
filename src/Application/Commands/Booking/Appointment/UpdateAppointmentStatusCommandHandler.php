@@ -12,7 +12,6 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\CustomerBooking;
 use AmeliaBooking\Domain\Entity\Entities;
-use AmeliaBooking\Domain\Entity\Payment\Payment;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
@@ -20,7 +19,6 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepos
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\WP\Translations\BackendStrings;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
-use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use Interop\Container\Exception\ContainerException;
 
 /**
@@ -67,9 +65,6 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
         $userAS = $this->getContainer()->get('application.user.service');
         /** @var AppointmentApplicationService $appointmentAS */
         $appointmentAS = $this->container->get('application.booking.appointment.service');
-        /** @var PaymentApplicationService $paymentAS */
-        $paymentAS = $this->container->get('application.payment.service');
-
 
         $appointmentId = (int)$command->getArg('id');
         $requestedStatus = $command->getField('status');
@@ -79,7 +74,7 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
         $oldStatus = $appointment->getStatus()->getValue();
 
         if ($bookingAS->isBookingApprovedOrPending($requestedStatus) &&
-            $bookingAS->isBookingCanceledOrRejected($oldStatus)
+            $bookingAS->isBookingCanceledOrRejected($appointment->getStatus()->getValue())
         ) {
             /** @var AbstractUser $user */
             $user = $this->container->get('logged.in.user');
@@ -89,7 +84,7 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
                 $result->setMessage(FrontendStrings::getCommonStrings()['time_slot_unavailable']);
                 $result->setData([
                     'timeSlotUnavailable' => true,
-                    'status'              => $oldStatus
+                    'status'              => $appointment->getStatus()->getValue()
                 ]);
 
                 return $result;
@@ -97,15 +92,10 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
         }
 
         $oldAppointmentArray = $appointment->toArray();
-        $payments = [];
-        /** @var CustomerBooking $booking */        
+
+        /** @var CustomerBooking $booking */
         foreach ($appointment->getBookings()->getItems() as $booking) {
             $booking->setStatus(new BookingStatus($requestedStatus));
-            foreach($booking->getPayments()->getItems() as $key => $payment) {
-              if (!array_key_exists($key, $payments)) {
-                $payments += [ $key => $payment];
-              }
-            }                        
         }
 
         $appointment->setStatus(new BookingStatus($requestedStatus));
@@ -115,14 +105,6 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
         try {
             $bookingRepository->updateStatusByAppointmentId($appointmentId, $requestedStatus);
             $appointmentRepo->updateStatusById($appointmentId, $requestedStatus);
-
-            if ($oldStatus === BookingStatus::PENDING && $requestedStatus === BookingStatus::APPROVED) {
-              /** @var Payment $payment */ 
-              foreach($payments as $payment) {
-                $paymentAS->processPaymentCapture($payment);
-              }
-            }
-
         } catch (QueryExecutionException $e) {
             $appointmentRepo->rollback();
             throw $e;

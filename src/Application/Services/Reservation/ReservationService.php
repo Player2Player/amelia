@@ -44,7 +44,7 @@ class ReservationService
 
             case (Entities::PACKAGE):
                 /** @var ReservationServiceInterface $reservationService */
-                $reservationService = $this->container->get('application.reservation.appointment.service');
+                $reservationService = $this->container->get('application.reservation.package.service');
 
                 return $reservationService;
 

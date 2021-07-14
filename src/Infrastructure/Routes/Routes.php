@@ -16,6 +16,7 @@ use AmeliaBooking\Infrastructure\Routes\Booking\Booking;
 use AmeliaBooking\Infrastructure\Routes\Booking\Event\Event;
 use AmeliaBooking\Infrastructure\Routes\Coupon\Coupon;
 use AmeliaBooking\Infrastructure\Routes\Outlook\Outlook;
+use AmeliaBooking\Infrastructure\Routes\Stash\Stash;
 use AmeliaBooking\Infrastructure\Routes\Stats\Stats;
 use AmeliaBooking\Infrastructure\Routes\Location\Location;
 use AmeliaBooking\Infrastructure\Routes\Notification\Notification;
@@ -62,6 +63,8 @@ class Routes
 
         Entities::routes($app);
 
+        Stash::routes($app);
+
         Extra::routes($app);
 
         Google::routes($app);
@@ -94,6 +97,6 @@ class Routes
 
         Zoom::routes($app);
 
-        
+        Package::routes($app);
     }
 }

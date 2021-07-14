@@ -12,7 +12,6 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
-use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class AbstractCategory
@@ -23,9 +22,6 @@ abstract class AbstractCategory
 {
     /** @var  Id */
     private $id;
-
-    /** @var Slug */
-    private $slug;
 
     /** @var  Status */
     protected $status;
@@ -73,22 +69,6 @@ abstract class AbstractCategory
     public function setId(Id $id)
     {
         $this->id = $id;
-    }
-
-    /**
-     * @param Slug $slug
-     */
-    public function setSlug(Slug $slug)
-    {
-        $this->slug = $slug;
-    }
-
-    /**
-     * @return Slug
-     */
-    public function getSlug()
-    {
-        return $this->slug;
     }
 
     /**
@@ -178,7 +158,6 @@ abstract class AbstractCategory
     {
         return [
             'id'            => null !== $this->getId() ? $this->getId()->getValue() : null,
-            'slug'            => null !== $this->getSlug() ? $this->getSlug()->getValue() : null,
             'status'        => $this->getStatus()->getValue(),
             'name'          => $this->getName()->getValue(),
             'serviceList'   => $this->getServiceList() ? $this->getServiceList()->toArray() : [],

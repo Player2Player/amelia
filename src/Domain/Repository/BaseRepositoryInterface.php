@@ -17,13 +17,6 @@ interface BaseRepositoryInterface
     public function getById($id);
 
     /**
-     * @param string $slug
-     *
-     * @return mixed
-     */
-    public function getBySlug($slug);
-
-    /**
      * @return mixed
      */
     public function getAll();

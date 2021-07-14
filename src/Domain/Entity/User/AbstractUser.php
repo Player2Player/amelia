@@ -9,7 +9,6 @@ use AmeliaBooking\Domain\ValueObjects\Picture;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\Email;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
-use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
@@ -32,9 +31,6 @@ abstract class AbstractUser
 
     /** @var Id */
     private $id;
-
-    /** @var Slug */
-    private $slug;
 
     /** @var Status */
     private $status;
@@ -98,22 +94,6 @@ abstract class AbstractUser
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @param Slug $slug
-     */
-    public function setSlug(Slug $slug)
-    {
-        $this->slug = $slug;
-    }
-
-    /**
-     * @return Slug
-     */
-    public function getSlug()
-    {
-        return $this->slug;
     }
 
     /**
@@ -371,7 +351,6 @@ abstract class AbstractUser
     {
         return [
             'id'               => null !== $this->getId() ? $this->getId()->getValue() : null,
-            'slug'             => null !== $this->getSlug() ? $this->getSlug()->getValue() : null,
             'firstName'        => $this->getFirstName()->getValue(),
             'lastName'         => $this->getLastName()->getValue(),
             'birthday'         => null !== $this->getBirthday() ? $this->getBirthday()->getValue() : null,
