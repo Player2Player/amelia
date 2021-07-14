@@ -22,6 +22,8 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\CategoryRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
+use AmeliaBooking\Application\Services\Helper\HelperService;
 
 /**
  * Class AddServiceCommandHandler
@@ -72,6 +74,11 @@ class AddServiceCommandHandler extends CommandHandler
             return $result;
         }
 
+        // create location slug from name
+        $slug = sanitize_title($service->getName()->getValue());
+        $slug = substr($slug, 0, 50);
+        $service->setSlug(new Slug($slug));
+
         /** @var ServiceRepository $serviceRepository */
         $serviceRepository = $this->container->get('domain.bookable.service.repository');
         /** @var BookableApplicationService $bookableService */
@@ -108,6 +115,10 @@ class AddServiceCommandHandler extends CommandHandler
         $galleryService->manageGalleryForEntityAdd($service->getGallery(), $serviceId);
 
         $serviceRepository->commit();
+
+        /** @var HelperService $helperService */
+        $helperService = $this->container->get('application.helper.service');
+        $helperService->cleanCustomTemplatesCache();
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully added new service.');

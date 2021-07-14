@@ -452,6 +452,7 @@ class Service extends AbstractBookable
         return array_merge(
             parent::toArray(),
             [
+                'slug'             => $this->getSlug() ? $this->getSlug()->getValue() : null,
                 'minCapacity'      => $this->getMinCapacity() ? $this->getMinCapacity()->getValue() : null,
                 'maxCapacity'      => $this->getMaxCapacity() ? $this->getMaxCapacity()->getValue() : null,
                 'duration'         => $this->getDuration() ? $this->getDuration()->getValue() : null,
