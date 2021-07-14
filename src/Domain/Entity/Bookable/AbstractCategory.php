@@ -178,6 +178,7 @@ abstract class AbstractCategory
     {
         return [
             'id'            => null !== $this->getId() ? $this->getId()->getValue() : null,
+            'slug'            => null !== $this->getSlug() ? $this->getSlug()->getValue() : null,
             'status'        => $this->getStatus()->getValue(),
             'name'          => $this->getName()->getValue(),
             'serviceList'   => $this->getServiceList() ? $this->getServiceList()->toArray() : [],
