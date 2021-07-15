@@ -18,6 +18,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Cycle;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Domain\ValueObjects\Priority;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Domain\Entity\Bookable\AbstractBookable;
 use AmeliaBooking\Domain\ValueObjects\Duration;
 use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
@@ -29,6 +30,10 @@ use AmeliaBooking\Domain\ValueObjects\PositiveDuration;
  */
 class Service extends AbstractBookable
 {
+    
+    /** @var Slug */
+    private $slug;
+
     /** @var  IntegerValue */
     private $minCapacity;
 
@@ -86,6 +91,22 @@ class Service extends AbstractBookable
     /** @var  Json */
     protected $translations;
 
+    /**
+     * @param Slug $slug
+     */
+    public function setSlug(Slug $slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return Slug
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+        
     /**
      * @return Id
      */
@@ -399,6 +420,7 @@ class Service extends AbstractBookable
             parent::toArray(),
             [
                 'minCapacity'      => $this->getMinCapacity() ? $this->getMinCapacity()->getValue() : null,
+                'slug'             => $this->getSlug() ? $this->getSlug()->getValue() : null,
                 'maxCapacity'      => $this->getMaxCapacity() ? $this->getMaxCapacity()->getValue() : null,
                 'duration'         => $this->getDuration() ? $this->getDuration()->getValue() : null,
                 'timeBefore'       => $this->getTimeBefore() ? $this->getTimeBefore()->getValue() : null,

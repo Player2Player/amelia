@@ -21,6 +21,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\String\BookingType;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
+use AmeliaBooking\Domain\ValueObjects\String\PaymentData;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
@@ -29,7 +30,9 @@ use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Services\Payment\CurrencyService;
 use AmeliaBooking\Infrastructure\Services\Payment\PayPalService;
 use AmeliaBooking\Infrastructure\Services\Payment\StripeService;
+use AmeliaStripe\PaymentIntent;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
+use AmeliaStripe\Stripe;
 use Exception;
 use Slim\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
@@ -246,7 +249,16 @@ class PaymentApplicationService
 
                     return false;
                 }
-
+                
+                if (isset($response['paymentIntentId'])) {
+                  $result->setData(
+                      [
+                          'paymentIntentId' => $response['paymentIntentId'],
+                          'paymentStatus' => $response['paymentStatus']
+                      ]
+                  );
+                }
+                
                 return true;
 
             case ('onSite'):
@@ -269,6 +281,45 @@ class PaymentApplicationService
 
         return false;
     }
+
+    /**
+     * @param Payment $payment
+     * @return bool
+     */
+    public function processPaymentCapture($payment) 
+    {
+      /** @var PaymentRepository $paymentRepository */
+      $paymentRepository = $this->container->get('domain.payment.repository');
+      $stripeSettings = $this->container->get('domain.settings.service')->getSetting('payments', 'stripe');
+      Stripe::setApiKey(
+        $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
+      );
+      $paymentData = $payment->getData()->getValue();
+      $gateway = $payment->getGateway()->getName()->getValue();
+      if (!$paymentData || empty($paymentData)) {
+         return false;
+      }
+      $intentData = json_decode($paymentData);
+      switch ($gateway) {
+        case 'stripe':           
+          if ($intentData['paymentStatus'] === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+            /** @var PaymentIntent $intent */    
+            $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
+            $intent->capture();
+            $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
+            $payment->setData(new PaymentData(json_encode($intentData)));
+            $paymentRepository->update($payment->getId()->getValue(), $payment);            
+          }
+          return true;
+        case 'payPal':
+          // TODO: Implement for paypal
+          return true;
+        case 'onSite':
+        case 'wc':
+        case 'mollie':
+          return true;
+      }
+    }    
 
     /**
      * @param AbstractBookable $bookable

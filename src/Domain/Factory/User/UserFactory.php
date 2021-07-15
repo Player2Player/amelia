@@ -25,6 +25,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Email;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Factory\Schedule\DayOffFactory;
 use AmeliaBooking\Domain\Factory\Schedule\TimeOutFactory;
@@ -151,6 +152,10 @@ class UserFactory
                     new Collection($appointmentList)
                 );
 
+                if (!empty($data['slug'])) {
+                  $user->setSlug(new Slug($data['slug']));
+                }
+                                
                 if (!empty($data['password'])) {
                     $user->setPassword(new Password($data['password']));
                 }

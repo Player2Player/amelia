@@ -35,13 +35,14 @@ class CategoryRepository extends AbstractRepository implements CategoryRepositor
             ':name'         => $data['name'],
             ':position'     => $data['position'],
             ':translations' => $data['translations'],
+            ':slug'         => $data['slug']
         ];
 
         try {
             $statement = $this->connection->prepare(
                 "INSERT INTO {$this->table} 
-                (`status`, `name`, `position`, `translations`)
-                VALUES (:status, :name, :position, :translations)"
+                (`status`, `name`, `position`, `translations`, `slug`)
+                VALUES (:status, :name, :position, :translations, :slug)"
             );
 
             $res = $statement->execute($params);

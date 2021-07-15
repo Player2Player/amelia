@@ -87,6 +87,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
             ':pictureFullPath'  => $data['pictureFullPath'],
             ':pictureThumbPath' => $data['pictureThumbPath'],
             ':pin'              => $data['pin'],
+            ':slug'             => $data['slug'],
         ];
 
         try {
@@ -102,7 +103,8 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                 `longitude`,
                 `pictureFullPath`,
                 `pictureThumbPath`,
-                `pin`
+                `pin`,
+                `slug`
                 )
                  VALUES (
                  :status,
@@ -114,7 +116,8 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                  :longitude,
                  :pictureFullPath,
                  :pictureThumbPath,
-                 :pin
+                 :pin,
+                 :slug
                  )"
             );
 

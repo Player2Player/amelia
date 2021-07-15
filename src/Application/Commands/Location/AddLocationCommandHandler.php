@@ -11,12 +11,14 @@ use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\Location\LocationFactory;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Commands\CommandHandler;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Domain\Factory\Location\ProviderLocationFactory;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
 use AmeliaBooking\Infrastructure\Repository\Location\ProviderLocationRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
+use AmeliaBooking\Application\Services\Helper\HelperService;
 
 /**
  * Class AddLocationCommandHandler
@@ -65,6 +67,10 @@ class AddLocationCommandHandler extends CommandHandler
             return $result;
         }
 
+        // create location slug from name
+        $slug = sanitize_title($location->getName()->getValue());
+        $slug = substr($slug, 0, 50);
+
         /** @var LocationRepository $locationRepository */
         $locationRepository = $this->container->get('domain.locations.repository');
 
@@ -76,10 +82,15 @@ class AddLocationCommandHandler extends CommandHandler
 
         /** @var Location $existingLocation */
         foreach ($existingLocations->getItems() as $existingLocation) {
-            if ($existingLocation === Status::VISIBLE) {
-                $allLocationsAreHidden = false;
-            }
+          if ($slug === $existingLocation->getSlug()->getValue()) {
+            $slug = "{$slug}02"; 
+          }
+          if ($existingLocation === Status::VISIBLE) {
+              $allLocationsAreHidden = false;
+          }
         }
+
+        $location->setSlug(new Slug($slug));
 
         if ($locationId = $locationRepository->add($location)) {
             if ($allLocationsAreHidden) {
@@ -112,6 +123,10 @@ class AddLocationCommandHandler extends CommandHandler
             ]);
 
             $locationRepository->commit();
+
+            /** @var HelperService $helperService */
+            $helperService = $this->container->get('application.helper.service');
+            $helperService->cleanCustomTemplatesCache();            
         }
 
         return $result;

@@ -4,6 +4,7 @@ namespace AmeliaBooking\Application\Commands\Bookable\Category;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
+use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Category;
@@ -13,6 +14,7 @@ use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Factory\Bookable\Service\CategoryFactory;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\CategoryRepository;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ExtraRepository;
@@ -59,6 +61,11 @@ class AddCategoryCommandHandler extends CommandHandler
             return $result;
         }
 
+        // create location slug from name
+        $slug = sanitize_title($category->getName()->getValue());
+        $slug = substr($slug, 0, 50);
+        $category->setSlug(new Slug($slug));
+
         /** @var CategoryRepository $categoryRepository */
         $categoryRepository = $this->container->get('domain.bookable.category.repository');
         /** @var ServiceRepository $serviceRepository */
@@ -93,6 +100,10 @@ class AddCategoryCommandHandler extends CommandHandler
         }
 
         $categoryRepository->commit();
+
+        /** @var HelperService $helperService */
+        $helperService = $this->container->get('application.helper.service');
+        $helperService->cleanCustomTemplatesCache();        
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully added new category.');

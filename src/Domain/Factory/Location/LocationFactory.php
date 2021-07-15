@@ -13,6 +13,7 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class LocationFactory
@@ -36,6 +37,10 @@ class LocationFactory
             $location->setId(new Id($data['id']));
         }
 
+        if (isset($data['slug'])) {
+          $location->setSlug(new Slug($data['slug']));
+        }
+                
         if (isset($data['name'])) {
             $location->setName(new Name($data['name']));
         }

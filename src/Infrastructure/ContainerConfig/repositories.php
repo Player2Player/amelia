@@ -248,6 +248,8 @@ $entries['domain.users.providers.repository'] = function (Container $c) {
         DB\User\Provider\ProvidersServiceTable::getTableName(),
         DB\User\Provider\ProvidersLocationTable::getTableName(),
         DB\Bookable\ServicesTable::getTableName(),
+        DB\Location\LocationsTable::getTableName(),
+        DB\Bookable\CategoriesTable::getTableName(),        
         DB\User\Provider\ProvidersViewsTable::getTableName(),
         DB\User\Provider\ProvidersGoogleCalendarTable::getTableName(),
         DB\User\Provider\ProvidersOutlookCalendarTable::getTableName()

@@ -8,6 +8,7 @@ namespace AmeliaBooking\Domain\Factory\Bookable\Service;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Entity\Bookable\Service\Category;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Gallery\GalleryImage;
@@ -30,6 +31,7 @@ use AmeliaBooking\Domain\ValueObjects\Priority;
 use AmeliaBooking\Domain\ValueObjects\String\Color;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class ServiceFactory
@@ -61,6 +63,10 @@ class ServiceFactory
             $service->setPrice(new Price($data['price']));
         }
 
+        if (isset($data['slug'])) {
+          $service->setSlug(new Slug($data['slug']));
+        }
+                
         if (isset($data['status'])) {
             $service->setStatus(new Status($data['status']));
         }
@@ -81,6 +87,16 @@ class ServiceFactory
             $service->setDuration(new PositiveDuration($data['duration']));
         }
 
+        if (isset($data['categoryName'])) {
+          $cat = new Category(
+            new Status(Status::VISIBLE),
+            new Name($data['categoryName']),
+            new PositiveInteger(1)
+          );
+          $cat->setSlug(new Slug($data['categorySlug']));
+          $service->setCategory($cat);          
+        }
+                
         if (isset($data['description'])) {
             $service->setDescription(new Description($data['description']));
         }

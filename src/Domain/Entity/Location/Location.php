@@ -11,6 +11,7 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class Location
@@ -21,6 +22,9 @@ class Location
 {
     /** @var Id */
     private $id;
+
+    /** @var Slug */
+    private $slug;
 
     /** @var Status */
     private $status;
@@ -62,6 +66,22 @@ class Location
         $this->id = $id;
     }
 
+    /**
+     * @param Slug $slug
+     */
+    public function setSlug(Slug $slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return Slug
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+    
     /**
      * @return Status
      */
@@ -197,6 +217,7 @@ class Location
     {
         return [
             'id'               => null !== $this->getId() ? $this->getId()->getValue() : null,
+            'slug'             => null !== $this->getSlug() ? $this->getSlug()->getValue() : null,
             'status'           => null !== $this->getStatus() ? $this->getStatus()->getValue() : null,
             'name'             => $this->getName()->getValue(),
             'description'      => null !== $this->getDescription() ? $this->getDescription()->getValue() : null,

@@ -25,21 +25,18 @@ class ProviderFactory extends UserFactory
         $providersCollection = new Collection();
 
         foreach ($providers as $providerKey => $providerArray) {
-            $providersCollection->addItem(
-                self::create($providerArray),
-                $providerKey
-            );
-
+            $provider = self::create($providerArray);
+            $providersCollection->addItem($provider, $providerKey);
             if ($providersServices && array_key_exists($providerKey, $providersServices)) {
                 foreach ((array)$providersServices[$providerKey] as $serviceKey => $providerService) {
                     if (array_key_exists($serviceKey, $services)) {
-                        $providersCollection->getItem($providerKey)->getServiceList()->addItem(
-                            ServiceFactory::create(array_merge(
-                                $services[$serviceKey],
-                                $providerService
-                            )),
-                            $serviceKey
-                        );
+                      $providersCollection->getItem($providerKey)->getServiceList()->addItem(
+                          ServiceFactory::create(array_merge(
+                              $services[$serviceKey],
+                              $providerService
+                          )),
+                          $serviceKey
+                      );
                     }
                 }
             }

@@ -136,7 +136,8 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
         $data = $entity->toArray();
 
         $params = [
-            ':name'             => $data['name'],
+            ':slug'             => $data['slug'],
+            ':name'             => $data['name'],            
             ':description'      => $data['description'],
             ':color'            => $data['color'],
             ':price'            => $data['price'],
@@ -196,7 +197,8 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
                 `depositPayment`,
                 `depositPerPerson`,
                 `mandatoryExtra`,
-                `minSelectedExtras`
+                `minSelectedExtras`,
+                `slug`
                 ) VALUES (
                 :name,
                 :description,
@@ -224,7 +226,8 @@ class ServiceRepository extends AbstractRepository implements ServiceRepositoryI
                 :depositPayment,
                 :depositPerPerson,
                 :mandatoryExtra,
-                :minSelectedExtras
+                :minSelectedExtras,
+                :slug
                 )"
             );
 
