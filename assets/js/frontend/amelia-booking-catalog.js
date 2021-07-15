@@ -24524,9 +24524,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                             ),
                                             e._v(" "),
                                             i("div", {
-                                              staticClass:
-                                                "am-category-service-image",
-                                              style: null,
+                                              staticClass: "am-category-service-image",                                              
+                                              style: null, //p2p: remove full image bg style
                                             }),
                                             e._v(" "),
                                             i(
@@ -24549,8 +24548,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                                         staticClass:
                                                           "am-category-color-wrapper",
                                                       },
-                                                      [
-                                                        i("img",
+                                                      [                                                        
+                                                        i("img", //p2p: replace service initials with pictureThumbPath
                                                           {
                                                             staticClass:
                                                               "am-category-service-color",
