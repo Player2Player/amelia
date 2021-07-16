@@ -22710,8 +22710,20 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
               ),
             ]),
             e._v(" "),
-            e._l(e.employees, function (t, a) {
-              return i("div", { key: a, staticClass: "am-service-provider" }, [
+            e._l(e.employees, function (t, a) { 
+              return i("div", //p2p: handle select employee event handler
+              {
+                 key: a, 
+                 staticClass: "am-service-provider" ,
+                 style: {
+                   cursor: "pointer",
+                 },
+                 on: {
+                  click: function() {
+                   e.$emit('selectemployee', t); 
+                  },  
+                 },
+                }, [ 
                 i("img", {
                   attrs: {
                     src: e.pictureLoad(t, !0),
@@ -23491,8 +23503,15 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                             t._v(" "),
                             t.service.extras.length > 0 &&
                             t.formParts.employees.visibility
-                              ? a("employees-block", {
-                                  attrs: {
+                              ? a("employees-block", //p2p: handle new event selectemployee
+                              { 
+                                on: {
+                                   "selectemployee": function(provider) {
+                                     if (t.$children[2] && t.$children[2].appointment) 
+                                      t.$children[2].appointment.providerId = provider.id;
+                                   },
+                                },  
+                                attrs: {
                                     "form-colors": t.formColors,
                                     "form-labels": t.formLabels,
                                     employees: t.getServiceProviders(
