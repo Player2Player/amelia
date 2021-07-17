@@ -28,9 +28,10 @@ class UpdateSMSNotificationHistoryCommandHandler extends CommandHandler
         /** @var NotificationSMSHistoryRepository $notificationsSMSHistoryRepo */
         $notificationsSMSHistoryRepo = $this->container->get('domain.notificationSMSHistory.repository');
 
+        //p2p: change for using custom twilio account as a weebhook callback
         $updateData = [
-            'status' => $command->getField('status'),
-            'price'  => $command->getField('price')
+            'status' => $command->getField('MessageStatus'),
+            //'price'  => $command->getField('price')
         ];
 
         if ($notificationsSMSHistoryRepo->update((int)$command->getArg('id'), $updateData)) {

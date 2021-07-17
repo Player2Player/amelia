@@ -96,7 +96,7 @@ class TwilioAPIService
             'To'          => $to,
             'From'        => $this->from,
             'Body'        => $body,
-            //'callbackUrl' => $callbackUrl
+            'StatusCallback' => $callbackUrl
         ];
 
         return $this->sendRequest($data);
