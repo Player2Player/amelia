@@ -116,7 +116,30 @@ abstract class Controller
             return $response;
         }
 
-        if ($commandResult->hasAttachment() === false) {
+        if ($commandResult->getXmlRoot()) {
+          $xml = new \SimpleXMLElement("<?xml version=\"1.0\" encoding=\"UTF-8\"?><{$commandResult->getXmlRoot()}/>");
+          array_walk_recursive($commandResult->getData(), function($value, $key) use ($xml) {
+            $xml->addChild($key, $value);
+          });
+          $this->emitSuccessEvent($this->eventBus, $commandResult);
+
+          switch ($commandResult->getResult()) {
+            case (CommandResult::RESULT_SUCCESS):
+              $response = $response->withStatus(self::STATUS_OK);
+              break;
+            case (CommandResult::RESULT_CONFLICT):
+              $response = $response->withStatus(self::STATUS_CONFLICT);
+              break;
+            default:
+              $response = $response->withStatus(self::STATUS_INTERNAL_SERVER_ERROR);
+              break;
+          }
+
+          /** @var Response $response */
+          $response = $response->withHeader('Content-Type', 'application/xml;charset=utf-8');
+          $response = $response->write($xml->asXML());
+        }
+        else if ($commandResult->hasAttachment() === false) {
             $responseBody = [
                 'message' => $commandResult->getMessage(),
                 'data'    => $commandResult->getData()

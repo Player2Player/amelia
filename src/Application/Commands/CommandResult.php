@@ -18,6 +18,8 @@ class CommandResult
 
     private $data;
     private $message;
+    private $xmlRoot;
+    private $responseAsXml;
 
     private $result = self::RESULT_SUCCESS;
 
@@ -40,6 +42,23 @@ class CommandResult
     public function setResult($result)
     {
         $this->result = $result;
+    }
+
+    /**
+     * @param string $root
+     */
+    public function setXmlRoot($root)
+    {
+        $this->xmlRoot = $root;
+        $this->responseAsXml = true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getXmlRoot()
+    {
+        return $this->xmlRoot;
     }
 
     /**

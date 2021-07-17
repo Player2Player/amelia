@@ -14,6 +14,7 @@ use AmeliaBooking\Application\Controller\Notification\SendTestEmailController;
 use AmeliaBooking\Application\Controller\Notification\UpdateNotificationController;
 use AmeliaBooking\Application\Controller\Notification\UpdateNotificationStatusController;
 use AmeliaBooking\Application\Controller\Notification\UpdateSMSNotificationHistoryController;
+use AmeliaBooking\Application\Controller\Notification\TwilioSMSWebhookController;
 use Slim\App;
 
 /**
@@ -43,5 +44,7 @@ class Notification
         $app->post('/notifications/sms/history/{id:[0-9]+}', UpdateSMSNotificationHistoryController::class);
 
         $app->get('/notifications/sms/history', GetSMSNotificationsHistoryController::class);
+
+        $app->post('/twilio/sms', TwilioSMSWebhookController::class);
     }
 }

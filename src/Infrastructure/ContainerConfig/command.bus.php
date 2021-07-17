@@ -130,6 +130,7 @@ $entries['command.bus'] = function ($c) {
             Notification\SendAmeliaSmsApiRequestCommand::class        => new Notification\SendAmeliaSmsApiRequestCommandHandler($c),
             Notification\UpdateSMSNotificationHistoryCommand::class   => new Notification\UpdateSMSNotificationHistoryCommandHandler($c),
             Notification\GetSMSNotificationsHistoryCommand::class     => new Notification\GetSMSNotificationsHistoryCommandHandler($c),
+            Notification\TwilioSMSWebhookCommand::class               => new Notification\TwilioSMSWebhookCommandHandler($c),
             // Payment
             Payment\AddPaymentCommand::class                          => new Payment\AddPaymentCommandHandler($c),
             Payment\DeletePaymentCommand::class                       => new Payment\DeletePaymentCommandHandler($c),
