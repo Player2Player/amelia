@@ -44,6 +44,7 @@ class TwilioAPIService
         $options = json_decode(get_option('p2p_settings'));
         $this->account = $options->twilio->user;
         $this->authToken = $options->twilio->auth;
+        $this->from = $options->twilio->from;
     }
 
     /**
@@ -96,6 +97,53 @@ class TwilioAPIService
             'From'        => $this->from,
             'Body'        => $body,
             //'callbackUrl' => $callbackUrl
+        ];
+
+        return $this->sendRequest($data);
+    }
+
+    /**
+     * @param $data
+     *
+     * @return mixed
+     *
+     * @throws QueryExecutionException
+     * @throws ContainerException
+     */
+    public function testNotification($data)
+    {
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        /** @var EmailNotificationService $notificationService */
+        $notificationService = $this->container->get('application.emailNotification.service');
+
+        /** @var PlaceholderService $placeholderService */
+        $placeholderService = $this->container->get("application.placeholder.{$data['type']}.service");
+
+        $appointmentsSettings = $settingsService->getCategorySettings('appointments');
+
+        $notification = $notificationService->getByNameAndType($data['notificationTemplate'], 'sms');
+
+        $dummyData = $placeholderService->getPlaceholdersDummyData('sms');
+
+        $isForCustomer = $notification->getSendTo()->getValue() === NotificationSendTo::CUSTOMER;
+        $placeholderStringRec = 'recurring' . 'Placeholders' . ($isForCustomer ? 'Customer' : '') . 'Sms';
+        $placeholderStringPack = 'package' . 'Placeholders' . ($isForCustomer ? 'Customer' : '') . 'Sms';
+
+        $dummyData['recurring_appointments_details'] = $placeholderService->applyPlaceholders($appointmentsSettings[$placeholderStringRec], $dummyData);
+        $dummyData['package_appointments_details']   =  $placeholderService->applyPlaceholders($appointmentsSettings[$placeholderStringPack], $dummyData);
+
+
+        $body = $placeholderService->applyPlaceholders(
+            $notification->getContent()->getValue(),
+            $dummyData
+        );
+
+        $data = [
+            'To'   => $data['recipientPhone'],
+            'From' => $this->from,
+            'Body' => $body
         ];
 
         return $this->sendRequest($data);

@@ -5,6 +5,7 @@ namespace AmeliaBooking\Application\Commands\Notification;
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Services\Notification\SMSAPIService;
+use AmeliaBooking\Application\Services\Notification\TwilioAPIService;
 
 /**
  * Class SendAmeliaSmsApiRequestCommandHandler
@@ -27,9 +28,18 @@ class SendAmeliaSmsApiRequestCommandHandler extends CommandHandler
         /** @var SMSAPIService $smsApiService */
         $smsApiService = $this->getContainer()->get('application.smsApi.service');
 
-        // Call method dynamically and pass data to the function. Method name is the request field.
-        $apiResponse = $smsApiService->{$command->getField('action')}($command->getField('data'));
+        $apiResponse = null;
 
+        // Call test notification with twilio
+        if ($command->getField('action') === 'testNotification') {
+          /** @var TwilioAPIService $twilioApiService */
+          $twilioApiService = $this->getContainer()->get('application.twilioApi.service');
+          $apiResponse = $twilioApiService->testNotification($command->getField('data'));  
+        }
+        else {
+          // Call method dynamically and pass data to the function. Method name is the request field.
+          $apiResponse = $smsApiService->{$command->getField('action')}($command->getField('data'));
+        }
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Amelia SMS API request successful');
         $result->setData($apiResponse);
