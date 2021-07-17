@@ -331,6 +331,17 @@ $entries['application.smsApi.service'] = function ($c) {
 };
 
 /**
+ * Twilio API Service
+ *
+ * @param Container $c
+ *
+ * @return \AmeliaBooking\Application\Services\Notification\TwilioAPIService
+ */
+$entries['application.twilioApi.service'] = function ($c) {
+  return new AmeliaBooking\Application\Services\Notification\TwilioAPIService($c);
+};
+
+/**
  * Payment service
  *
  * @param Container $c

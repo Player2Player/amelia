@@ -54,8 +54,16 @@ class SMSNotificationService extends AbstractNotificationService
         $userRepository = $this->container->get('domain.users.repository');
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');
-        /** @var SMSAPIService $smsApiService */
-        $smsApiService = $this->container->get('application.smsApi.service');
+
+        // /** @var SMSAPIService $smsApiService */
+        // $smsApiService = $this->container->get('application.smsApi.service');
+
+        /** 
+         * Replace amelia sms api service with custom account twilio apiservice
+         * @var TwilioAPIService $smsApiService 
+        */
+        $smsApiService = $this->container->get('application.twilioApi.service');
+
         /** @var PlaceholderService $placeholderService */
         $placeholderService = $this->container->get("application.placeholder.{$appointmentArray['type']}.service");
         /** @var HelperService $helperService */
@@ -170,8 +178,15 @@ class SMSNotificationService extends AbstractNotificationService
             /** @var NotificationSMSHistoryRepository $notificationsSMSHistoryRepo */
             $notificationsSMSHistoryRepo = $this->container->get('domain.notificationSMSHistory.repository');
 
-            /** @var SMSAPIService $smsApiService */
-            $smsApiService = $this->container->get('application.smsApi.service');
+            ///** @var SMSAPIService $smsApiService */
+            //$smsApiService = $this->container->get('application.smsApi.service');
+
+            /** 
+             * Replace amelia sms api service with custom account twilio apiservice
+             * @var TwilioAPIService $smsApiService 
+            */
+            $smsApiService = $this->container->get('application.twilioApi.service');
+
             /** @var PlaceholderService $placeholderService */
             $placeholderService = $this->container->get('application.placeholder.appointment.service');
             /** @var SettingsService $settingsService */
