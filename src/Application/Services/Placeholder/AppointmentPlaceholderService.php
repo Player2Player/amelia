@@ -233,7 +233,7 @@ class AppointmentPlaceholderService extends PlaceholderService
             $bookingKey !== null ? $appointmentArray['bookings'][$bookingKey]['info'] : null,
             $service->getTranslations() ? $service->getTranslations()->getValue() : null,
             'description'
-        ) ?: $service->getDescription()->getValue();
+        ) ?: ($service->getDescription() ? $service->getDescription()->getValue() : '');
 
         $data = [
             'category_name'           => $categoryName,
