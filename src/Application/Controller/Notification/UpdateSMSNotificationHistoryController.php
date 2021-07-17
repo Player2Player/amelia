@@ -19,6 +19,10 @@ class UpdateSMSNotificationHistoryController extends Controller
     protected $allowedFields = [
         'status',
         'price',
+        // add twilio request params
+        'MessageSid',
+        'MessageStatus',
+        'AccountSid'
     ];
 
     /**

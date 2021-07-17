@@ -80,7 +80,10 @@ class TwilioAPIService
         }
 
         curl_close($ch);
-        return json_decode($response);
+        return  (object) [
+          'message' => json_decode($response),
+          'status'  => 'OK'
+        ];         
     }
 
     /**

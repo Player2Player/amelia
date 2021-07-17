@@ -84,6 +84,8 @@ class NotificationSMSHistoryRepository extends AbstractRepository
             ':status'   => $data['status'],
             ':price'    => $data['price'],
             ':segments' => $data['segments'],
+            ':messageSid' => $data['messageSid'],
+            ':accountSid' => $data['accountSid'],
             ':id'       => $id
         ];
 
@@ -94,7 +96,9 @@ class NotificationSMSHistoryRepository extends AbstractRepository
                 `dateTime` = COALESCE(:dateTime, `dateTime`),
                 `status` = COALESCE(:status, `status`),
                 `price` = COALESCE(:price, `price`),
-                `segments` = COALESCE(:segments, `segments`)
+                `segments` = COALESCE(:segments, `segments`),
+                `messageSid` = COALESCE(:messageSid, `messageSid`),
+                `accountSid` = COALESCE(:accountSid, `accountSid`)
                 WHERE id = :id"
             );
 

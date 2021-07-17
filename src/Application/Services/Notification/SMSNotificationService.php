@@ -132,11 +132,13 @@ class SMSNotificationService extends AbstractNotificationService
 
                     if ($apiResponse->status === 'OK') {
                         $notificationsSMSHistoryRepo->update($historyId, [
-                            'logId'    => $apiResponse->message->logId,
-                            'status'   => $apiResponse->message->status,
-                            'price'    => $apiResponse->message->price,
-                            'dateTime' => DateTimeService::getNowDateTimeInUtc(),
-                            'segments' => $apiResponse->message->segments
+                            'logId'       => $apiResponse->message->logId,
+                            'status'      => $apiResponse->message->status,
+                            'price'       => $apiResponse->message->price,
+                            'messageSid'  => $apiResponse->message->sid,
+                            'accountSid'  => $apiResponse->message->account_sid,
+                            'dateTime'    => DateTimeService::getNowDateTimeInUtc(),
+                            'segments'    => $apiResponse->message->num_segments
                         ]);
 
                         if ($logNotification) {

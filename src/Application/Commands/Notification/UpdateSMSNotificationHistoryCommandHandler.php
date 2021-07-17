@@ -30,13 +30,13 @@ class UpdateSMSNotificationHistoryCommandHandler extends CommandHandler
 
         //p2p: change for using custom twilio account as a weebhook callback
         $updateData = [
-            'status' => $command->getField('MessageStatus'),
-            //'price'  => $command->getField('price')
+            'status' => $command->getField('MessageStatus')
         ];
 
         if ($notificationsSMSHistoryRepo->update((int)$command->getArg('id'), $updateData)) {
             $result->setResult(CommandResult::RESULT_SUCCESS);
             $result->setMessage('Successfully updated SMS notification history.');
+            $result->setData($updateData);
         }
 
         return $result;
