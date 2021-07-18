@@ -4,7 +4,9 @@ namespace AmeliaBooking\Infrastructure\Repository\Notification;
 
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
+use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
+use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\AppointmentsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\UsersTable;
 
 /**
@@ -205,4 +207,52 @@ class NotificationSMSHistoryRepository extends AbstractRepository
 
         return $row;
     }
+
+    /**
+     * @param $criteria
+     *     
+     * @return array
+     * @throws QueryExecutionException
+     */
+    public function getLastNotificationDelivered($criteria)
+    {
+      $row = null;        
+      $params = [':status' => 'delivered'];
+      $where = [];
+      try {
+        if (!empty($criteria['notificationId'])) {
+          $where[] = "`notificationId` = :notificationId";
+          $params[':notificationId'] = $criteria['notificationId'];
+        }
+
+        if (!empty($criteria['phone'])) {
+          $where[] = "`phone` = :phone";
+          $params[':phone'] = $criteria['phone'];
+        }
+
+        $where = $where ? ' AND ' . implode(' AND ', $where) : '';
+        $appointmentTable = AppointmentsTable::getTableName();
+        $statement = $this->connection->prepare(
+            "SELECT a.*, b.status as appointmentStatus
+            FROM {$this->table} a
+            INNER JOIN $appointmentTable b
+            ON b.id = a.appointmentId
+            WHERE `status` = :status $where
+            ORDER BY `dateTime` DESC
+            LIMIT 1"
+        );
+
+        $statement->execute($params);
+
+        $row = $statement->fetch();
+      } catch (\Exception $e) {
+          throw new QueryExecutionException('Unable to get data from ' . __CLASS__, $e->getCode(), $e);
+      }
+
+      if (!$row) {
+        throw new NotFoundException('Data not found in ' . __CLASS__);
+      }
+      return $row;
+    }
+
 }

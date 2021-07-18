@@ -18,6 +18,12 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      */
     public function findByExternalId($id);
 
+    /**
+     * @param string $phone
+     *
+     * @return mixed
+     */
+    public function findByPhone($phone, $type);
 
     /**
      * @param $type

@@ -194,6 +194,33 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
     }
 
     /**
+     * @param string $phone
+     * @param string $type
+     * 
+     * @return Admin|Customer|Manager|Provider|bool
+     * @throws InvalidArgumentException
+     * @throws QueryExecutionException
+     */
+    public function findByPhone($phone, $type)
+    {
+        try {
+            $statement = $this->connection->prepare("SELECT * FROM {$this->table} WHERE `type` = :type AND phone = :phone");
+            $statement->bindParam(':type', $type);
+            $statement->bindParam(':phone', $phone);            
+            $statement->execute();
+            $row = $statement->fetch();
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to find by phone number in ' . __CLASS__, $e->getCode(), $e);
+        }
+
+        if (!$row) {
+            return false;
+        }
+
+        return UserFactory::create($row);
+    }
+
+    /**
      * @param $type
      *
      * @return Collection

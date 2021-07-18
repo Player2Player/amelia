@@ -19,6 +19,7 @@ use AmeliaBooking\Application\Services\TimeSlot\TimeSlotService;
 use AmeliaBooking\Application\Services\User\CustomerApplicationService;
 use AmeliaBooking\Application\Services\User\ProviderApplicationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
+use AmeliaBooking\Application\Services\Booking\AppointmentStatusService;
 use AmeliaBooking\Domain\Entity\Booking\Reservation;
 use AmeliaBooking\Infrastructure\Common\Container;
 
@@ -75,6 +76,17 @@ $entries['application.currentLocation.service'] = function () {
  */
 $entries['application.booking.appointment.service'] = function ($c) {
     return new AmeliaBooking\Application\Services\Booking\AppointmentApplicationService($c);
+};
+
+/**
+ * Appointment status service
+ *
+ * @param Container $c
+ *
+ * @return AppointmentStatusService
+ */
+$entries['application.booking.appointment.status.service'] = function ($c) {
+  return new AmeliaBooking\Application\Services\Booking\AppointmentStatusService($c);
 };
 
 /**
