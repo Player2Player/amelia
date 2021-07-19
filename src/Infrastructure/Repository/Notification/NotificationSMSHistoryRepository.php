@@ -221,12 +221,12 @@ class NotificationSMSHistoryRepository extends AbstractRepository
       $where = [];
       try {
         if (!empty($criteria['notificationId'])) {
-          $where[] = "`notificationId` = :notificationId";
+          $where[] = "a.`notificationId` = :notificationId";
           $params[':notificationId'] = $criteria['notificationId'];
         }
 
         if (!empty($criteria['phone'])) {
-          $where[] = "`phone` = :phone";
+          $where[] = "a.`phone` = :phone";
           $params[':phone'] = $criteria['phone'];
         }
 
@@ -237,8 +237,8 @@ class NotificationSMSHistoryRepository extends AbstractRepository
             FROM {$this->table} a
             INNER JOIN $appointmentTable b
             ON b.id = a.appointmentId
-            WHERE `status` = :status $where
-            ORDER BY `dateTime` DESC
+            WHERE a.`status` = :status $where
+            ORDER BY a.`dateTime` DESC
             LIMIT 1"
         );
 

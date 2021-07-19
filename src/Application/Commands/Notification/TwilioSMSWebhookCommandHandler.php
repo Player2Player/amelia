@@ -35,7 +35,7 @@ class TwilioSMSWebhookCommandHandler extends CommandHandler
     $result = new CommandResult();
     $result->setXmlRoot('Response');
 
-    $signtureMessage = 'Thank you,\nPlayer2Player';
+    $signtureMessage = "Thank you,\n Player2Player";
     $userPhoneNumber = $command->getField('From');
     $bodyMessage = trim(strtolower($command->getField('Body')));
     $message = null;
@@ -82,8 +82,8 @@ class TwilioSMSWebhookCommandHandler extends CommandHandler
           $message = 'Your appointment is already rejected';
           break;    
         }
-    } catch (NotFoundException) {
-      $message = 'You don\'t any sms message for appointment pending';
+    } catch (NotFoundException $exc) {
+      $message = 'You don\'t have any sms message for appointment pending';
     }    
 
     if ($changeStatusAppointment) {      
@@ -92,13 +92,12 @@ class TwilioSMSWebhookCommandHandler extends CommandHandler
       $appointmentStatusService = $this->container->get('application.booking.appointment.status.service');
       $appointmentResult = $appointmentStatusService->Update($user, $appointmentId, $requestedStatus);
       if ($appointmentResult->getResult() === CommandResult::RESULT_ERROR) {
-        $result->setResult(CommandResult::RESULT_ERROR);
-        $result->setData([]);
-        return $result; 
+        $message = $appointmentResult->getMessage();
+      } else {
+        $message = $requestedStatus === BookingStatus::APPROVED 
+          ? 'Your appointment has been approved'
+          : 'Your appointment has been rejected';
       }
-      $message = $requestedStatus === BookingStatus::APPROVED 
-        ? 'Your appointment has been approved'
-        : 'Your appointment has been rejected';
     }
 
     $result->setResult(CommandResult::RESULT_SUCCESS);

@@ -302,7 +302,7 @@ class PaymentApplicationService
       $intentData = json_decode($paymentData);
       switch ($gateway) {
         case 'stripe':           
-          if ($intentData['paymentStatus'] === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+          if ($intentData->paymentStatus === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
             /** @var PaymentIntent $intent */    
             $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
             $intent->capture();
