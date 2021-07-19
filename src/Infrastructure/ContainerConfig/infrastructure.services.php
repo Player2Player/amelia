@@ -14,6 +14,7 @@ use AmeliaBooking\Infrastructure\Services\Notification\WpMailService;
 use AmeliaBooking\Infrastructure\Services\Outlook\OutlookCalendarService;
 use AmeliaBooking\Infrastructure\Services\Recaptcha\RecaptchaService;
 use AmeliaBooking\Infrastructure\Services\Zoom\ZoomService;
+use AmeliaBooking\Infrastructure\Services\Twilio\RequestValidator;
 
 defined('ABSPATH') or die('No script kiddies please!');
 
@@ -150,4 +151,13 @@ $entries['infrastructure.recaptcha.service'] = function ($c) {
     return new AmeliaBooking\Infrastructure\Services\Recaptcha\RecaptchaService(
         $c->get('domain.settings.service')
     );
+};
+
+/**
+ * Twilio request validator
+ *
+ * @return RequestValidator
+ */
+$entries['infrastructure.twilio.requestValidator'] = function () {
+  return new AmeliaBooking\Infrastructure\Services\Twilio\RequestValidator();
 };

@@ -11,6 +11,8 @@ use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
+use AmeliaBooking\Infrastructure\Services\Twilio\RequestValidator;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 
 /**
  * Class TwilioSMSWebhookCommandHandler
@@ -19,8 +21,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
  */
 class TwilioSMSWebhookCommandHandler extends CommandHandler
 {
-    
-    
+        
   public static $providerAppointmentPending = 24;
 
   /**
@@ -32,6 +33,13 @@ class TwilioSMSWebhookCommandHandler extends CommandHandler
    */
   public function handle(TwilioSMSWebhookCommand $command)
   {
+    
+    /** @var RequestValidator $requestValidator */
+    $requestValidator = $this->container->get('infrastructure.twilio.requestValidator');
+    if (!$requestValidator->isValid()) {
+      throw new AccessDeniedException('You are not allowed to execute this request');
+    }
+
     $result = new CommandResult();
     $result->setXmlRoot('Response');
 
