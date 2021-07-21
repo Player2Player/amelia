@@ -607,11 +607,32 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
     }
 
-    public function getBookingOpenEvents($location) {
+    /**
+     * @param array $criteria
+     * 
+     * @return Collection
+     * @throws QueryExecutionException
+     */
+    public function getBookingOpenEvents($criteria = []) {
       $params = [];
+      $where = [];
       $params[':now'] = DateTimeService::getNowDateTimeInUtc();
-      $params[':location'] = $location;
+      $params[':show'] = 1;
       $eventsPeriodsTable = EventsPeriodsTable::getTableName();
+
+      if (!empty($criteria['locations'])) {
+        $queryLocations = [];
+        foreach ((array)$criteria['locations'] as $index => $value) {
+            $param = ':location' . $index;
+            $queryLocations[] = $param;
+            $params[$param] = $value;
+        }
+
+        $where[] = 'e.locationId IN (' . implode(', ', $queryLocations) . ')';
+      }
+
+      $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
       try {
         $statement = $this->connection->prepare(
             "SELECT
@@ -650,8 +671,8 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 ep.periodEnd AS event_periodEnd                
             FROM {$this->table} e
             INNER JOIN {$eventsPeriodsTable} ep ON ep.eventId = e.id
-            WHERE :now <= DATE_FORMAT(e.bookingCloses, '%Y-%m-%d %H:%i:%s') AND e.locationId = :location
-            ORDER BY ep.periodStart"
+            WHERE e.show = :show AND :now <= DATE_FORMAT(e.bookingCloses, '%Y-%m-%d %H:%i:%s') $where            
+            ORDER BY e.locationId, ep.periodStart"
         );
 
         $statement->execute($params);
