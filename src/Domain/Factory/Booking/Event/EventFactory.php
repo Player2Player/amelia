@@ -29,6 +29,7 @@ use AmeliaBooking\Domain\ValueObjects\String\DepositType;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\EntityType;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class EventFactory
@@ -54,6 +55,10 @@ class EventFactory
 
         if (isset($data['name'])) {
             $event->setName(new Name($data['name']));
+        }
+
+        if (isset($data['slug'])) {
+          $event->setSlug(new Slug($data['slug']));
         }
 
         if (isset($data['price'])) {
@@ -267,6 +272,7 @@ class EventFactory
                     'id'                    => $eventId,
                     'name'                  => $row['event_name'],
                     'status'                => $row['event_status'],
+                    'slug'                  => $row['event_slug'],
                     'bookingOpens'          => $row['event_bookingOpens'] ?
                         DateTimeService::getCustomDateTimeFromUtc($row['event_bookingOpens']) : null,
                     'bookingCloses'         => $row['event_bookingCloses'] ?

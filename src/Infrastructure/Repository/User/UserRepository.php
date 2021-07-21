@@ -39,6 +39,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
 
         $params = [
             ':type'             => $data['type'],
+            ':slug'             => $data['slug'],
             ':status'           => $data['status'] ?: 'visible',
             ':externalId'       => $data['externalId'] ?: null,
             ':firstName'        => $data['firstName'],
@@ -60,6 +61,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
             $statement = $this->connection->prepare(
                 "INSERT INTO {$this->table} (
                 `type`,
+                `slug`,
                 `status`,
                 `externalId`,
                 `firstName`,
@@ -77,6 +79,7 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
                 `password`
                 ) VALUES (
                 :type,
+                :slug,
                 :status,
                 :externalId,
                 :firstName,

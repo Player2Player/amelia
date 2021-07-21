@@ -213,8 +213,12 @@ class UserFactory
             }
         }
 
+        if (!empty($data['slug'])) {
+            $user->setSlug(new Slug($data['slug']));
+        }
+
         if (!empty($data['id'])) {
-            $user->setId(new Id($data['id']));
+          $user->setId(new Id($data['id']));
         }
 
         if (!empty($data['externalId'])) {

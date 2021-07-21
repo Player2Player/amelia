@@ -69,7 +69,7 @@ class AddLocationCommandHandler extends CommandHandler
 
         // create location slug from name
         $slug = sanitize_title($location->getName()->getValue());
-        $slug = substr($slug, 0, 50);
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
 
         /** @var LocationRepository $locationRepository */
         $locationRepository = $this->container->get('domain.locations.repository');

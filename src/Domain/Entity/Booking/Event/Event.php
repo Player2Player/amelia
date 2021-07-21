@@ -19,6 +19,7 @@ use AmeliaBooking\Domain\ValueObjects\Recurring;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\BookingType;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Domain\ValueObjects\Json;
 
 /**
@@ -30,6 +31,9 @@ class Event extends AbstractBookable
 {
     /** @var  Id */
     protected $parentId;
+
+    /** @var Slug */
+    private $slug;
 
     /** @var  BookingStatus */
     protected $status;
@@ -111,6 +115,22 @@ class Event extends AbstractBookable
     public function setParentId(Id $parentId)
     {
         $this->parentId = $parentId;
+    }
+
+    /**
+     * @param Slug $slug
+     */
+    public function setSlug(Slug $slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return Slug
+     */
+    public function getSlug()
+    {
+        return $this->slug;
     }
 
     /**
@@ -490,6 +510,7 @@ class Event extends AbstractBookable
             parent::toArray(),
             [
                 'bookings'           => $this->getBookings() ? $this->getBookings()->toArray() : [],
+                'slug'               => null !== $this->getSlug() ? $this->getSlug()->getValue() : null,
                 'periods'            => $this->getPeriods()->toArray(),
                 'bookingOpens'       => $this->getBookingOpens() ?
                     $this->getBookingOpens()->getValue()->format('Y-m-d H:i:s') : null,

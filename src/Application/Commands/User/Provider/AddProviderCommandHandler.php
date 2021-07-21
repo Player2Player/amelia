@@ -14,6 +14,7 @@ use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use Interop\Container\Exception\ContainerException;
@@ -71,6 +72,11 @@ class AddProviderCommandHandler extends CommandHandler
             return $result;
         }
 
+        // create location slug from name
+        $slug = sanitize_title($user->getFullName());
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
+        $user->setSlug(new Slug($slug));
+        
         $providerRepository->beginTransaction();
 
         if ($providerRepository->getByEmail($user->getEmail()->getValue())) {

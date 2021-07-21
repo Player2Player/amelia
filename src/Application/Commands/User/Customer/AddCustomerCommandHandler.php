@@ -12,6 +12,7 @@ use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class AddCustomerCommandHandler
@@ -60,6 +61,11 @@ class AddCustomerCommandHandler extends CommandHandler
 
             return $result;
         }
+
+        // create location slug from name
+        $slug = sanitize_title($user->getFullName());
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
+        $user->setSlug(new Slug($slug));
 
         /** @var UserRepository $userRepository */
         $userRepository = $this->container->get('domain.users.repository');

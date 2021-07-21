@@ -43,6 +43,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         $data = $entity->toArray();
 
         $params = [
+            ':slug'                 => $data['slug'],          
             ':bookingOpens'         => $data['bookingOpens'] ? DateTimeService::getCustomDateTimeInUtc($data['bookingOpens']) : null,
             ':bookingCloses'        => $data['bookingCloses'] ? DateTimeService::getCustomDateTimeInUtc($data['bookingCloses']) : null,
             ':bookingOpensRec'      => $data['bookingOpensRec'],
@@ -90,6 +91,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 "INSERT INTO {$this->table} 
                 (
                 `bookingOpens`,
+                `slug`,
                 `bookingCloses`,
                 `bookingOpensRec`,
                 `bookingClosesRec`,
@@ -124,6 +126,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 )
                 VALUES (
                 :bookingOpens,
+                :slug,
                 :bookingCloses,
                 :bookingOpensRec,
                 :bookingClosesRec,
@@ -1042,6 +1045,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 "SELECT
                     e.id AS event_id,
                     e.name AS event_name,
+                    e.slug AS event_slug,
                     e.status AS event_status,
                     e.bookingOpens AS event_bookingOpens,
                     e.bookingCloses AS event_bookingCloses, 

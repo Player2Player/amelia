@@ -26,6 +26,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\CustomerBookingEventPeriodRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventPeriodsRepository;
@@ -730,6 +731,11 @@ class EventApplicationService
         /** @var GalleryApplicationService $galleryService */
         $galleryService = $this->container->get('application.gallery.service');
 
+        // create location slug from name
+        $slug = sanitize_title($event->getName()->getValue());
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
+        
+        $event->setSlug(new Slug($slug));
         $event->setStatus(new BookingStatus(BookingStatus::APPROVED));
         $event->setNotifyParticipants(1);
         $event->setCreated(new DateTimeValue(DateTimeService::getNowDateTimeObject()));

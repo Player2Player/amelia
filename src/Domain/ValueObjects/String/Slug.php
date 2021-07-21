@@ -11,7 +11,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
  */
 final class Slug
 {
-    const MAX_LENGTH = 50;
+    const MAX_LENGTH = 255;
     /**
      * @var string
      */

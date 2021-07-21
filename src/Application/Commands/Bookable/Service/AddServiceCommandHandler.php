@@ -76,7 +76,7 @@ class AddServiceCommandHandler extends CommandHandler
 
         // create location slug from name
         $slug = sanitize_title($service->getName()->getValue());
-        $slug = substr($slug, 0, 50);
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
         $service->setSlug(new Slug($slug));        
 
         /** @var ServiceRepository $serviceRepository */

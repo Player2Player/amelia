@@ -63,7 +63,7 @@ class AddCategoryCommandHandler extends CommandHandler
 
         // create location slug from name
         $slug = sanitize_title($category->getName()->getValue());
-        $slug = substr($slug, 0, 50);
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
         $category->setSlug(new Slug($slug));
 
         /** @var CategoryRepository $categoryRepository */
