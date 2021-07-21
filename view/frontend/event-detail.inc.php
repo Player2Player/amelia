@@ -1,0 +1,3 @@
+<p>
+  event detail
+</p>

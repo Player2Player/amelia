@@ -243,6 +243,7 @@ class Plugin
             add_shortcode('p2pcoach', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachProfileShortcodeService', 'shortcodeHandler'));
             add_shortcode('p2psports', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\SportsCatalogShortcodeService', 'shortcodeHandler'));
             add_shortcode('p2pevents', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\EventsCatalogShortcodeService', 'shortcodeHandler'));
+            add_shortcode('p2pevent', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\EventDetailShortcodeService', 'shortcodeHandler'));
         }
 
         if (defined('ELEMENTOR_VERSION')) {
@@ -345,6 +346,7 @@ class Plugin
       $vars[] = 'location';
       $vars[] = 'category';
       $vars[] = 'coachSlug';
+      $vars[] = 'eventSlug';
       return $vars;
     }
 
@@ -354,6 +356,7 @@ class Plugin
       add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', "index.php?page_id={$tpl->coaches}&location=\$matches[1]&category=\$matches[2]", 'top');
       add_rewrite_rule('^coach/([^/]*)/?', "index.php?page_id={$tpl->coach}&coachSlug=\$matches[1]", 'top');
       add_rewrite_rule('^sports/([^/]*)/?', "index.php?page_id={$tpl->sports}&location=\$matches[1]", 'top');
+      add_rewrite_rule('^event/([^/]*)/?', "index.php?page_id={$tpl->event}&eventSlug=\$matches[1]", 'top');
     }    
 }
 
