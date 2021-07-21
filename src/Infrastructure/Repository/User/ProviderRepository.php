@@ -575,7 +575,9 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
       try {
 
         $where = [];
+        $params = [];
         $params[':type'] = AbstractUser::USER_ROLE_PROVIDER;
+        $params[':status'] = Status::VISIBLE;
 
         if ($criteria['location']) {
           $params[':location'] = $criteria['location'];
@@ -634,7 +636,7 @@ class ProviderRepository extends UserRepository implements ProviderRepositoryInt
             LEFT JOIN {$this->providerServicesTable} st ON st.userId = u.id
             LEFT JOIN {$this->serviceTable} s ON s.id = st.serviceId
             LEFT JOIN {$this->categoryTable} c ON c.id = s.categoryId
-            WHERE u.type = :type $where
+            WHERE u.type = :type AND u.status = :status $where
             ORDER BY u.slug"
           );
 

@@ -826,7 +826,7 @@ wpJsonpAmeliaBookingPlugin([10], {
                                                             {
                                                               staticClass: "am-event-time",
                                                               style: { "white-space": "nowrap" },
-                                                            }, //p2p: add periodStart date and periodEnd date
+                                                            }, //p2p: add periodStart date and periodEnd date and format date with short month name
                                                             [
                                                               t._v(
                                                                 "\n                                    " +
@@ -1118,7 +1118,7 @@ wpJsonpAmeliaBookingPlugin([10], {
                                                                 {
                                                                   staticClass:
                                                                     "am-semi-strong",
-                                                                },
+                                                                }, //p2p: format date with short month name
                                                                 [
                                                                   t._v(
                                                                     t._s(
@@ -1216,7 +1216,7 @@ wpJsonpAmeliaBookingPlugin([10], {
                                                                 {
                                                                   staticClass:
                                                                     "am-semi-strong",
-                                                                },
+                                                                }, //p2p: format date with short month name
                                                                 [
                                                                   t._v(
                                                                     t._s(

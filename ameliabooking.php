@@ -242,6 +242,7 @@ class Plugin
             add_shortcode('p2pcoaches', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachesCatalogShortcodeService', 'shortcodeHandler'));            
             add_shortcode('p2pcoach', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\CoachProfileShortcodeService', 'shortcodeHandler'));
             add_shortcode('p2psports', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\SportsCatalogShortcodeService', 'shortcodeHandler'));
+            add_shortcode('p2pevents', array('AmeliaBooking\Infrastructure\WP\ShortcodeService\EventsCatalogShortcodeService', 'shortcodeHandler'));
         }
 
         if (defined('ELEMENTOR_VERSION')) {

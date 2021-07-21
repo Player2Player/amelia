@@ -17,9 +17,9 @@
         ?>         
         <div id="post-<?php echo $id?>" class="et_pb_portfolio_item et_pb_grid_item">
           <?php 
-            $fullName = "{$item->getFirstName()->getValue()} {$item->getLastName()->getValue()}";
+            $fullName = "{$item->getFullName()}";
             $picture  =  $item->getPicture() ? $item->getPicture()->getFullPath() : $genericCoachImage;
-            $profileUrl = "/coach/{$item->getSlug()->getValue()}";
+            $profileUrl = $item->getSlug() ? "/coach/{$item->getSlug()->getValue()}" : "";
             $categories = [];
             foreach($item->getServiceList()->getItems() as $service) {
               $categoryId = $service->getCategoryId()->getValue();          

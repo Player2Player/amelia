@@ -607,6 +607,63 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
         return call_user_func([static::FACTORY, 'createCollection'], $rows);
     }
 
+    public function getBookingOpenEvents($location) {
+      $params = [];
+      $params[':now'] = DateTimeService::getNowDateTimeInUtc();
+      $params[':location'] = $location;
+      $eventsPeriodsTable = EventsPeriodsTable::getTableName();
+      try {
+        $statement = $this->connection->prepare(
+            "SELECT
+                e.id AS event_id,
+                e.name AS event_name,
+                e.status AS event_status,
+                e.bookingOpens AS event_bookingOpens,
+                e.bookingCloses AS event_bookingCloses,
+                e.recurringCycle AS event_recurringCycle,
+                e.recurringOrder AS event_recurringOrder,
+                e.recurringInterval AS event_recurringInterval,
+                e.recurringUntil AS event_recurringUntil,
+                e.recurringMonthly AS event_recurringMonthly, 
+                e.monthlyDate AS event_monthlyDate,
+                e.monthlyOnRepeat AS event_monthlyOnRepeat,
+                e.monthlyOnDay AS event_monthlyOnDay,
+                e.bringingAnyone AS event_bringingAnyone,
+                e.bookMultipleTimes AS event_bookMultipleTimes,
+                e.maxCapacity AS event_maxCapacity,
+                e.price AS event_price,
+                e.description AS event_description,
+                e.color AS event_color,
+                e.show AS event_show,
+                e.locationId AS event_locationId,
+                e.customLocation AS event_customLocation,
+                e.parentId AS event_parentId,
+                e.created AS event_created,
+                e.notifyParticipants AS event_notifyParticipants,
+                e.translations AS event_translations,
+                e.deposit AS event_deposit,
+                e.depositPayment AS event_depositPayment,
+                e.depositPerPerson AS event_depositPerPerson,
+                
+                ep.id AS event_periodId,
+                ep.periodStart AS event_periodStart,
+                ep.periodEnd AS event_periodEnd                
+            FROM {$this->table} e
+            INNER JOIN {$eventsPeriodsTable} ep ON ep.eventId = e.id
+            WHERE :now <= DATE_FORMAT(e.bookingCloses, '%Y-%m-%d %H:%i:%s') AND e.locationId = :location
+            ORDER BY ep.periodStart"
+        );
+
+        $statement->execute($params);
+
+        $rows = $statement->fetchAll();
+      } catch (\Exception $e) {
+          throw new QueryExecutionException('Unable to find booking open events in ' . __CLASS__, $e->getCode(), $e);
+      }
+
+      return call_user_func([static::FACTORY, 'createCollection'], $rows);      
+    }
+
     /**
      * @param array $criteria
      *
