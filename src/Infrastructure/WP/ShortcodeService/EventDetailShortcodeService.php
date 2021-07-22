@@ -6,6 +6,7 @@ use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Location\Location;
+use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use Slim\App;
 
 /**
@@ -26,8 +27,19 @@ class EventDetailShortcodeService
       $containerConfig = require AMELIA_PATH . '/src/Infrastructure/ContainerConfig/container.php';
       $app = new App($containerConfig);
       self::$container = $app->getContainer();      
+     
+      $atts = shortcode_atts(
+        [
+          'eventSlug' => get_query_var('eventSlug')
+        ],
+        $atts
+      );
+
+      if (empty($atts['eventSlug'])) {
+        self::force404();
+      }
       
-      $data = self::getData();
+      $data = self::getData($atts);
 
       ob_start();
       include AMELIA_PATH . '/view/frontend/event-detail.inc.php';
@@ -36,16 +48,29 @@ class EventDetailShortcodeService
       return $html;
     }
 
-    protected static function getData() {
+    protected static function getData($atts) {
       $result = [];
+
+      /** @var EventRepository $eventRepository */
+      $eventRepository = self::$container->get('domain.booking.event.repository');
+
+      try {
+        $event = $eventRepository->getBySlug($atts['eventSlug']);
+      }
+      catch(NotFoundException $exc) {        
+        self::force404();
+      }
+
+      $result['event'] = $event;
+
       return $result;
     }
 
-    protected static function strLimit($value, $limit = 100, $end = '...')
-    {
-        $limit = $limit - mb_strlen($end); // Take into account $end string into the limit
-        $valuelen = mb_strlen($value);
-        return $limit < $valuelen ? mb_substr($value, 0, mb_strrpos($value, ' ', $limit - $valuelen)) . $end : $value;
+    protected static function force404() {
+      status_header(404);
+      nocache_headers();
+      include( get_query_template( '404' ) );
+      die();
     }
 
 }

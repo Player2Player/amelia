@@ -356,7 +356,7 @@ class Plugin
       add_rewrite_rule('^coaches/([^/]*)/?([^/]*)/?', "index.php?page_id={$tpl->coaches}&location=\$matches[1]&category=\$matches[2]", 'top');
       add_rewrite_rule('^coach/([^/]*)/?', "index.php?page_id={$tpl->coach}&coachSlug=\$matches[1]", 'top');
       add_rewrite_rule('^sports/([^/]*)/?', "index.php?page_id={$tpl->sports}&location=\$matches[1]", 'top');
-      add_rewrite_rule('^event/([^/]*)/?', "index.php?page_id={$tpl->event}&eventSlug=\$matches[1]", 'top');
+      add_rewrite_rule('^event-detail/([^/]*)/?', "index.php?page_id={$tpl->event}&eventSlug=\$matches[1]", 'top');
     }    
 }
 

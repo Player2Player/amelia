@@ -643,6 +643,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
             "SELECT
                 e.id AS event_id,
                 e.name AS event_name,
+                e.slug AS event_slug,
                 e.status AS event_status,
                 e.bookingOpens AS event_bookingOpens,
                 e.bookingCloses AS event_bookingCloses,

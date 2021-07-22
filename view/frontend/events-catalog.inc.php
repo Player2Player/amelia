@@ -15,7 +15,7 @@
         foreach($events as $event) {            
       ?>
         <li>
-          <a href="/event/<?php echo $event->getId()->getValue() ?>">
+          <a href="/event-detail/<?php echo $event->getSlug()->getValue() ?>">
             <strong><?php echo $event->getName()->getValue() ?>: </strong>
           </a>
           <?php echo $event->getDescription() ? self::strLimit($event->getDescription()->getValue(), 120) : '' ?>
