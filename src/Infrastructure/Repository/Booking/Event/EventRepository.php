@@ -186,6 +186,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
 
         $params = [
             ':id'                   => $id,
+            ':slug'                 => $data['slug'],
             ':bookingOpens'         => $data['bookingOpens'] ? DateTimeService::getCustomDateTimeInUtc($data['bookingOpens']) : null,
             ':bookingCloses'        => $data['bookingCloses'] ? DateTimeService::getCustomDateTimeInUtc($data['bookingCloses']) : null,
             ':bookingOpensRec'      => $data['bookingOpensRec'],
@@ -223,6 +224,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 "UPDATE {$this->table}
                 SET
                 `bookingOpens` = :bookingOpens,
+                `slug` = :slug,
                 `bookingCloses` = :bookingCloses, 
                 `bookingOpensRec` = :bookingOpensRec,
                 `bookingClosesRec` = :bookingClosesRec, 

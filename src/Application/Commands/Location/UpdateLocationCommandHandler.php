@@ -11,6 +11,7 @@ use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
+use AmeliaBooking\Domain\ValueObjects\String\Slug;
 
 /**
  * Class UpdateLocationCommandHandler
@@ -58,6 +59,11 @@ class UpdateLocationCommandHandler extends CommandHandler
 
             return $result;
         }
+        
+        // create location slug from name
+        $slug = sanitize_title($location->getName()->getValue());
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
+        $location->setSlug(new Slug($slug));
 
         /** @var LocationRepository $locationRepository */
         $locationRepository = $this->container->get('domain.locations.repository');

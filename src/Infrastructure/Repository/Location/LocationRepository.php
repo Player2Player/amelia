@@ -145,6 +145,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
 
         $params = [
             ':status'           => $data['status'],
+            ':slug'             => $data['slug'],
             ':name'             => $data['name'],
             ':description'      => $data['description'],
             ':address'          => $data['address'],
@@ -163,7 +164,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                 SET `status` = :status, `name` = :name, `description` = :description, `address` = :address,
                 `phone` = :phone, `latitude` = :latitude, `longitude` = :longitude,
                 `pictureFullPath` = :pictureFullPath, `pictureThumbPath` = :pictureThumbPath,
-                `pin` = :pin
+                `pin` = :pin, `slug` = :slug
                 WHERE id = :id"
             );
 

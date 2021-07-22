@@ -850,6 +850,11 @@ class EventApplicationService
 
         $galleryService->manageGalleryForEntityUpdate($newEvent->getGallery(), $eventId, Entities::EVENT);
 
+        // create event slug from name
+        $slug = sanitize_title($newEvent->getName()->getValue());
+        $slug = substr($slug, 0, Slug::MAX_LENGTH);
+        $newEvent->setSlug(new Slug($slug));
+        
         $eventRepository->update($eventId, $newEvent);
     }
 
