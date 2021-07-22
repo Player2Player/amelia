@@ -11898,7 +11898,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                           ref:
                                             "customFields." + t.id + ".value",
                                           refInFor: !0,
-                                          attrs: { sm: e.columnsLg },
+                                          attrs: { sm: 24 }, //p2p: change layout to one line per custom field
                                         },
                                         [
                                           i(

@@ -45,7 +45,7 @@
           15: "events-calendar",
           20: "events-list",
         }[e] || e) +
-        "-e062ce735147150ae069.js");
+        "-e062ce735147150ae069.js?t=" + new Date().getTime());
     var s = setTimeout(l, 12e4);
     function l() {
       (o.onerror = o.onload = null), clearTimeout(s);
