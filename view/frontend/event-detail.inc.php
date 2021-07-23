@@ -1,5 +1,7 @@
-<header>
-  <h1 style="text-align: center;">Book this event</h1>
-  <h3 style="text-align: center;">Click continue to fill the form</h3>
-</header>
+<div class="et_pb_module et_pb_text et_pb_text_0  et_pb_text_align_center et_pb_bg_layout_light">
+  <div class="et_pb_text_inner">
+    <h5>TRAINING CAMPS AND CLINICS</h5>
+    <h1><?php echo $data['event']->getName()->getValue() ?></h1>
+  </div>  
+</div>
 <?php echo do_shortcode( "[ameliaevents event={$data['event']->getId()->getValue()}]" ) ?>
