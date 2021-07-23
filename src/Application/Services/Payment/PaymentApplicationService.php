@@ -138,8 +138,10 @@ class PaymentApplicationService
      */
     public function processPayment($result, $paymentData, $reservation, $bookingType)
     {
+        $bookingTypeValue = $bookingType->getValue();  
+
         /** @var ReservationServiceInterface $reservationService */
-        $reservationService = $this->container->get('application.reservation.service')->get($bookingType->getValue());
+        $reservationService = $this->container->get('application.reservation.service')->get($bookingTypeValue);
 
         $paymentAmount = $reservationService->getReservationPaymentAmount($reservation);
 
@@ -210,7 +212,8 @@ class PaymentApplicationService
                                 $paymentData['data']['paymentIntentId'] : null,
                             'amount'          => $currencyService->getAmountInFractionalUnit(new Price($paymentAmount)),
                             'metaData'        => $additionalInformation['metaData'],
-                            'description'     => $additionalInformation['description']
+                            'description'     => $additionalInformation['description'],
+                            'manualCapture'   => $bookingTypeValue === BookingType::APPOINTMENT
                         ]
                     );
                 } catch (Exception $e) {

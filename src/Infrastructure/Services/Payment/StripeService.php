@@ -27,7 +27,7 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
         $stripeSettings = $this->settingsService->getSetting('payments', 'stripe');
         // TODO: Add manual capture option on stripe payment setting
         // $manualCapture = $stripeSettings['manualCapture'];
-        $manualCapture = true;
+        $manualCapture = $data['manualCapture'];
         
         Stripe::setApiKey(
             $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
