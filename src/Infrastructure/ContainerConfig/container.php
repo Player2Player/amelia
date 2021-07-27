@@ -23,6 +23,13 @@ $entries['errorHandler'] = function (Container $c) {
     return function ($request, \Slim\Http\Response $response, $exception) use ($c) {
         /** @var Exception $exception */
 
+        // We are using wp_sentry_safe to make sure this code runs even if the Sentry plugin is disabled
+        if (function_exists( 'wp_sentry_safe' )) {
+          wp_sentry_safe( function ( \Sentry\State\HubInterface $client ) use ( $exception ) {
+            $client->captureException($exception);
+          });
+        }
+
         switch (get_class($exception)) {
             case \AmeliaBooking\Application\Common\Exceptions\AccessDeniedException::class:
                 $status = \AmeliaBooking\Application\Controller\Controller::STATUS_FORBIDDEN;
@@ -45,16 +52,21 @@ $entries['errorHandler'] = function (Container $c) {
 
 
 // Disabled for now for easier debug
-//// Handle PHP errors
-//$entries['phpErrorHandler'] = function (Container $c) {
-//    return function ($request, \Slim\Http\Response $response, $exception) use ($c) {
-//        /** @var Exception $exception */
-//
-//        return $response->withStatus(500)
-//            ->withHeader('Content-Type', 'text/html')
-//            ->write($exception->getMessage());
-//    };
-//};
+// Handle PHP errors
+$entries['phpErrorHandler'] = function (Container $c) {
+    return function ($request, \Slim\Http\Response $response, $exception) use ($c) {
+        /** @var Exception $exception */
+
+        // We are using wp_sentry_safe to make sure this code runs even if the Sentry plugin is disabled
+        if (function_exists( 'wp_sentry_safe' )) {
+          wp_sentry_safe( function ( \Sentry\State\HubInterface $client ) use ( $exception ) {
+            $client->captureException($exception);
+          });
+        }
+
+        throw $exception;
+    };
+};
 
 ##########################################################################
 ##########################################################################
