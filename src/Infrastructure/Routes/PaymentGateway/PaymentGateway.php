@@ -12,6 +12,7 @@ use AmeliaBooking\Application\Controller\PaymentGateway\PayPalPaymentCallbackCon
 use AmeliaBooking\Application\Controller\PaymentGateway\PayPalPaymentController;
 use AmeliaBooking\Application\Controller\PaymentGateway\WooCommercePaymentController;
 use AmeliaBooking\Application\Controller\PaymentGateway\WooCommerceProductsController;
+use AmeliaBooking\Application\Controller\PaymentGateway\Webhook\StripeWebhookController;
 use Slim\App;
 
 /**
@@ -37,5 +38,7 @@ class PaymentGateway
         $app->post('/payment/mollie/notify', MolliePaymentNotifyController::class);
 
         $app->post('/payment/mollie', MolliePaymentController::class);
+
+        $app->post('/payment/stripe/webhook', StripeWebhookController::class);
     }
 }

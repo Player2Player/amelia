@@ -143,6 +143,7 @@ $entries['command.bus'] = function ($c) {
             PaymentGateway\WooCommerceProductsCommand::class          => new PaymentGateway\WooCommerceProductsCommandHandler($c),
             PaymentGateway\MolliePaymentNotifyCommand::class          => new PaymentGateway\MolliePaymentNotifyCommandHandler($c),
             PaymentGateway\MolliePaymentCommand::class                => new PaymentGateway\MolliePaymentCommandHandler($c),
+            PaymentGateway\Webhook\StripeWebhookCommand::class        => new PaymentGateway\Webhook\StripeWebhookCommandHandler($c),
             // Report
             Report\GetAppointmentsCommand::class                      => new Report\GetAppointmentsCommandHandler($c),
             Report\GetCouponsCommand::class                           => new Report\GetCouponsCommandHandler($c),

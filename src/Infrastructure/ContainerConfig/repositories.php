@@ -139,6 +139,13 @@ $entries['domain.notificationSMSHistory.repository'] = function (Container $c) {
     );
 };
 
+$entries['domain.stripeLog.repository'] = function (Container $c) {
+  return new Repository\Payment\StripeLogRepository(
+      $c->getDatabaseConnection(),
+      DB\Payment\StripeLogTable::getTableName()
+  );
+};
+
 $entries['domain.payment.repository'] = function (Container $c) {
     return new Repository\Payment\PaymentRepository(
         $c->getDatabaseConnection(),
