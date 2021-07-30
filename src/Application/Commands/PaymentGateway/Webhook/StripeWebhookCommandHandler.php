@@ -7,6 +7,7 @@ use AmeliaBooking\Infrastructure\Repository\Payment\StripeLogRepository;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\Services\Notification\MailServiceInterface;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaStripe\Webhook;
 use AmeliaStripe\Stripe;
 use AmeliaStripe\StripeObject;
@@ -33,18 +34,23 @@ class StripeWebhookCommandHandler extends CommandHandler
    */
   public function handle(StripeWebhookCommand $command)
   {    
+    if (empty($command->getSignature())) 
+      throw new AccessDeniedException("You are not allowed to execute this endpoint");
+    
     $result = new CommandResult();
     $event = null;
     $stripeSettings = $this->container->get('domain.settings.service')->getSetting('payments', 'stripe');
     $options = json_decode(get_option('p2p_settings'));
+    
+    if (!isset($options->stripe)) 
+      throw new \Exception("Must setup option stripe in p2p_settings json string");
+    
     $this->stripeOptions = $options->stripe;
     $endpointSecret = $this->stripeOptions->webhook;
     Stripe::setApiKey(
         $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
     );
-
-    $result->setResult(CommandResult::RESULT_SUCCESS);
-    $result->setMessage('Webhook executed successfully');
+    
     try {
       $event = Webhook::constructEvent(
           $command->getRawBody(), 
@@ -56,11 +62,13 @@ class StripeWebhookCommandHandler extends CommandHandler
         // Invalid payload
         $result->setResult(CommandResult::RESULT_ERROR);
         $result->setMessage('Invalid payload');
+        return $result;
     }
     catch(SignatureVerification $e) {
         // Invalid signature
         $result->setResult(CommandResult::RESULT_ERROR);
         $result->setMessage('Invalid signature');
+        return $result;
     }
 
     // Handle the event
@@ -72,6 +80,9 @@ class StripeWebhookCommandHandler extends CommandHandler
         $this->handleEvent($event);
     }
 
+    $result->setResult(CommandResult::RESULT_SUCCESS);
+    $result->setMessage('Webhook executed successfully');
+
     return $result;
   }
 
@@ -79,11 +90,13 @@ class StripeWebhookCommandHandler extends CommandHandler
     $this->addEvent($event);
     $object = $event->data->object;
     $emailData = $this->stripeOptions->paymentFailed;
+    $amount = round($object->amount / 100, 2);
     $metadata = $this->serializeToUl($object->metadata, 'No metadata');    
     $paymentError = $this->serializeToUl($object->last_payment_error, 'No error detail');
     $content = str_replace("%description%", $object->description ?: 'No description', $emailData->template);
     $content = str_replace("%metadata%", $metadata, $content);
     $content = str_replace("%error%", $paymentError, $content);
+    $content = str_replace("%amount%", $amount, $content);
     /** @var MailServiceInterface $mailService */
     $mailService = $this->getContainer()->get('infrastructure.mail.service');
     $mailService->send(
