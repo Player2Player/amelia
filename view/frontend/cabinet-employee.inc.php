@@ -26,7 +26,11 @@
     lazyBookingEntitiesIds.push(bookingEntitiesIds.pop());
   }
 </script>
-
+<style>
+  .amelia-app-booking .el-input--suffix .el-input__inner, .am-modal.am-in-body .el-input--suffix .el-input__inner {
+    padding-left: 30px !important;
+  }
+</style>
 <div id="amelia-app-booking<?php echo $atts['counter']; ?>" class="amelia-cabinet amelia-frontend amelia-app-booking<?php echo $atts['trigger'] ? ' amelia-skip-load amelia-skip-load-' . $atts['counter'] : ''; ?>">
   <cabinet :cabinet-type="'provider'"></cabinet>
 </div>
