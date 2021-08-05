@@ -5185,9 +5185,8 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                       ],
                                                       1
                                                     ),
-                                                    e._v(" "),
-                                                    "provider" ===
-                                                    e.state.cabinetType
+                                                    e._v(" "), //P2P: display custom fields for customer
+                                                    ["provider", "customer"].includes(e.state.cabinetType)
                                                       ? i(
                                                           "el-row",
                                                           {
@@ -5217,6 +5216,10 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                             e._l(
                                                               n.bookings,
                                                               function (t, o) {
+                                                                //P2P: for customer only display its own data
+                                                                if (e.state.cabinetType === "customer" && e.state.clonedProfile.id !== t.customer.id)
+                                                                  return e._v(" ");
+
                                                                 return i(
                                                                   "el-row",
                                                                   { key: o },
@@ -11358,7 +11361,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                 e._v(e._s(e.$root.settings.role === "provider" 
                 ? "Coach Profile"
                 : "Parent Profile")
-                 ),
+                 ), //P2P: set caption for coach/parent front-end panel
               ]),
             ]),
             e._v(" "),
