@@ -677,7 +677,7 @@ class EventRepository extends AbstractRepository implements EventRepositoryInter
                 ep.periodEnd AS event_periodEnd                
             FROM {$this->table} e
             INNER JOIN {$eventsPeriodsTable} ep ON ep.eventId = e.id
-            WHERE e.show = :show AND :now <= DATE_FORMAT(e.bookingCloses, '%Y-%m-%d %H:%i:%s') $where            
+            WHERE e.show = :show AND :now <= DATE_FORMAT(COALESCE(e.bookingCloses, ep.periodStart), '%Y-%m-%d %H:%i:%s') $where
             ORDER BY e.locationId, ep.periodStart"
         );
 

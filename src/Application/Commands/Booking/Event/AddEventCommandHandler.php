@@ -2,6 +2,7 @@
 
 namespace AmeliaBooking\Application\Commands\Booking\Event;
 
+use AmeliaBooking\Application\Services\Helper\HelperService;
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
@@ -93,6 +94,10 @@ class AddEventCommandHandler extends CommandHandler
         }
 
         $eventRepository->commit();
+
+        /** @var HelperService $helperService */
+        $helperService = $this->container->get('application.helper.service');
+        $helperService->cleanCustomTemplatesCache();        
 
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully added new event.');

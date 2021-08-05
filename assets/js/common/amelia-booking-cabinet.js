@@ -4491,12 +4491,49 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                                     ),
                                                                   ]
                                                                 ),
-                                                                e._v(" "),
+                                                                e._v(" "), //p2p: status label for customer role
+                                                                e.$root.settings.role === "customer" ?
                                                                 i(
                                                                   "div",
                                                                   {
+                                                                  staticClass:
+                                                                    "am-status",
+                                                                  },
+                                                                  [
+                                                                  i("span", {
                                                                     staticClass:
-                                                                      "am-appointment-status", //p2p: status select
+                                                                    "am-appointment-status-symbol am-relative",
+                                                                    class:
+                                                                    e.getStatus(
+                                                                      n
+                                                                    ),
+                                                                  }),
+                                                                  e._v(" "),
+                                                                  i(
+                                                                    "h4",
+                                                                    {
+                                                                    staticClass:
+                                                                      "am-pl-8",
+                                                                    },
+                                                                    [
+                                                                    e._v(
+                                                                      "\n                            " +
+                                                                      e._s(
+                                                                        e.getStatusLabel(
+                                                                        n
+                                                                        )
+                                                                      ) +
+                                                                      "\n                          "
+                                                                    ),
+                                                                    ]
+                                                                  ),
+                                                                  ]
+                                                                )                                                                
+                                                                : i(
+                                                                  "div",
+                                                                  {
+                                                                    staticClass:
+                                                                      "am-appointment-status", //p2p: status select for provider role
                                                                     on: {
                                                                       click:
                                                                         function (
@@ -11318,7 +11355,10 @@ wpJsonpAmeliaBookingPlugin([1], {
             e._v(" "),
             i("div", { staticClass: "am-cabinet-profile__title" }, [
               i("p", [
-                e._v(e._s("Coach Profile")),
+                e._v(e._s(e.$root.settings.role === "provider" 
+                ? "Coach Profile"
+                : "Parent Profile")
+                 ),
               ]),
             ]),
             e._v(" "),
