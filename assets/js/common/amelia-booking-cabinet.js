@@ -42657,6 +42657,14 @@ wpJsonpAmeliaBookingPlugin([1], {
         this.categorizedServiceList.forEach(function (t) {
           e.handleCheckSingleInCategory(t);
         });
+        //P2P: Add price formatter
+        this.priceFormatter = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',        
+          // These options are needed to round to whole numbers if that's what you want.
+          //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+          //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+        });
       },
       methods: {
         changeCategory: function (e) {
@@ -42724,6 +42732,10 @@ wpJsonpAmeliaBookingPlugin([1], {
                     });
                 });
               });
+        },
+        //P2P: Add format price
+        formatPrice: function(price) {
+          return this.priceFormatter.format(price);
         },
       },
     };
@@ -42841,8 +42853,18 @@ wpJsonpAmeliaBookingPlugin([1], {
                               i("p", { staticStyle: { display: "none" } }, [
                                 e._v(e._s(e.$root.labels.price)),
                               ]),
-                              e._v(" "),
-                              i(
+                              e._v(" "), //P2P: Change input money for label if role is provider
+                              e.$root.settings.role === "provider" 
+                              ? i(
+                                "span",
+                                {
+                                  staticClass: "v-money el-input__inner",
+                                },
+                                [
+                                  e._v(e._s(e.formatPrice(n.price)))
+                                ]
+                              )
+                              : i(
                                 "money",
                                 e._b(
                                   {
