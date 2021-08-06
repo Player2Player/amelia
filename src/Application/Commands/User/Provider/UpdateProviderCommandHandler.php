@@ -2,11 +2,13 @@
 
 namespace AmeliaBooking\Application\Commands\User\Provider;
 
+use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
 use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\User\ProviderApplicationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
+use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
@@ -16,6 +18,7 @@ use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
+use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
@@ -44,6 +47,9 @@ class UpdateProviderCommandHandler extends CommandHandler
 
         /** @var ProviderRepository $providerRepository */
         $providerRepository = $this->container->get('domain.users.providers.repository');
+
+        /** @var ServiceRepository $serviceRepository */
+        $serviceRepository = $this->container->get('domain.bookable.service.repository');
 
         /** @var ProviderApplicationService $providerAS */
         $providerAS = $this->container->get('application.user.provider.service');
@@ -116,6 +122,42 @@ class UpdateProviderCommandHandler extends CommandHandler
             if (!$rolesSettings['allowConfigureSpecialDays']) {
                 $newUser->setSpecialDayList($oldUser->getSpecialDayList());
             }
+        }
+
+        /**
+         * Do not allow modify prices for role provider
+         * For role provider set the current user prices ($oldUser->getServiceList())
+         * and for new one set current service price
+         */
+        if ($currentUser->getType() === AbstractUser::USER_ROLE_PROVIDER && $rolesSettings['allowConfigureServices']) {
+          $serviceList = $serviceRepository->getAll()->getItems();
+          $newServices = new Collection();          
+          $oldServices = $oldUser->getServiceList()->getItems();
+          /** @var Service $service */
+          foreach ($newUser->getServiceList()->getItems() as $service) {
+            $serviceId = $service->getId()->getValue();
+            $isNew = true;
+            /** @var Service $oldService */
+            foreach($oldServices as $oldService) {
+              if ($oldService->getId()->getValue() === $serviceId) {
+                $service->setPrice($oldService->getPrice());
+                $newServices->addItem($service);
+                $isNew = false;
+                break;
+              }
+            }
+            if (!$isNew) continue;
+            /** @var Service $newService */
+            foreach($serviceList as $newService) {
+              if ($newService->getId()->getValue() === $serviceId) {
+                $newService->setMinCapacity($service->getMinCapacity());
+                $newService->setMaxCapacity($service->getMaxCapacity());
+                $newServices->addItem($newService);
+                break;
+              }
+            }
+          }
+          $newUser->setServiceList($newServices);
         }
 
         $providerRepository->beginTransaction();
