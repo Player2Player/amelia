@@ -14659,7 +14659,12 @@ wpJsonpAmeliaBookingPlugin([1], {
             end: "23:59",
             step: this.secondsToTimeSelectStep(this.getTimeSlotLength()),
           },
+          customTimeOptions: [],
         };
+      },
+      //P2P: get custom select options on created
+      created: function(){
+        this.customTimeOptions = this.getCustomTimeSelectOptions();
       },
       methods: {
         convertDateTimeRangeDifferenceToMomentDuration: function (e, t) {
@@ -14694,6 +14699,42 @@ wpJsonpAmeliaBookingPlugin([1], {
             : ((t <= 9 ? "0" + t : t) || "00") +
                 ":" +
                 ((i <= 9 ? "0" + i : i) || "00");
+        },
+        //P2P: Get  custom select options for time
+        getCustomTimeSelectOptions: function() {                    
+          var step = this.secondsToTimeSelectStep(this.getTimeSlotLength());
+          var dateTime = this.$moment('2020-01-01');
+          var times = [];
+          var hour, minute, value;
+          do {
+            hour = dateTime.hour();
+            minute = dateTime.minute();
+            value = hour > 0 ? dateTime.format('HH:mm') : `00:${minute < 10 ? '0' : ''}${minute}`;
+            times.push({value, label: dateTime.format('hh:mm A') });
+            dateTime = dateTime.add(step);
+          } while (dateTime.date() === 1);
+          return times;
+        },
+        //P2P: Get 12 format from 24 format time value
+        to12Format: function(value) {
+          var item = this.customTimeOptions.find(x => x.value === value);
+          return item ? item.label : this.customTimeOptions[0].label;
+        },
+        customTimeSelect: function(creator, minTime, maxTime) {
+          var options = this.customTimeOptions.map(item => 
+            creator("el-option", {
+              key: item.value,
+              attrs: {
+                value: item.value,
+                label: item.label
+              },
+            })
+          );
+          options.unshift(creator('i', {
+            slot: 'prefix',
+            staticClass: 'el-input__icon el-icon-time'
+          }));
+          return options;
         },
         getTimeSlotLength: function () {
           return this.$root.settings.general.timeSlotLength;
@@ -19862,7 +19903,8 @@ wpJsonpAmeliaBookingPlugin([1], {
         },
         setInitialCustomers: function () {
           var e = this;
-          "customer" !== this.$root.settings.role &&
+          //p2p: do not fetch all customers for provider and customer role
+          "customer" !== this.$root.settings.role && "provider" !== this.$root.settings.role &&
             this.searchCustomers("", function () {
               var t = e.options.entities.customers.map(function (e) {
                   return parseInt(e.id);
@@ -34205,6 +34247,18 @@ wpJsonpAmeliaBookingPlugin([1], {
               return this.$root.labels.dayoff;
           }
         },
+        //P2P: Format hour to 12AM/PM
+        format12Hours: function(time) {
+          time = time.substr(0,5);
+          var number = parseInt(time.substr(0,2), 10);
+          if (number <= 12) {
+            return number === 12 ? `${time} PM` : `${time} AM`;
+          }
+
+          number -= 12;
+          var strNumber = number >= 10 ? `${number}` : `0${number}`;
+          return `${strNumber}${time.substr(2)} PM`;
+        },
         getParsedEditCategorizedServiceList: function (e, t) {
           var i = [];
           return (
@@ -34255,6 +34309,7 @@ wpJsonpAmeliaBookingPlugin([1], {
             t
           );
         },
+        //P2P add formatTime property
         getParsedEditWeekDayList: function (e) {
           for (
             var t = [],
@@ -34297,6 +34352,10 @@ wpJsonpAmeliaBookingPlugin([1], {
                       e.startTime.substring(0, e.startTime.length - 3),
                       e.endTime.substring(0, e.endTime.length - 3),
                     ],
+                    formatTime: [
+                      i.format12Hours(e.startTime),
+                      i.format12Hours(e.endTime),
+                    ],
                   });
                 }),
                   (t[o].periods = i.getParsedWeekDayPeriods(e)),
@@ -34304,20 +34363,31 @@ wpJsonpAmeliaBookingPlugin([1], {
                     e.startTime.substring(0, e.startTime.length - 3),
                     e.endTime.substring(0, e.endTime.length - 3),
                   ]),
+                  (t[0].formatTime = [
+                      i.format12Hours(e.startTime),
+                      i.format12Hours(e.endTime),
+                    ]
+                  ),
                   (t[o].day = n[e.dayIndex - 1]),
                   (t[o].id = e.id);
               }),
             t
           );
         },
+        //P2P add formatTime property
         getParsedWeekDayPeriods: function (e) {
           var t = [];
+          var _this = this;
           return (
             e.periodList.forEach(function (e) {
               t.push({
                 time: [
                   e.startTime.substring(0, e.startTime.length - 3),
                   e.endTime.substring(0, e.endTime.length - 3),
+                ],
+                formatTime: [
+                  _this.format12Hours(e.startTime),
+                  _this.format12Hours(e.endTime),
                 ],
                 id: e.id,
                 serviceIds: e.periodServiceList.map(function (e) {
@@ -34337,6 +34407,10 @@ wpJsonpAmeliaBookingPlugin([1], {
                 time: [
                   e.startTime.substring(0, e.startTime.length - 3),
                   e.endTime.substring(0, e.endTime.length - 3),
+                ],
+                formatTime: [
+                  _this.format12Hours(e.startTime),
+                  _this.format12Hours(e.endTime),
                 ],
                 id: null,
                 serviceIds: [],
@@ -39576,15 +39650,29 @@ wpJsonpAmeliaBookingPlugin([1], {
             t
           );
         },
+        //P2P: Format hour to 12AM/PM
+        format12Hours: function(time) {
+          var number = parseInt(time.substr(0,2), 10);
+          if (number <= 12) {
+            return number === 12 ? `${time} PM` : `${time} AM`;
+          }
+
+          number -= 12;
+          var strNumber = number >= 10 ? `${number}` : `0${number}`;
+          return `${strNumber}${time.substr(2)} PM`;
+        },
         getDayHours: function (e) {
           var t = this,
             i = [];
+          //P2P: add formatTime property to 12AM/PM  
           return (
-            e.periods.forEach(function (e, t) {
-              i.push({ index: t, type: "Work", data: e });
+            e.periods.forEach(function (e, index) {
+              //e.formatTime = [t.format12Hours(e.time[0]), t.format12Hours(e.time[1])];
+              i.push({ index, type: "Work", data: e });
             }),
-            e.breaks.forEach(function (e, t) {
-              i.push({ index: t, type: "Break", data: e });
+            e.breaks.forEach(function (e, index) {
+              //e.formatTime = [t.format12Hours(e.time[0]), t.format12Hours(e.time[1])];
+              i.push({ index, type: "Break", data: e });
             }),
             i.sort(function (e, i) {
               return t
@@ -40119,7 +40207,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                 },
                                                 [
                                                   i(
-                                                    "el-form-item",
+                                                    "el-form-item", //P2P: Change el-time-select with custom for formating as AM/PM
                                                     {
                                                       attrs: {
                                                         rules:
@@ -40128,20 +40216,12 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                       },
                                                     },
                                                     [
-                                                      i("el-time-select", {
+                                                      i("el-select", {
                                                         staticStyle: {
                                                           "margin-bottom":
                                                             "12px",
                                                         },
                                                         attrs: {
-                                                          "picker-options":
-                                                            e.getPeriodBorderTime(
-                                                              t.form.data
-                                                                .time[0],
-                                                              t.form.data
-                                                                .time[1],
-                                                              !0
-                                                            ),
                                                           size: "mini",
                                                         },
                                                         on: {
@@ -40187,11 +40267,18 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                               0,
                                                               i
                                                             );
+                                                            e.$set(
+                                                              t.form.data.formatTime,
+                                                              0,
+                                                              e.to12Format(i)
+                                                            );
                                                           },
                                                           expression:
                                                             "workDay.form.data.time[0]",
                                                         },
-                                                      }),
+                                                      },
+                                                      e.customTimeSelect(i, t.form.data.time[0], t.form.data.time[1])
+                                                      ),
                                                     ],
                                                     1
                                                   ),
@@ -40209,7 +40296,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                 },
                                                 [
                                                   i(
-                                                    "el-form-item",
+                                                    "el-form-item", //P2P: Change time-select options to AM/PM 12 Hours format
                                                     {
                                                       attrs: {
                                                         rules: e.rules.endTime,
@@ -40217,20 +40304,12 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                       },
                                                     },
                                                     [
-                                                      i("el-time-select", {
+                                                      i("el-select", {
                                                         staticStyle: {
                                                           "margin-bottom":
                                                             "12px",
                                                         },
                                                         attrs: {
-                                                          "picker-options":
-                                                            e.getPeriodBorderTime(
-                                                              t.form.data
-                                                                .time[0],
-                                                              t.form.data
-                                                                .time[1],
-                                                              !1
-                                                            ),
                                                           size: "mini",
                                                           disabled:
                                                             null ===
@@ -40247,11 +40326,18 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                               1,
                                                               i
                                                             );
+                                                            e.$set(
+                                                              t.form.data.formatTime,
+                                                              1,
+                                                              e.to12Format(i)
+                                                            );
                                                           },
                                                           expression:
                                                             "workDay.form.data.time[1]",
                                                         },
-                                                      }),
+                                                      },
+                                                      e.customTimeSelect(i, t.form.data.time[0], t.form.data.time[1])
+                                                      ),
                                                     ],
                                                     1
                                                   ),
@@ -40547,9 +40633,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                           attrs: {
                                                             filterable: "",
                                                             clearable: "",
-                                                            placeholder:
-                                                              e.$root.labels
-                                                                .location,
+                                                            placeholder: "Applied for my location profile",
                                                             "collapse-tags": "",
                                                             size: "mini",
                                                           },
@@ -40633,7 +40717,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                         { attrs: { span: 12 } },
                                         [
                                           i(
-                                            "el-form-item",
+                                            "el-form-item", //P2P: Replace time select for breaks
                                             {
                                               attrs: {
                                                 rules: e.rules.startTime,
@@ -40641,24 +40725,11 @@ wpJsonpAmeliaBookingPlugin([1], {
                                               },
                                             },
                                             [
-                                              i("el-time-select", {
+                                              i("el-select", {
                                                 staticStyle: {
                                                   "margin-bottom": "14px",
                                                 },
                                                 attrs: {
-                                                  "picker-options":
-                                                    e.getTimeSelectOptionsForBreaks(
-                                                      t.periods.length
-                                                        ? t.periods[0].time[0]
-                                                        : "00:00",
-                                                      t.periods.length
-                                                        ? t.periods[
-                                                            t.periods.length - 1
-                                                          ].time[1]
-                                                        : "24:00",
-                                                      "",
-                                                      t.form.data.time[1]
-                                                    ),
                                                   size: "mini",
                                                 },
                                                 model: {
@@ -40673,7 +40744,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                   expression:
                                                     "workDay.form.data.time[0]",
                                                 },
-                                              }),
+                                              }, e.customTimeSelect(i)),
                                             ],
                                             1
                                           ),
@@ -40694,24 +40765,11 @@ wpJsonpAmeliaBookingPlugin([1], {
                                               },
                                             },
                                             [
-                                              i("el-time-select", {
+                                              i("el-select", {
                                                 staticStyle: {
                                                   "margin-bottom": "14px",
                                                 },
                                                 attrs: {
-                                                  "picker-options":
-                                                    e.getTimeSelectOptionsForBreaks(
-                                                      t.periods.length
-                                                        ? t.periods[0].time[0]
-                                                        : "00:00",
-                                                      t.periods.length
-                                                        ? t.periods[
-                                                            t.periods.length - 1
-                                                          ].time[1]
-                                                        : "24:00",
-                                                      t.form.data.time[0],
-                                                      ""
-                                                    ),
                                                   size: "mini",
                                                 },
                                                 model: {
@@ -40726,7 +40784,9 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                   expression:
                                                     "workDay.form.data.time[1]",
                                                 },
-                                              }),
+                                              },
+                                              e.customTimeSelect(i)
+                                              ),
                                             ],
                                             1
                                           ),
@@ -40824,7 +40884,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                   [
                                     i("el-col", { attrs: { span: 24 } }, [
                                       i(
-                                        "span",
+                                        "span", //P2P: Set start - end
                                         {
                                           class: {
                                             "am-period-break":
@@ -40833,9 +40893,9 @@ wpJsonpAmeliaBookingPlugin([1], {
                                         },
                                         [
                                           e._v(
-                                            e._s(o.data.time[0]) +
+                                            e._s(o.data.formatTime[0]) +
                                               " - " +
-                                              e._s(o.data.time[1])
+                                            e._s(o.data.formatTime[1])
                                           ),
                                         ]
                                       ),
@@ -43607,7 +43667,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                             },
                                             [
                                               i(
-                                                "el-form-item",
+                                                "el-form-item", //P2P: Replace el-time-select with custom for especial days
                                                 {
                                                   attrs: {
                                                     prop:
@@ -43618,19 +43678,11 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                   },
                                                 },
                                                 [
-                                                  i("el-time-select", {
+                                                  i("el-select", {
                                                     staticStyle: {
                                                       "margin-bottom": "12px",
                                                     },
                                                     attrs: {
-                                                      "picker-options":
-                                                        e.getTimeSelectOptionsWithLimits(
-                                                          e.getPeriodBorderTime(
-                                                            e.specialDayModel,
-                                                            n
-                                                          )[0],
-                                                          t.endTime
-                                                        ),
                                                       size: "mini",
                                                       "is-required": !0,
                                                     },
@@ -43649,7 +43701,9 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                       expression:
                                                         "period.startTime",
                                                     },
-                                                  }),
+                                                  },
+                                                  e.customTimeSelect(i)
+                                                  ),
                                                 ],
                                                 1
                                               ),
@@ -43678,19 +43732,11 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                   },
                                                 },
                                                 [
-                                                  i("el-time-select", {
+                                                  i("el-select", {
                                                     staticStyle: {
                                                       "margin-bottom": "12px",
                                                     },
                                                     attrs: {
-                                                      "picker-options":
-                                                        e.getTimeSelectOptionsWithLimits(
-                                                          t.startTime,
-                                                          e.getPeriodBorderTime(
-                                                            e.specialDayModel,
-                                                            n
-                                                          )[1]
-                                                        ),
                                                       size: "mini",
                                                       "is-required": !0,
                                                     },
@@ -43705,7 +43751,9 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                       expression:
                                                         "period.endTime",
                                                     },
-                                                  }),
+                                                  },
+                                                  e.customTimeSelect(i)
+                                                  ),
                                                 ],
                                                 1
                                               ),
