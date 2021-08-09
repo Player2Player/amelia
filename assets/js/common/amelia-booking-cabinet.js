@@ -10128,6 +10128,7 @@ wpJsonpAmeliaBookingPlugin([1], {
         outlookCalendar: "",
       },
       data: function () {
+        //P2P: Set required email and phone number
         return {
           countryPhoneIsoValue: null,
           profileRules: {
@@ -10147,7 +10148,7 @@ wpJsonpAmeliaBookingPlugin([1], {
             ],
             email: [
               {
-                required: !1,
+                required: true,
                 message: this.$root.labels.enter_email_warning,
                 trigger: "submit",
               },
@@ -10169,7 +10170,7 @@ wpJsonpAmeliaBookingPlugin([1], {
             ],
             phone: [
               {
-                required: !1,
+                required: true,
                 message: this.$root.labels.enter_phone_warning,
                 trigger: "submit",
               },
