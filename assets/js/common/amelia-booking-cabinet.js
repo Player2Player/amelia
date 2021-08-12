@@ -915,13 +915,6 @@ wpJsonpAmeliaBookingPlugin([1], {
                 e.state.display.changePassword ||
                   ("provider" === e.cabinetType &&
                     (e.$store.commit(
-                      "cabinet/setEditCategorizedServiceList",
-                      e.getParsedEditCategorizedServiceList(
-                        e.state.profile,
-                        e.options.entities.categories
-                      )
-                    ),
-                    e.$store.commit(
                       "cabinet/setEditWeekDayList",
                       e.getParsedEditWeekDayList(e.state.profile)
                     )));
@@ -9857,6 +9850,8 @@ wpJsonpAmeliaBookingPlugin([1], {
       k = i.n(_),
       C = i(907),
       D = i.n(C),
+      //P2P: Add customerChildren component
+      customerChildren = i.n(i(954)),
       w = (i(741), i(650)),
       S =
         Object.assign ||
@@ -9876,6 +9871,8 @@ wpJsonpAmeliaBookingPlugin([1], {
         DaysOff: p.a,
         SpecialDays: y.a,
         WorkingHours: D.a,
+        //P2P: Add customerChildren component
+        CustomerChildren: customerChildren.a,
       },
       props: { options: { type: Object, default: function () {} } },
       mixins: [c.a, u.a, m.a, v.a, v.a, f.a],
@@ -10075,6 +10072,10 @@ wpJsonpAmeliaBookingPlugin([1], {
               property: "specialDayList",
               value: i,
             });
+        },
+        //P2P: Event handler for changeChildren
+        changeChildren(e, t) {
+
         },
         showChangePasswordForm: function () {
           this.$store.commit("cabinet/setDisplayProperty", {
@@ -11393,7 +11394,29 @@ wpJsonpAmeliaBookingPlugin([1], {
                   ],
                   1
                 ),
-                e._v(" "),
+                e._v(" "), // p2p: add new tab for adding customer children
+                "customer" === e.state.cabinetType
+                  ? i(
+                    "el-tab-pane",
+                    { attrs: { label: 'Children', name: "customerChildren" } },
+                    [
+                      i("customer-children", {
+                        attrs: {
+                          "active-tab": e.activeTab,
+                          "children-list": [{
+                            firstName: "first name 01",
+                            lastName: "last name 01"
+                          }],
+                          "categorized-service-list": e.options.entities.categories,
+                          "should-scroll-view": false,
+                          "is-cabinet": true,
+                        },
+                        on: { changeChildren: e.changeChildren },
+                      }),
+                    ]
+                  )
+                  : e._e(),
+                e._v(" "),                  
                 "provider" === e.state.cabinetType &&
                 e.$root.settings.roles.allowConfigureServices
                   ? i(
@@ -44272,5 +44295,518 @@ wpJsonpAmeliaBookingPlugin([1], {
         },
       },
     };
+  },
+  /**
+   * //P2P: Component for adding customer children
+   * Render function
+   * @param {*} e 
+   * @param {*} t 
+   */
+  952(e, t) {
+    e.exports = {
+      render() {
+        var e = this,
+          t = e.$createElement,
+          i = e._self._c || t;
+        return i(
+          "div",
+          { ref: "customerChildren", staticClass: "am-employee-special-days" },
+          [
+            i("div", { staticClass: "am-dialog-table" }, 
+            [
+              i(
+                "el-row",
+                {
+                  staticClass: "am-dialog-table-head days",
+                  attrs: { gutter: 20 },
+                },
+                [
+                  i("el-col", { attrs: { span: 24 } }, [
+                    i("span", [e._v(e._s("Children list"))]),
+                  ]),
+                ]
+              ),
+              e._v(" "),
+              i("el-row",
+                e._l(e.childrenList, (child, index) => i(
+                  "div", 
+                  { key: index + 1, staticClass: "am-special-day" },
+                  [
+                    e._v(e._s(`${child.firstName} ${child.lastName}`)),
+                  ]
+                ))
+              ),
+              e._v(" "),
+              i("el-row",
+              [
+                i("el-col", [
+                  i(
+                    "div",
+                    {
+                      staticClass: "am-add-element",
+                      on: { click: e.addChild },                      
+                    },
+                    [
+                      i("i", { staticClass: "el-icon-plus" }),
+                      e._v(" "),
+                      i("span", [
+                        e._v(
+                          "\n          " +
+                            e._s("Add child") +
+                            "\n          "
+                        ),
+                      ]),
+                    ]
+                  ),
+                ]),
+              ]
+              ),
+            ] 
+            ),
+            e._v(" "),
+            i("transition", { attrs: { name: "fade" } }, [
+              i("div",
+              {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: e.showChildForm,
+                    expression: "showChildForm",
+                  },
+                ],
+                staticStyle: {
+                  marginTop: "20px",
+                }
+              },
+              [
+                i("el-form", {
+                  ref: "childModel",
+                  attrs: {
+                    model: e.childModel,
+                    "label-position": "top",
+                    id: "childForm",
+                    rules: e.rules,
+                  },
+                  on: {
+                    submit (e) {
+                      e.preventDefault();
+                    },
+                  },
+                }, 
+                [
+                  i("el-row", { attrs: { gutter: 16 } }, 
+                  [
+                    i("el-col", {
+                      attrs: { xs: 24, sm: 12 },
+                    },
+                    [
+                      i("el-form-item",
+                        {
+                          attrs: {
+                            label: e.$root.labels.first_name_colon,
+                            prop: "firstName",                            
+                          },
+                        },
+                        [
+                          i("el-input", {
+                            attrs: { size: "mini", },
+                            model: {
+                              value: e.childModel.firstName,
+                              callback: function (val) {
+                                e.$set(e.childModel, "firstName", val);
+                              },
+                              expression: "childModel.firstName",
+                            },
+                          }),
+                        ]
+                      ),
+                    ]),
+                    e._v(" "),
+                    i("el-col", {
+                      attrs: { xs: 24, sm: 12 },
+                    },
+                    [
+                      i("el-form-item",
+                        {
+                          attrs: {
+                            label: e.$root.labels.last_name_colon,
+                            prop: "lastName",
+                          },
+                        },
+                        [
+                          i("el-input", {
+                            attrs: { size: "mini", },
+                            model: {
+                              value: e.childModel.lastName,
+                              callback: function (val) {
+                                e.$set(e.childModel, "lastName", val);
+                              },
+                              expression: "childModel.lastName",
+                            },
+                          }),
+                        ]
+                      ),
+                    ]),
+                    e._v(" "),
+                    i("el-col", {
+                      attrs: { xs: 24, sm: 12 },
+                    },
+                    [
+                      i("el-row",
+                        {
+                          staticStyle: {
+                            "flex-wrap": "wrap",
+                          },
+                          attrs: {
+                            gutter: 10,
+                            type: "flex",
+                          },
+                        },
+                        [
+                          i("el-col",
+                            {
+                              staticStyle: {
+                                "margin-bottom": "4px",
+                              },
+                              attrs: { span: 24 },
+                            },
+                            [
+                              i("span", [
+                                e._v(e._s("Sports of interest")),
+                              ]),
+                              e._v(" "),
+                              i("el-tooltip",
+                                {
+                                  attrs: {
+                                    placement: "top",
+                                  },
+                                },
+                                [
+                                  i("div", {
+                                    attrs: {
+                                      slot: "content",
+                                    },
+                                    domProps: {
+                                      innerHTML: e._s(
+                                        "Select all your sports of interest"
+                                      ),
+                                    },
+                                    slot: "content",
+                                  }),
+                                  e._v(" "),
+                                  i("i", {
+                                    staticClass:
+                                      "el-icon-question am-tooltip-icon",
+                                  }),
+                                ]
+                              ),
+                            ]
+                          ),
+                          e._v(" "),
+                          i("el-col",
+                            {
+                              attrs: { span: 24 }
+                            },
+                            [
+                              i("el-select",
+                                {
+                                  staticClass:
+                                    "am-select-service",
+                                  staticStyle: {
+                                    "margin-bottom":
+                                      "12px",
+                                  },
+                                  attrs: {
+                                    multiple: "",
+                                    filterable: true,
+                                    placeholder: "Select one or more sports of interest",
+                                    "collapse-tags": "",
+                                    size: "mini"
+                                  },
+                                  on: {
+                                    change(t) {
+                                      //return e.clearValidation();
+                                    },
+                                  },
+                                  model: {
+                                    value: e.childModel.serviceIds,
+                                    callback(ev) {
+                                      e.$set(
+                                        e.childModel,
+                                        "serviceIds",
+                                        ev
+                                      );
+                                    },
+                                    expression: "childModel.serviceIds",
+                                  },
+                                },
+                                [
+                                  e._l(e.categorizedServiceList, n => [
+                                    i(
+                                      "el-option",
+                                      {
+                                        key: `cat-${n.id}`,
+                                        attrs:
+                                          {
+                                            label: n.name,
+                                            value: `cat-${n.id}`,
+                                          },
+                                      },
+                                      [
+                                        i(
+                                          "div",
+                                          {
+                                            staticClass:
+                                              "am-drop-parent",
+                                            on: {
+                                              click(ev) {
+                                                ev.stopPropagation();
+                                                ev.preventDefault();
+                                                return e.selectAllInCategory(
+                                                  e.childModel,
+                                                  n.id
+                                                );
+                                              },
+                                            },
+                                          },
+                                          [
+                                            i("span",[
+                                              e._v(e._s(n.name)),
+                                            ]),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                    e._v(" "),
+                                    e._l(n.serviceList, t =>
+                                      i("el-option",
+                                        {
+                                          key: t.id,
+                                          staticClass:
+                                            "am-drop-child",
+                                          attrs:
+                                            {
+                                              label: t.name,
+                                              value: t.id,
+                                            },
+                                        }
+                                      )
+                                    ),
+                                    ]
+                                  )
+                                ]
+                              )
+                            ]
+                          ),
+                        ]
+                      )
+                    ]),
+                    e._v(" "),
+                    i("el-col", {
+                      attrs: { xs: 24, sm: 12 },
+                    },
+                    [
+                      i("el-form-item",
+                        {
+                          attrs: {
+                            label: e.$root.labels.date_of_birth,
+                            prop: "birthday",
+                          },
+                        },
+                        [
+                          i("el-date-picker", {
+                            attrs: {
+                              size: "mini",
+                              type: "date",
+                              format: "MMMM d, yyyy",
+                              "value-format": "yyyy-MM-dd",
+                              placeholder: "MMMM D, YYYY"
+                            },
+                            model: {
+                              value: e.childModel.birthday,
+                              callback: function (ev) {
+                                e.$set(e.childModel, "birthday", ev);
+                              },
+                              expression: "childModel.birthday",
+                            },
+                          }),
+                        ]
+                      ),
+                    ]),
+                  ]),
+                  e._v(" "),
+                  i("el-row",
+                    { attrs: { type: "flex", justify: "end"  } },
+                    [
+                      i("el-col",
+                        { attrs: { span: 2 } },
+                        [
+                          i("el-button",
+                            {
+                              attrs: { size: "mini" },
+                              on: {
+                                click: function (t) {
+                                  e.showChildForm = !e.showChildForm;
+                                },
+                              },
+                            },
+                            [
+                              e._v(
+                                e._s(e.$root.labels.cancel) +
+                                  "\n            "
+                              ),
+                            ]
+                          ),
+                        ]
+                      ),
+                      i("el-col", { staticStyle: { marginRight: "8px" }, attrs: { span: 3 } }, [
+                        i(
+                          "el-button",
+                          {
+                            staticClass: "am-dialog-create",
+                            attrs: { size: "mini", type: "primary" },
+                            on: { click: e.saveChild },
+                          },
+                          [
+                            e._v(
+                              "\n              " +
+                                e._s("Save Child Data") +
+                                "\n            "
+                            ),
+                          ]
+                        )
+                      ]),
+                    ]
+                  ),
+                ]),    
+              ]            
+              ),
+            ]),
+          ]
+        );
+      },
+      staticRenderFns: [],
+    };
+  },
+  /**
+   * //P2P: Component for adding customer children
+   * component logic
+   * @param {*} e 
+   * @param {*} t 
+   * @param {*} i 
+   */
+  953(e, t, i) {
+    "use strict";
+    Object.defineProperty(t, "__esModule", { value: true });
+    var n = i(687),
+      o = i(337),
+      a = i(692),
+      s = i(686),
+      r = i(695);
+    
+    t.default = {
+      mixins: [n.a, o.a, a.a, s.a, r.a],
+      props: {
+        activeTab: "",
+        categorizedServiceList: null,
+        childrenList: [],
+        shouldScrollView: { type: Boolean, default: true, required: false },
+        isCabinet: { type: Boolean, default: false, required: false },
+      },
+      data() {
+        return {
+          childModel: {},
+          rules: {
+            firstName: [
+              {
+                required: true,
+                message: this.$root.labels.enter_first_name_warning,
+                trigger: "submit",
+              },
+            ],
+            lastName: [
+              {
+                required: true,
+                message: this.$root.labels.enter_last_name_warning,
+                trigger: "submit",
+              },
+            ],
+          },
+          showChildForm: false,
+        };
+      },
+      created: function () {
+        window.addEventListener("resize", this.handleResize);
+      },
+      mounted: function () {},
+      methods: {
+        addChild() {
+          this.childModel = this.getInitChildModel();
+          this.showChildForm = true;
+          if (this.shouldScrollView) {
+            this.scrollViewInModal("childForm");
+          }
+        },
+        getInitChildModel() {
+          return {
+            index: null,
+            id: null,
+            serviceIds: [],
+            firstName: "",
+            lastName: "",
+            birthday: "",
+          };
+        },
+        handleResize() {
+
+        },
+        saveChild() {
+          var e = this;
+          this.$refs.childForm.validate((isValid) => {
+            if (!isValid) return false;
+            var model = {
+              id: e.childModel.id,
+              serviceIds: e.childModel.serviceIds,
+              birthday: e
+                .$moment(e.childModel.birthday)
+                .format("YYYY-MM-DD"),
+              firstName: e.childModel.firstName,
+              lastName: e.childModel.lastName,
+            };
+            e.$emit("changeChildren", model, e.childModel.index);
+            e.clearValidation();
+            e.showSpecialDayForm = false;
+          });
+        },
+        selectAllInCategory: function (model, id) {
+          var serviceIds = this.categorizedServiceList
+            .find(x => x.id === id)
+            .serviceList
+            .map(x => x.id);
+
+          _.isEqual(_.intersection(serviceIds, model.serviceIds), serviceIds)
+            ? (model.serviceIds = _.difference(model.serviceIds, serviceIds))
+            : (model.serviceIds = _.uniq(model.serviceIds.concat(serviceIds)));
+        },
+      },
+      computed: {
+
+      },
+      watch: {
+
+      },
+    };   
+  },
+  /**
+   * //P2P: Component for adding customer children
+   * Main component
+   * @param {*} e 
+   * @param {*} t 
+   * @param {*} i 
+   */
+  954(e, t, i) {
+    var n = i(685)(i(953), i(952), false, null, null, null);
+    e.exports = n.exports;
   },
 });
