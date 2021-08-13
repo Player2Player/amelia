@@ -2,7 +2,8 @@ CREATE TABLE `wp_amelia_customer_children` (
   `id` int(11) NOT NULL,
   `firstName` varchar(255) NOT NULL DEFAULT '',
   `lastName` varchar(255) NOT NULL DEFAULT '',
-  `birthday` date DEFAULT NULL
+  `birthday` date DEFAULT NULL,
+  `customerId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
