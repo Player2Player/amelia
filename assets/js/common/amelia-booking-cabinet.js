@@ -363,6 +363,18 @@ wpJsonpAmeliaBookingPlugin([1], {
                                     (e.description =
                                       l.getDescriptionTranslated(e));
                                 });
+                            }), //P2P: Add parsing for children birthday
+                          "customer" === (r = s.data.data.user).type &&
+                            r.childrenList.forEach((e) => {
+                              if (e.birthday) {
+                                e.birthday = I.a.utc(
+                                    e.birthday.date,
+                                    "YYYY-MM-DD HH:mm:ss"
+                                  )
+                                  .toDate();
+                              }
+                              e.serviceIds = e.serviceList.map(x => x.id);
+                              delete e.serviceList;
                             }),
                           this.$store.commit(
                             "cabinet/setProfile",
@@ -10075,7 +10087,12 @@ wpJsonpAmeliaBookingPlugin([1], {
         },
         //P2P: Event handler for changeChildren
         changeChildren(e, t) {
-
+          var i = JSON.parse(JSON.stringify(this.state.profile.childrenList));
+          null === t ? i.push(e) : (i[t] = e),
+            this.$store.commit("cabinet/setProfileProperty", {
+              property: "childrenList",
+              value: i,
+            });
         },
         showChangePasswordForm: function () {
           this.$store.commit("cabinet/setDisplayProperty", {
@@ -11377,6 +11394,9 @@ wpJsonpAmeliaBookingPlugin([1], {
                   },
                   expression: "activeTab",
                 },
+                attrs: {
+                  id: "user-profile-tabs"
+                },
               },
               [
                 i(
@@ -11403,12 +11423,9 @@ wpJsonpAmeliaBookingPlugin([1], {
                       i("customer-children", {
                         attrs: {
                           "active-tab": e.activeTab,
-                          "children-list": [{
-                            firstName: "first name 01",
-                            lastName: "last name 01"
-                          }],
+                          "children-list": e.state.profile.childrenList,
                           "categorized-service-list": e.options.entities.categories,
-                          "should-scroll-view": false,
+                          "should-scroll-view": true,
                           "is-cabinet": true,
                         },
                         on: { changeChildren: e.changeChildren },
@@ -44332,7 +44349,122 @@ wpJsonpAmeliaBookingPlugin([1], {
                   "div", 
                   { key: index + 1, staticClass: "am-special-day" },
                   [
-                    e._v(e._s(`${child.firstName} ${child.lastName}`)),
+                    i("el-row",
+                    [
+                      i("el-col", { attrs: { span: 20 } },
+                        [
+                          i("div", { staticClass: "am-special-day-data" },
+                            [
+                              i("span", { staticClass: "am-strong" }, [
+                                e._v(
+                                  "\n              " +
+                                  e._s(child.firstName) +
+                                  " " +
+                                  e._s(child.lastName) +
+                                  "\n            "
+                                ),
+                              ]),
+                            ]
+                          ),
+                          e._v(" "),
+                          i("div",
+                            {
+                              staticClass: "am-special-day-data",
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: child.birthday !== null,
+                                  expression: "child.birthday !== null",
+                                },
+                              ],
+                            },
+                            [
+                              i("span", { staticClass: "am-strong" }, [
+                                e._v(e._s("Date of Birth") + ": "),
+                              ]),
+                              e._v(" "),
+                              i("span", [
+                                e._v(
+                                  e._s(
+                                    e.getFrontedFormattedDate(child.birthday)
+                                  )
+                                ),
+                              ]),
+                            ]
+                          ),
+                          e._v(" "),
+                          i("div",
+                            {
+                              staticClass: "am-special-day-data",
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: child.serviceIds.length > 0,
+                                  expression: "child.serviceIds.length > 0",
+                                },
+                              ],
+                            },
+                            [
+                              i("span", { staticClass: "am-strong" }, [
+                                e._v(e._s("Sports of Interest: ")),
+                              ]),
+                              e._v(" "),
+                              i("span", { staticClass: "am-special-day-services" },
+                                [
+                                  i("span",
+                                    { staticClass: "am-special-day-service" },
+                                    [
+                                      e._v(
+                                        "\n                " +
+                                        e.getAssignedServices(child.serviceIds) +
+                                        "\n              "
+                                      ),
+                                    ]
+                                  ),
+                                ]
+                              ),
+                            ]
+                          ),
+                        ]
+                      ),
+                      e._v(" "),
+                      i("el-col",
+                        { staticClass: "align-right", attrs: { span: 4 } },
+                        [
+                          i("div",
+                            {
+                              staticClass: "am-edit-element",
+                              on: {
+                                click(ev) {
+                                  return e.editChild(index);
+                                },
+                              },
+                            },
+                            [
+                              i("img", {
+                                attrs: {
+                                  src: e.$root.getUrl + "public/img/edit-pen.svg",
+                                },
+                              }),
+                            ]
+                          ),
+                          e._v(" "),
+                          i("div",
+                            {
+                              staticClass: "am-delete-element",
+                              on: {
+                                click(ev) {
+                                  return e.deleteChild(index);
+                                },
+                              },
+                            },
+                            [i("i", { staticClass: "el-icon-minus" })]
+                          ),
+                        ]
+                      )
+                    ])
                   ]
                 ))
               ),
@@ -44646,7 +44778,8 @@ wpJsonpAmeliaBookingPlugin([1], {
                             {
                               attrs: { size: "mini" },
                               on: {
-                                click: function (t) {
+                                click(t) {
+                                  e.scrollToTop();
                                   e.showChildForm = !e.showChildForm;
                                 },
                               },
@@ -44717,6 +44850,7 @@ wpJsonpAmeliaBookingPlugin([1], {
       data() {
         return {
           childModel: {},
+          serviceList: [],
           rules: {
             firstName: [
               {
@@ -44738,15 +44872,34 @@ wpJsonpAmeliaBookingPlugin([1], {
       },
       created: function () {
         window.addEventListener("resize", this.handleResize);
+        this.categorizedServiceList.forEach(item =>
+          this.serviceList.push(...item.serviceList)
+        );
       },
       mounted: function () {},
       methods: {
+        scrollToForm() {
+          this.$nextTick(() => {
+            document.querySelector("#user-profile-tabs .el-tabs__content").scrollTop =
+              document.getElementById('childForm').offsetTop;
+          });
+        },
+        scrollToTop() {
+          this.$nextTick(() => {
+            document.querySelector("#user-profile-tabs .el-tabs__content").scrollTop = 0;
+          });
+        },
+        getAssignedServices(ids) {
+          if (!ids.length) return "";
+          return ids.reduce((acc, current) => {
+            const item = this.serviceList.find(x => x.id === current);
+            return acc ? `${acc}, ${item.name}` : item.name;
+          }, null);
+        },
         addChild() {
           this.childModel = this.getInitChildModel();
           this.showChildForm = true;
-          if (this.shouldScrollView) {
-            this.scrollViewInModal("childForm");
-          }
+          this.scrollToForm();
         },
         getInitChildModel() {
           return {
@@ -44763,23 +44916,41 @@ wpJsonpAmeliaBookingPlugin([1], {
         },
         saveChild() {
           var e = this;
-          this.$refs.childForm.validate((isValid) => {
+          this.$refs.childModel.validate((isValid) => {
             if (!isValid) return false;
             var model = {
               id: e.childModel.id,
               serviceIds: e.childModel.serviceIds,
-              birthday: e
-                .$moment(e.childModel.birthday)
+              birthday: !e.childModel.birthday ? null :
+                e.$moment(e.childModel.birthday)
                 .format("YYYY-MM-DD"),
               firstName: e.childModel.firstName,
               lastName: e.childModel.lastName,
             };
             e.$emit("changeChildren", model, e.childModel.index);
-            e.clearValidation();
-            e.showSpecialDayForm = false;
+            e.$refs.childModel.clearValidate();
+            e.showChildForm = false;
           });
         },
-        selectAllInCategory: function (model, id) {
+        editChild(index) {
+          const model = {
+            index,
+            id: this.childrenList[index].id,
+            birthday: this.childrenList[index].birthday
+              ? this.$moment(this.childrenList[index].birthday).toDate()
+              : "",
+            firstName: this.childrenList[index].firstName,
+            lastName: this.childrenList[index].lastName,
+            serviceIds: this.childrenList[index].serviceIds
+          };
+          this.childModel = model;
+          this.showChildForm = true;
+          this.scrollToForm();
+        },
+        deleteChild(index) {
+          this.childrenList.splice(index, 1);
+        },
+        selectAllInCategory(model, id) {
           var serviceIds = this.categorizedServiceList
             .find(x => x.id === id)
             .serviceList

@@ -6,6 +6,7 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\User\CustomerChild;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\DateTime\Birthday;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 
 /**
@@ -28,6 +29,9 @@ class CustomerChildFactory
       foreach ($customers as $customerKey => $customerArray) {
         $child = new CustomerChild(new Name($customerArray['firstName']), 
                                    new Name($customerArray['lastName']));
+
+        $child->setId(new Id((int)$customerKey));
+
         if (!empty($customerArray['birthday'])) {
           if (is_string($customerArray['birthday'])) {
             $child->setBirthday(new Birthday(\DateTime::createFromFormat('Y-m-d', $customerArray['birthday'])));

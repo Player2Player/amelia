@@ -37,6 +37,8 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
               st.serviceId AS service_id,
               s.name AS service_name,
               s.description AS service_description,
+              s.price as service_price,
+              s.status as service_status,
               s.categoryId AS service_categoryId
           FROM $customerChildTable u
           LEFT JOIN $childrenServiceTable st ON st.customerChildrenId = u.id
@@ -287,9 +289,11 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
             !array_key_exists($serviceId, $customerRows[$childId]['serviceList'])
         ) {
             $customerRows[$childId]['serviceList'][$serviceId] = [
-                'id'         => $serviceId,
+                'id'               => $serviceId,
                 'name'             => $row['service_name'],
                 'description'      => $row['service_description'],
+                'price'            => $row['service_price'],
+                'status'           => $row['service_status'],
                 'categoryId'       => (int)$row['service_categoryId'],
             ];
         }

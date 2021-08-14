@@ -25,6 +25,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
+use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
 use AmeliaBooking\Infrastructure\Services\Google\GoogleCalendarService;
 use AmeliaBooking\Infrastructure\Services\Outlook\OutlookCalendarService;
 use AmeliaBooking\Infrastructure\WP\UserService\CreateWPUser;
@@ -274,6 +275,8 @@ class UserApplicationService
         /** @var OutlookCalendarService $outlookCalendarService */
         $outlookCalendarService = $this->container->get('infrastructure.outlook.calendar.service');
 
+        /** @var CustomerRepository $customerRepository */
+        $customerRepository = $this->container->get('domain.users.customers.repository');
 
         // If cabinet is for provider, return provider with services and schedule
         if ($cabinetType === AbstractUser::USER_ROLE_PROVIDER) {
@@ -314,6 +317,12 @@ class UserApplicationService
                 );
             } catch (\Exception $e) {
             }
+        }
+
+        // P2P: Set children for customers
+        if ($cabinetType === AbstractUser::USER_ROLE_CUSTOMER) {
+          $customerChildren = $customerRepository->getCustomerChildren($user->getId()->getValue());
+          $userArray['childrenList'] = $customerChildren->toArray();  
         }
 
         $responseData = [
