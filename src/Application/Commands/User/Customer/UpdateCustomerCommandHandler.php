@@ -6,6 +6,7 @@ use AmeliaBooking\Application\Commands\CommandHandler;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
+use AmeliaBooking\Application\Services\User\CustomerApplicationService;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
@@ -53,6 +54,9 @@ class UpdateCustomerCommandHandler extends CommandHandler
         /** @var UserRepository $userRepository */
         $userRepository = $this->getContainer()->get('domain.users.repository');
 
+        /** @var CustomerApplicationService $customerApplicationService */
+        $customerApplicationService = $this->container->get('application.user.customer.service');
+
         $userRepository->beginTransaction();
 
         if (!$this->getContainer()->getPermissionsService()->currentUserCanWrite(Entities::CUSTOMERS)) {
@@ -75,7 +79,9 @@ class UpdateCustomerCommandHandler extends CommandHandler
 
         if ($command->getField('externalId') === -1) {
             $command->setField('externalId', null);
-        }
+        }        
+
+        $customerApplicationService->updateChildren($command->getArg('id'), $command->getField('childrenList'));
 
         /** @var SettingsService $settingsService */
         $settingsService = $this->container->get('domain.settings.service');

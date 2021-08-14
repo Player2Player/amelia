@@ -26,5 +26,4 @@ interface CustomerRepositoryInterface extends BaseRepositoryInterface
      */
     public function getCount($criteria);
 
-    public function getCustomerChildren($customerId);
 }

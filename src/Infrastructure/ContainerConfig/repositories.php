@@ -270,6 +270,15 @@ $entries['domain.users.customers.repository'] = function (Container $c) {
     );
 };
 
+$entries['domain.users.customerChild.repository'] = function (Container $c) {
+  return new Repository\User\CustomerChildRepository(
+      $c->getDatabaseConnection(),
+      DB\User\Customer\CustomerChildTable::getTableName(),
+      DB\User\Customer\ChildServiceTable::getTableName(),
+      DB\Bookable\ServicesTable::getTableName()
+  );
+};
+
 $entries['domain.wpUsers.repository'] = function (Container $c) {
     return new Repository\User\WPUserRepository(
         $c->getDatabaseConnection(),

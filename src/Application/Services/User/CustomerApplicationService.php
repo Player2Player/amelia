@@ -14,9 +14,11 @@ use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Payment\Payment;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Customer;
+use AmeliaBooking\Domain\Entity\User\CustomerChild;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\PackageCustomerRepository;
@@ -28,6 +30,7 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Event\CustomerBookingEventPe
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Payment\PaymentRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
+use AmeliaBooking\Infrastructure\Repository\User\CustomerChildRepository;
 use Exception;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
@@ -152,6 +155,59 @@ class CustomerApplicationService
                 }
             }
         }
+    }
+
+    public function updateChildren($customerId, $children) {
+        /** @var CustomerChildRepository $customerChildRepository */
+        $customerChildRepository = $this->container->get('domain.users.customerChild.repository');
+
+        $oldCustomerChildren = $customerChildRepository->getCustomerChildren($customerId);
+     
+        $childrenIds = array_column($children, 'id');
+        $oldServices = [];
+
+        // Delete items
+        /** @var CustomerChild $child */
+        foreach($oldCustomerChildren->getItems() as $key => $child) {          
+          $oldServices[$key] = array_column($child->getServiceList()->getItems(), 'id');
+
+          if (in_array($key, $childrenIds)) continue;
+          
+          $customerChildRepository->deleteServices($key);
+          $customerChildRepository->delete($key);
+        }
+
+        foreach($children as $item) {
+          $entity = new CustomerChild(
+            new Name($item['firstName']),
+            new Name($item['lastName'])
+          );
+          $id = $item['id'];
+          if ($id) {
+            $entity->setId($id);
+          }
+          if ($item['birthday']) {
+            $entity->setBirthday($item['birthday']);
+          }
+
+          if ($id) {  
+            $customerChildRepository->update($id, $entity);
+            $servicesToDelete = array_diff($oldServices[$id], $item['serviceIds']);
+            foreach($servicesToDelete as $toDelete) {
+              $customerChildRepository->deleteService($id, $toDelete);
+            }
+            $servicesToAdd = array_diff($item['serviceIds'], $oldServices[$id]);
+            foreach($servicesToAdd as $toAdd) {
+              $customerChildRepository->addService($id, $toAdd);
+            }
+          }
+          else {
+            $id = $customerChildRepository->add($entity);
+            foreach($item['serviceIds'] as $serviceId) {
+              $customerChildRepository->addService($id, $serviceId);
+            }  
+          }
+        } 
     }
 
     /**

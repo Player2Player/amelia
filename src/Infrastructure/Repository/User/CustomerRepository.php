@@ -2,7 +2,6 @@
 
 namespace AmeliaBooking\Infrastructure\Repository\User;
 
-use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Repository\User\CustomerRepositoryInterface;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
@@ -12,8 +11,6 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\AppointmentsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\Booking\CustomerBookingsTable;
 use AmeliaBooking\Infrastructure\WP\InstallActions\DB\User\WPUsersTable;
-use AmeliaBooking\Infrastructure\WP\InstallActions\DB;
-use AmeliaBooking\Domain\Factory\User\CustomerChildFactory;
 
 /**
  * Class UserRepository
@@ -23,53 +20,6 @@ use AmeliaBooking\Domain\Factory\User\CustomerChildFactory;
 class CustomerRepository extends UserRepository implements CustomerRepositoryInterface
 {
     
-    public function getCustomerChildren($customerId) {
-      $customerChildTable = DB\User\Customer\CustomerChildTable::getTableName();
-      $childrenServiceTable = DB\User\Customer\ChildServiceTable::getTableName();
-      $serviceTable = DB\Bookable\ServicesTable::getTableName();
-      try {
-        $statement = $this->connection->prepare(
-          "SELECT
-              u.id AS child_id,
-              u.firstName AS child_firstName,
-              u.lastName AS child_lastName,
-              u.birthday AS child_birthday,
-              st.serviceId AS service_id,
-              s.name AS service_name,
-              s.description AS service_description,
-              s.price as service_price,
-              s.status as service_status,
-              s.categoryId AS service_categoryId
-          FROM $customerChildTable u
-          LEFT JOIN $childrenServiceTable st ON st.customerChildrenId = u.id
-          LEFT JOIN $serviceTable s ON s.id = st.serviceId
-          WHERE u.customerId = :customer
-          ORDER BY CONCAT(u.firstName, ' ', u.lastName)"
-        );
-
-        $statement->bindParam(':customer', $customerId);
-        $statement->execute();        
-
-        $customerRows = [];
-
-        while ($row = $statement->fetch()) {
-            $this->parseCustomerChildRow($row, $customerRows);
-        }
-
-        $providers = CustomerChildFactory::createChildrenCollection($customerRows);
-
-        if (!$providers->length()) {
-            return new Collection();
-        }
-      }
-      catch (\Exception $e) {
-        throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
-      }
-
-      return $providers;
-    }
-  
-
     /**
      * @param     $criteria
      * @param int $itemsPerPage
@@ -260,44 +210,6 @@ class CustomerRepository extends UserRepository implements CustomerRepositoryInt
         }
 
         return $rows;
-    }
-
-    /** @noinspection MoreThanThreeArgumentsInspection */
-    /**
-     * @param array $row
-     * @param array $customerRows
-     *
-     * @return void
-     */
-    private function parseCustomerChildRow($row, &$customerRows)
-    {
-        $childId = (int)$row['child_id'];
-        $serviceId = isset($row['service_id']) ? (int)$row['service_id'] : null;
-
-        if (!array_key_exists($childId, $customerRows)) {
-            $customerRows[$childId] = [
-                'id'               => $childId,
-                'firstName'        => $row['child_firstName'],
-                'lastName'         => $row['child_lastName'],
-                'birthday'         => isset($row['child_birthday']) ? $row['child_birthday'] : null,
-                'serviceList'      => [],
-            ];
-        }
-
-        if ($serviceId &&
-            array_key_exists($childId, $customerRows) &&
-            !array_key_exists($serviceId, $customerRows[$childId]['serviceList'])
-        ) {
-            $customerRows[$childId]['serviceList'][$serviceId] = [
-                'id'               => $serviceId,
-                'name'             => $row['service_name'],
-                'description'      => $row['service_description'],
-                'price'            => $row['service_price'],
-                'status'           => $row['service_status'],
-                'categoryId'       => (int)$row['service_categoryId'],
-            ];
-        }
-
     }
 
 }
