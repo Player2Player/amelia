@@ -193,6 +193,9 @@ class CustomerApplicationService
           }
           if ($item['birthday']) {
             $birthday = \DateTime::createFromFormat('Y-m-d', $item['birthday']);
+            if ($birthday === false) {
+              throw new InvalidArgumentException("{$item['birthday']} could not be converted to date time");
+            }
             $entity->setBirthday(new Birthday($birthday));
           }
 

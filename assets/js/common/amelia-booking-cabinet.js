@@ -9968,6 +9968,11 @@ wpJsonpAmeliaBookingPlugin([1], {
                                   this.editWeekDayList
                                 ),
                               })),
+                            "customer" === this.state.cabinetType &&
+                             (this.$store.commit("cabinet/setProfileProperty", {
+                               property: "childrenList",
+                               value: this.formatChildrenBirthday(),
+                             })),
                             (e.next = 8),
                             this.$http.post(
                               this.$root.getAjaxUrl +
@@ -10076,6 +10081,15 @@ wpJsonpAmeliaBookingPlugin([1], {
             property: "dayOffList",
             value: t,
           });
+        },
+        // P2P: Correct format for children birthday
+        formatChildrenBirthday() {
+          var items = JSON.parse(JSON.stringify(this.state.profile.childrenList));
+          items.forEach(item => {
+            if (item.birthday)
+              item.birthday = g()(item.birthday).format("YYYY-MM-DD");
+          });
+          return items;
         },
         changeSpecialDays: function (e, t) {
           var i = JSON.parse(JSON.stringify(this.state.profile.specialDayList));
