@@ -17,6 +17,7 @@ use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\Entity\User\CustomerChild;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\ValueObjects\DateTime\Birthday;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Infrastructure\Common\Container;
@@ -158,11 +159,14 @@ class CustomerApplicationService
     }
 
     public function updateChildren($customerId, $children) {
+
+        if (!$customerId) 
+          throw new \InvalidArgumentException("Customer id is required");
+
         /** @var CustomerChildRepository $customerChildRepository */
         $customerChildRepository = $this->container->get('domain.users.customerChild.repository');
 
-        $oldCustomerChildren = $customerChildRepository->getCustomerChildren($customerId);
-     
+        $oldCustomerChildren = $customerChildRepository->getCustomerChildren($customerId);        
         $childrenIds = array_column($children, 'id');
         $oldServices = [];
 
@@ -182,12 +186,14 @@ class CustomerApplicationService
             new Name($item['firstName']),
             new Name($item['lastName'])
           );
+          $entity->setCustomerId(new Id($customerId));
           $id = $item['id'];
           if ($id) {
-            $entity->setId($id);
+            $entity->setId(new Id($id));
           }
           if ($item['birthday']) {
-            $entity->setBirthday($item['birthday']);
+            $birthday = \DateTime::createFromFormat('Y-m-d', $item['birthday']);
+            $entity->setBirthday(new Birthday($birthday));
           }
 
           if ($id) {  

@@ -35,7 +35,8 @@ class UpdateCustomerController extends Controller
         'password',
         'countryPhoneIso',
         'pictureFullPath',
-        'pictureThumbPath'
+        'pictureThumbPath',
+        'childrenList'
     ];
 
     /**
