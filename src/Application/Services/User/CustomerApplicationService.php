@@ -173,7 +173,7 @@ class CustomerApplicationService
         // Delete items
         /** @var CustomerChild $child */
         foreach($oldCustomerChildren->getItems() as $key => $child) {          
-          $oldServices[$key] = array_column($child->getServiceList()->getItems(), 'id');
+          $oldServices[$key] = array_keys($child->getServiceList()->getItems());
 
           if (in_array($key, $childrenIds)) continue;
           
