@@ -168,16 +168,16 @@ class CustomerApplicationService
 
         $oldCustomerChildren = $customerChildRepository->getCustomerChildren($customerId);        
         $childrenIds = array_column($children, 'id');
-        $oldServices = [];
+        $oldCategories = [];
 
         // Delete items
         /** @var CustomerChild $child */
         foreach($oldCustomerChildren->getItems() as $key => $child) {          
-          $oldServices[$key] = array_keys($child->getServiceList()->getItems());
+          $oldCategories[$key] = array_keys($child->getCategoryList()->getItems());
 
           if (in_array($key, $childrenIds)) continue;
           
-          $customerChildRepository->deleteServices($key);
+          $customerChildRepository->deleteCategories($key);
           $customerChildRepository->delete($key);
         }
 
@@ -201,19 +201,19 @@ class CustomerApplicationService
 
           if ($id) {  
             $customerChildRepository->update($id, $entity);
-            $servicesToDelete = array_diff($oldServices[$id], $item['serviceIds']);
-            foreach($servicesToDelete as $toDelete) {
-              $customerChildRepository->deleteService($id, $toDelete);
+            $categoriesToDelete = array_diff($oldCategories[$id], $item['categoryIds']);
+            foreach($categoriesToDelete as $toDelete) {
+              $customerChildRepository->deleteCategory($id, $toDelete);
             }
-            $servicesToAdd = array_diff($item['serviceIds'], $oldServices[$id]);
-            foreach($servicesToAdd as $toAdd) {
-              $customerChildRepository->addService($id, $toAdd);
+            $categoriesToAdd = array_diff($item['categoryIds'], $oldCategories[$id]);
+            foreach($categoriesToAdd as $toAdd) {
+              $customerChildRepository->addCategory($id, $toAdd);
             }
           }
           else {
             $id = $customerChildRepository->add($entity);
-            foreach($item['serviceIds'] as $serviceId) {
-              $customerChildRepository->addService($id, $serviceId);
+            foreach($item['categoryIds'] as $categoryId) {
+              $customerChildRepository->addCategory($id, $categoryId);
             }  
           }
         } 

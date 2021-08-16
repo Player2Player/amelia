@@ -28,7 +28,7 @@ class CustomerChild
   {
     $this->firstName = $firstName;
     $this->lastName = $lastName;
-    $this->serviceList = new Collection();
+    $this->categoryList = new Collection();
   }
 
 
@@ -48,7 +48,7 @@ class CustomerChild
   private $customerId;
 
   /** @var Collection */
-  private $serviceList;
+  private $categoryList;
 
   /**
    * @return Id
@@ -141,17 +141,17 @@ class CustomerChild
   /**
    * @return Collection
    */
-  public function getServiceList()
+  public function getCategoryList()
   {
-      return $this->serviceList;
+      return $this->categoryList;
   }
 
   /**
-   * @param Collection $serviceList
+   * @param Collection $categoryList
    */
-  public function setServiceList(Collection $serviceList)
+  public function setCategoryList(Collection $categoryList)
   {
-      $this->serviceList = $serviceList;
+      $this->categoryList = $categoryList;
   }
 
   /**
@@ -159,14 +159,14 @@ class CustomerChild
    */
   public function toArray()
   {
-      return [
-          'id'               => null !== $this->getId() ? $this->getId()->getValue() : null,
-          'customerId'       => null !== $this->getCustomerId() ? $this->getCustomerId()->getValue() : null,
-          'firstName'        => $this->getFirstName()->getValue(),
-          'lastName'         => $this->getLastName()->getValue(),
-          'birthday'         => null !== $this->getBirthday() ? $this->getBirthday()->getValue() : null,
-          'serviceList'      => $this->serviceList->toArray(),
-      ];
+    return [
+      'id'               => null !== $this->getId() ? $this->getId()->getValue() : null,
+      'customerId'       => null !== $this->getCustomerId() ? $this->getCustomerId()->getValue() : null,
+      'firstName'        => $this->getFirstName()->getValue(),
+      'lastName'         => $this->getLastName()->getValue(),
+      'birthday'         => null !== $this->getBirthday() ? $this->getBirthday()->getValue() : null,
+      'categoryList'     => $this->categoryList->toArray(),
+    ];
   }
 
 }

@@ -17,18 +17,18 @@ use AmeliaBooking\Domain\Repository\User\CustomerChildRepositoryInterface;
 class CustomerChildRepository extends AbstractRepository implements CustomerChildRepositoryInterface
 {
     
-  private $childrenServiceTable;
-  private $serviceTable;
+  private $childrenCategoryTable;
+  private $categoryTable;
   
   public function __construct(
     Connection $connection,
     $table,
-    $childrenServiceTable,
-    $serviceTable
+    $childrenCategoryTable,
+    $categoryTable
     ) {
       parent::__construct($connection, $table);
-      $this->childrenServiceTable = $childrenServiceTable;
-      $this->serviceTable = $serviceTable;
+      $this->childrenCategoryTable = $childrenCategoryTable;
+      $this->categoryTable = $categoryTable;
   }
 
   
@@ -102,20 +102,20 @@ class CustomerChildRepository extends AbstractRepository implements CustomerChil
     }
   }
 
-  public function addService($childId, $serviceId) {
+  public function addCategory($childId, $categoryId) {
     $params = [
         ':childId'          => $childId,
-        ':serviceId'        => $serviceId,
+        ':categoryId'       => $categoryId,
     ];
 
     try {
       $statement = $this->connection->prepare(
-          "INSERT INTO {$this->childrenServiceTable} (
+          "INSERT INTO {$this->childrenCategoryTable} (
           `customerChildrenId`,
-          `serviceId`
+          `categoryId`
           ) VALUES (
           :childId,
-          :serviceId
+          :categoryId
           )"
       );
 
@@ -131,16 +131,16 @@ class CustomerChildRepository extends AbstractRepository implements CustomerChil
     return $this->connection->lastInsertId();
   }
 
-  public function deleteService($childId, $serviceId) {
+  public function deleteCategory($childId, $categoryId) {
     $params = [
       ':childId'          => $childId,
-      ':serviceId'        => $serviceId,
+      ':categoryId'       => $categoryId,
     ];
 
     try {
       $statement = $this->connection->prepare(
-          "DELETE FROM  {$this->childrenServiceTable} 
-            WHERE  `customerChildrenId` = :childId AND `serviceId` = :serviceId 
+          "DELETE FROM  {$this->childrenCategoryTable} 
+            WHERE `customerChildrenId` = :childId AND `categoryId` = :categoryId 
           "
       );
 
@@ -154,14 +154,14 @@ class CustomerChildRepository extends AbstractRepository implements CustomerChil
     }
   }
 
-  public function deleteServices($childId) {
+  public function deleteCategories($childId) {
     $params = [
       ':childId' => $childId
     ];
 
     try {
       $statement = $this->connection->prepare(
-          "DELETE FROM  {$this->childrenServiceTable} 
+          "DELETE FROM  {$this->childrenCategoryTable} 
             WHERE  `customerChildrenId` = :childId
           "
       );
@@ -176,47 +176,74 @@ class CustomerChildRepository extends AbstractRepository implements CustomerChil
     }
   }
 
-  public function getCustomerChildren($customerId) {
+  public function getCustomersChildren($criteria) {
     try {
+      $params = [];
+      $queryProviders = [];
+      $where = '';
+      if ($criteria['customerIds']) {
+        $customerIds = $criteria['customerIds'];  
+        foreach ($customerIds as $index => $value) {
+          $param = ':customer' . $index;
+          $queryProviders[] = $param;
+          $params[$param] = $value;
+        }
+        $where =  'u.customerId IN (' . implode(', ', $queryProviders) . ')';
+      }
+      else if ($criteria['customerId']) {
+        $params[':customerId'] = $criteria['customerId'];
+        $where = "u.customerId = :customerId";
+      }
+
+      if ($where) {
+        $where = " WHERE $where";
+      } 
+
       $statement = $this->connection->prepare(
         "SELECT
             u.id AS child_id,
+            u.customerId AS customer_id,
             u.firstName AS child_firstName,
             u.lastName AS child_lastName,
             u.birthday AS child_birthday,
-            st.serviceId AS service_id,
-            s.name AS service_name,
-            s.description AS service_description,
-            s.price as service_price,
-            s.status as service_status,
-            s.categoryId AS service_categoryId
+            st.categoryId AS category_id,
+            c.name AS category_name,
+            c.position as category_position
         FROM {$this->table} u
-        LEFT JOIN {$this->childrenServiceTable} st ON st.customerChildrenId = u.id
-        LEFT JOIN {$this->serviceTable} s ON s.id = st.serviceId
-        WHERE u.customerId = :customer
-        ORDER BY CONCAT(u.firstName, ' ', u.lastName)"
+        LEFT JOIN {$this->childrenCategoryTable} st ON st.customerChildrenId = u.id
+        LEFT JOIN {$this->categoryTable} c ON c.id = st.categoryId
+        $where
+        ORDER BY u.customerId, CONCAT(u.firstName, ' ', u.lastName)"
       );
 
-      $statement->bindParam(':customer', $customerId);
-      $statement->execute();        
+      $statement->execute($params);        
 
       $customerRows = [];
 
       while ($row = $statement->fetch()) {
           $this->parseCustomerChildRow($row, $customerRows);
       }
-
-      $providers = CustomerChildFactory::createChildrenCollection($customerRows);
-
-      if (!$providers->length()) {
-          return new Collection();
+      $collectionArray = [];
+      foreach($customerRows as $key => $children) {
+        $collectionArray[$key] = CustomerChildFactory::createChildrenCollection($children);
       }
     }
     catch (\Exception $e) {
       throw new QueryExecutionException('Unable to find by id in ' . __CLASS__, $e->getCode(), $e);
     }
 
-    return $providers;
+    return $collectionArray;
+  }
+
+  /**
+   * @param int $customerId
+   * @return Collection
+   */
+  public function getCustomerChildren($customerId) {
+    $criteria = ['customerId' => $customerId];
+    $customers = $this->getCustomersChildren($criteria);
+
+    return $customers[$customerId];
   }
 
   /**
@@ -227,30 +254,34 @@ class CustomerChildRepository extends AbstractRepository implements CustomerChil
    */
   private function parseCustomerChildRow($row, &$customerRows)
   {
+    $customerId = (int)$row['customer_id'];
     $childId = (int)$row['child_id'];
-    $serviceId = isset($row['service_id']) ? (int)$row['service_id'] : null;
+    $categoryId = isset($row['category_id']) ? (int)$row['category_id'] : null;
 
-    if (!array_key_exists($childId, $customerRows)) {
-      $customerRows[$childId] = [
+    if (!array_key_exists($customerId, $customerRows)) {
+      $customerRows[$customerId] = [];
+    }
+
+    if (array_key_exists($customerId, $customerRows) &&
+      !array_key_exists($childId, $customerRows[$customerId])) {
+      $customerRows[$customerId][$childId] = [
           'id'               => $childId,
+          'customerId'       => $customerId,
           'firstName'        => $row['child_firstName'],
           'lastName'         => $row['child_lastName'],
           'birthday'         => isset($row['child_birthday']) ? $row['child_birthday'] : null,
-          'serviceList'      => [],
+          'categoryList'     => [],
       ];
     }
 
-    if ($serviceId &&
-      array_key_exists($childId, $customerRows) &&
-      !array_key_exists($serviceId, $customerRows[$childId]['serviceList'])
+    if ($categoryId &&
+      array_key_exists($childId, $customerRows[$customerId]) &&
+      !array_key_exists($categoryId, $customerRows[$customerId][$childId]['categoryList'])
     ) {
-      $customerRows[$childId]['serviceList'][$serviceId] = [
-          'id'               => $serviceId,
-          'name'             => $row['service_name'],
-          'description'      => $row['service_description'],
-          'price'            => $row['service_price'],
-          'status'           => $row['service_status'],
-          'categoryId'       => (int)$row['service_categoryId'],
+      $customerRows[$customerId][$childId]['categoryList'][$categoryId] = [
+          'id'               => $categoryId,
+          'name'             => $row['category_name'],
+          'position'         => $row['category_position']
       ];
     }
   }

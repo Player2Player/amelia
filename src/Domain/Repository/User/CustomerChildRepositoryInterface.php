@@ -11,21 +11,32 @@ use AmeliaBooking\Domain\Repository\BaseRepositoryInterface;
  */
 interface CustomerChildRepositoryInterface extends BaseRepositoryInterface
 {
+  
   /**
    * @param string $customerId
    */
   public function getCustomerChildren($customerId);
 
   /**
-   * @param int $childId
-   * @param int $serviceId
+   * @param array $customerIds
    */
-  public function addService($childId, $serviceId);
+  public function getCustomersChildren($customerIds);
 
   /**
    * @param int $childId
-   * @param int $serviceId
+   * @param int $categoryId
    */
-  public function deleteService($childId, $serviceId);
+  public function addCategory($childId, $categoryId);
+
+  /**
+   * @param int $childId
+   * @param int $categoryId
+   */
+  public function deleteCategory($childId, $categoryId);
+
+  /**
+   * @param int $childId
+   */
+  public function deleteCategories($childId);
   
 }

@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\CustomerRepository;
+use AmeliaBooking\Infrastructure\Repository\User\CustomerChildRepository;
 use Exception;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
@@ -76,6 +77,9 @@ class GetCustomersCommandHandler extends CommandHandler
 
         /** @var ProviderApplicationService $providerAS */
         $providerAS = $this->container->get('application.user.provider.service');
+
+        /** @var CustomerChildRepository $customerChildRepository */
+        $customerChildRepository = $this->container->get('domain.users.customerChild.repository');
 
         $params = $command->getField('params');
 

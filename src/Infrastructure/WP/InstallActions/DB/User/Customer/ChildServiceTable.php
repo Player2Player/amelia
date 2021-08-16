@@ -13,5 +13,5 @@ use AmeliaBooking\Infrastructure\WP\InstallActions\DB\AbstractDatabaseTable;
  */
 class ChildServiceTable extends AbstractDatabaseTable
 {
-  const TABLE = 'children_to_services';
+  const TABLE = 'children_to_categories';
 }

@@ -275,7 +275,7 @@ $entries['domain.users.customerChild.repository'] = function (Container $c) {
       $c->getDatabaseConnection(),
       DB\User\Customer\CustomerChildTable::getTableName(),
       DB\User\Customer\ChildServiceTable::getTableName(),
-      DB\Bookable\ServicesTable::getTableName()
+      DB\Bookable\CategoriesTable::getTableName()
   );
 };
 

@@ -373,8 +373,8 @@ wpJsonpAmeliaBookingPlugin([1], {
                                   )
                                   .toDate();
                               }
-                              e.serviceIds = e.serviceList.map(x => x.id);
-                              delete e.serviceList;
+                              e.categoryIds = e.categoryList.map(x => x.id);
+                              delete e.categoryList;
                             }),
                           this.$store.commit(
                             "cabinet/setProfile",
@@ -44415,8 +44415,8 @@ wpJsonpAmeliaBookingPlugin([1], {
                                 {
                                   name: "show",
                                   rawName: "v-show",
-                                  value: child.serviceIds.length > 0,
-                                  expression: "child.serviceIds.length > 0",
+                                  value: child.categoryIds.length > 0,
+                                  expression: "child.categoryIds.length > 0",
                                 },
                               ],
                             },
@@ -44432,7 +44432,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                     [
                                       e._v(
                                         "\n                " +
-                                        e.getAssignedServices(child.serviceIds) +
+                                        e.getAssignedCategories(child.categoryIds) +
                                         "\n              "
                                       ),
                                     ]
@@ -44676,15 +44676,15 @@ wpJsonpAmeliaBookingPlugin([1], {
                                     },
                                   },
                                   model: {
-                                    value: e.childModel.serviceIds,
+                                    value: e.childModel.categoryIds,
                                     callback(ev) {
                                       e.$set(
                                         e.childModel,
-                                        "serviceIds",
+                                        "categoryIds",
                                         ev
                                       );
                                     },
-                                    expression: "childModel.serviceIds",
+                                    expression: "childModel.categoryIds",
                                   },
                                 },
                                 [
@@ -44692,52 +44692,13 @@ wpJsonpAmeliaBookingPlugin([1], {
                                     i(
                                       "el-option",
                                       {
-                                        key: `cat-${n.id}`,
+                                        key: n.id,
                                         attrs:
                                           {
                                             label: n.name,
-                                            value: `cat-${n.id}`,
+                                            value: n.id,
                                           },
-                                      },
-                                      [
-                                        i(
-                                          "div",
-                                          {
-                                            staticClass:
-                                              "am-drop-parent",
-                                            on: {
-                                              click(ev) {
-                                                ev.stopPropagation();
-                                                ev.preventDefault();
-                                                return e.selectAllInCategory(
-                                                  e.childModel,
-                                                  n.id
-                                                );
-                                              },
-                                            },
-                                          },
-                                          [
-                                            i("span",[
-                                              e._v(e._s(n.name)),
-                                            ]),
-                                          ]
-                                        ),
-                                      ]
-                                    ),
-                                    e._v(" "),
-                                    e._l(n.serviceList, t =>
-                                      i("el-option",
-                                        {
-                                          key: t.id,
-                                          staticClass:
-                                            "am-drop-child",
-                                          attrs:
-                                            {
-                                              label: t.name,
-                                              value: t.id,
-                                            },
-                                        }
-                                      )
+                                      }
                                     ),
                                     ]
                                   )
@@ -44864,7 +44825,7 @@ wpJsonpAmeliaBookingPlugin([1], {
       data() {
         return {
           childModel: {},
-          serviceList: [],
+          categoryList: [],
           rules: {
             firstName: [
               {
@@ -44886,8 +44847,10 @@ wpJsonpAmeliaBookingPlugin([1], {
       },
       created: function () {
         window.addEventListener("resize", this.handleResize);
-        this.categorizedServiceList.forEach(item =>
-          this.serviceList.push(...item.serviceList)
+        this.categoryList = this.categorizedServiceList.map(item => ({
+          id: item.id,
+          name: item.name
+          })
         );
       },
       mounted: function () {},
@@ -44903,10 +44866,10 @@ wpJsonpAmeliaBookingPlugin([1], {
             document.querySelector("#user-profile-tabs .el-tabs__content").scrollTop = 0;
           });
         },
-        getAssignedServices(ids) {
+        getAssignedCategories(ids) {
           if (!ids.length) return "";
           return ids.reduce((acc, current) => {
-            const item = this.serviceList.find(x => x.id === current);
+            const item = this.categoryList.find(x => x.id === current);
             return acc ? `${acc}, ${item.name}` : item.name;
           }, null);
         },
@@ -44919,7 +44882,7 @@ wpJsonpAmeliaBookingPlugin([1], {
           return {
             index: null,
             id: null,
-            serviceIds: [],
+            categoryIds: [],
             firstName: "",
             lastName: "",
             birthday: "",
@@ -44934,7 +44897,7 @@ wpJsonpAmeliaBookingPlugin([1], {
             if (!isValid) return false;
             var model = {
               id: e.childModel.id,
-              serviceIds: e.childModel.serviceIds,
+              categoryIds: e.childModel.categoryIds,
               birthday: !e.childModel.birthday ? null :
                 e.$moment(e.childModel.birthday)
                 .format("YYYY-MM-DD"),
@@ -44955,7 +44918,7 @@ wpJsonpAmeliaBookingPlugin([1], {
               : "",
             firstName: this.childrenList[index].firstName,
             lastName: this.childrenList[index].lastName,
-            serviceIds: this.childrenList[index].serviceIds
+            categoryIds: this.childrenList[index].categoryIds
           };
           this.childModel = model;
           this.showChildForm = true;
@@ -44964,22 +44927,10 @@ wpJsonpAmeliaBookingPlugin([1], {
         deleteChild(index) {
           this.childrenList.splice(index, 1);
         },
-        selectAllInCategory(model, id) {
-          var serviceIds = this.categorizedServiceList
-            .find(x => x.id === id)
-            .serviceList
-            .map(x => x.id);
-
-          _.isEqual(_.intersection(serviceIds, model.serviceIds), serviceIds)
-            ? (model.serviceIds = _.difference(model.serviceIds, serviceIds))
-            : (model.serviceIds = _.uniq(model.serviceIds.concat(serviceIds)));
-        },
       },
       computed: {
-
       },
       watch: {
-
       },
     };   
   },
