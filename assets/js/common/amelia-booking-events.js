@@ -8521,6 +8521,7 @@ wpJsonpAmeliaBookingPlugin([10], {
                 e.response && t.onError("", e.response.data.data);
               });
         },
+        //P2P: Send location id and custom location
         editEntity: function (e) {
           var t = this,
             n = null;
@@ -17896,6 +17897,7 @@ wpJsonpAmeliaBookingPlugin([10], {
         clearValidation: function () {
           void 0 !== this.$refs.event && this.$refs.event.clearValidate();
         },
+        //P2P: Set both location id and custom location
         getParsedEntity: function (e) {
           var t = this,
             n = [];
@@ -18000,7 +18002,7 @@ wpJsonpAmeliaBookingPlugin([10], {
             locationId:
               null !== this.event.locationId ? this.event.locationId : null,
             customLocation:
-              null === this.event.locationId ? this.event.customLocation : null,
+              null !== this.event.customLocation ? this.event.customLocation : null,
             applyGlobally: e,
             settings: JSON.stringify(i),
             zoomUserId: this.event.zoomUserId,
@@ -21061,8 +21063,7 @@ wpJsonpAmeliaBookingPlugin([10], {
                                                 n("p", [
                                                   e._v(
                                                     e._s(
-                                                      e.$root.labels
-                                                        .event_select_address
+                                                      "Select Location"
                                                     )
                                                   ),
                                                 ]),
@@ -21100,32 +21101,15 @@ wpJsonpAmeliaBookingPlugin([10], {
                                                       expression:
                                                         "event.locationId",
                                                     },
-                                                  },
-                                                  [
-                                                    n("el-option", {
-                                                      key: null,
+                                                  }, //P2P: Remove custom address option from location list
+                                                  e._l(e.locations, loc => n("el-option", {
+                                                      key: loc.id,
                                                       attrs: {
-                                                        label:
-                                                          this.$root.labels
-                                                            .event_custom_address,
-                                                        value: null,
+                                                        label: loc.name,
+                                                        value: loc.id,
                                                       },
-                                                    }),
-                                                    e._v(" "),
-                                                    e._l(
-                                                      e.locations,
-                                                      function (e) {
-                                                        return n("el-option", {
-                                                          key: e.id,
-                                                          attrs: {
-                                                            label: e.name,
-                                                            value: e.id,
-                                                          },
-                                                        });
-                                                      }
-                                                    ),
-                                                  ],
-                                                  2
+                                                    })
+                                                  )
                                                 ),
                                               ],
                                               1
@@ -21137,14 +21121,6 @@ wpJsonpAmeliaBookingPlugin([10], {
                                         n(
                                           "el-row",
                                           {
-                                            directives: [
-                                              {
-                                                name: "show",
-                                                rawName: "v-show",
-                                                value: !e.event.locationId,
-                                                expression: "!event.locationId",
-                                              },
-                                            ],
                                             attrs: { gutter: 10 },
                                           },
                                           [

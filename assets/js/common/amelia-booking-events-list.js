@@ -385,14 +385,19 @@ wpJsonpAmeliaBookingPlugin([20], {
           (e.showEventDetails = !e.showEventDetails),
             (e.showEventBooking = !e.showEventBooking);
         },
+        // P2P: Display location and custom location
         getLocation: function (e) {
+          let location = '';
           if (e.locationId && this.options.entities.locations.length) {
             var t = this.options.entities.locations.find(function (t) {
               return t.id === e.locationId;
             });
-            return void 0 !== t ? t.name : "";
+            location = t ? t.name : "";
           }
-          if (e.customLocation) return e.customLocation;
+          if (e.customLocation) {
+            location = `${location} ${e.customLocation}`;
+          }
+          return location.trim();
         },
         inlineBookingSVG: function () {
           o(693).init({
