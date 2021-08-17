@@ -101,23 +101,28 @@ class GetCustomersCommandHandler extends CommandHandler
             array_merge($params, ['ignoredBookings' => true]),
             $itemsPerPage
         );
-
+        
+        $customersChildren = [];
         if (!empty($users)) {
             $usersWithBookingsStats = $customerRepository->getFiltered(
                 array_merge($params, ['ignoredBookings' => false, 'customers' => array_keys($users)]),
                 null
             );
-
+            $userIds = [];
             foreach ($users as $key => $user) {
                 $users[$key] = $usersWithBookingsStats[$key];
+                $userIds[] = $key;
             }
+            $criteria = ['customerIds' => $userIds];
+            $customersChildren  = $customerChildRepository->getCustomersChildren($criteria);            
         }
 
         $users = array_values($users);
 
         foreach ($users as &$user) {
+            $userId = $user['id'];
             $user['wpUserPhotoUrl'] = $this->container->get('user.avatar')->getAvatar($user['externalId']);
-
+            $user['childrenList'] = $customersChildren[$userId] ? $customersChildren[$userId]->toArray() : [];
             $user = array_map(
                 function ($v) {
                     return (null === $v) ? '' : $v;

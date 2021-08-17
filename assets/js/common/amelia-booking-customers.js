@@ -1153,59 +1153,6 @@ wpJsonpAmeliaBookingPlugin([18], {
                                                   a("el-col", {
                                                     attrs: { md: 2, sm: 1 },
                                                   }),
-                                                  t._v(" "),
-                                                  a(
-                                                    "el-col",
-                                                    {
-                                                      attrs: { md: 10, sm: 10 },
-                                                    },
-                                                    [
-                                                      a(
-                                                        "p",
-                                                        {
-                                                          staticClass:
-                                                            "am-data",
-                                                        },
-                                                        [
-                                                          t._v(
-                                                            t._s(
-                                                              t.$root.labels
-                                                                .last_appointment
-                                                            ) + ":"
-                                                          ),
-                                                        ]
-                                                      ),
-                                                    ]
-                                                  ),
-                                                  t._v(" "),
-                                                  a(
-                                                    "el-col",
-                                                    {
-                                                      attrs: { md: 10, sm: 13 },
-                                                    },
-                                                    [
-                                                      e.lastAppointment
-                                                        ? a(
-                                                            "p",
-                                                            {
-                                                              staticClass:
-                                                                "am-value",
-                                                            },
-                                                            [
-                                                              t._v(
-                                                                "\n                          " +
-                                                                  t._s(
-                                                                    t.getFrontedFormattedDateTime(
-                                                                      e.lastAppointment
-                                                                    )
-                                                                  ) +
-                                                                  "\n                        "
-                                                              ),
-                                                            ]
-                                                          )
-                                                        : a("h4", [t._v("/")]),
-                                                    ]
-                                                  ),
                                                 ],
                                                 1
                                               ),
@@ -1278,6 +1225,100 @@ wpJsonpAmeliaBookingPlugin([18], {
                                         ],
                                         1
                                       ),
+                                      a("el-row",
+                                        {
+                                          staticStyle: { marginTop: '15px' },
+                                          directives: [
+                                            {
+                                              name: "show",
+                                              rawName: "v-show",
+                                              value: e.childrenList.length > 0,
+                                              expression: "childrenList.length > 0",
+                                            },
+                                          ],
+                                        },
+                                      [
+                                        a("el-col", { attrs: { md: 24, offset: 1 } },
+                                        [
+                                          a(
+                                            "h3",
+                                            [
+                                              t._v(
+                                                t._s("Children List")
+                                              ),
+                                            ]
+                                          ),
+                                        ],
+                                        ),
+                                        t._v(" "),
+                                        t._l(e.childrenList, (child, index) => a("div",
+                                          {
+                                            key: index + 1,
+                                            staticClass: "am-customer" ,
+                                            staticStyle: { marginTop: '5px' }
+                                          },
+                                          [
+                                            a("el-row", [
+                                              a("el-col", { attrs: { md: 24, offset: 1 } },
+                                                [
+                                                  a("p", { staticClass: "am-strong" },
+                                                    [
+                                                      t._v(t._s(
+                                                        `${child.firstName} ${child.lastName}`
+                                                      )),
+                                                    ]
+                                                  ),
+                                                ],
+                                              ),
+                                              a("el-col",
+                                                {
+                                                  attrs: { md: 24, offset: 1 },
+                                                  directives: [
+                                                    {
+                                                      name: "show",
+                                                      rawName: "v-show",
+                                                      value: child.birthday !== null,
+                                                      expression: "child.birthday !== null",
+                                                    },
+                                                  ],
+                                                },
+                                                [
+                                                  a("p",
+                                                    [
+                                                      t._v(t._s(
+                                                        child.birthday
+                                                          ? `Date of Birth: ${t.$moment(child.birthday.date).format('MMMM D, YYYY')}`
+                                                          : ''
+                                                      )),
+                                                    ]
+                                                  ),
+                                                ],
+                                              ),
+                                              a("el-col",
+                                                {
+                                                  attrs: { md: 24, offset: 1 },
+                                                  directives: [
+                                                    {
+                                                      name: "show",
+                                                      rawName: "v-show",
+                                                      value: child.categoryList.length > 0,
+                                                      expression: "child.categoryList.length > 0",
+                                                    },
+                                                  ],
+                                                },
+                                                [
+                                                  a("p", [
+                                                    t._v(t._s(
+                                                      "Sports of Interest: " +
+                                                      child.categoryList.map(x => x.name).join(', ')
+                                                    )),
+                                                  ]),
+                                                ]
+                                              )
+                                            ])
+                                          ]
+                                        ))
+                                      ]),
                                     ],
                                     1
                                   ),
