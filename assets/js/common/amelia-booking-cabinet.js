@@ -927,9 +927,17 @@ wpJsonpAmeliaBookingPlugin([1], {
                 e.state.display.changePassword ||
                   ("provider" === e.cabinetType &&
                     (e.$store.commit(
+                      "cabinet/setEditCategorizedServiceList",
+                      e.getParsedEditCategorizedServiceList(
+                        e.state.profile,
+                        e.options.entities.categories
+                      )
+                    ),
+                    e.$store.commit(
                       "cabinet/setEditWeekDayList",
                       e.getParsedEditWeekDayList(e.state.profile)
-                    )));
+                    ))
+                  );
                 var t = [].concat(
                   (function (e) {
                     if (Array.isArray(e)) {
