@@ -43784,7 +43784,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                                             },
                                             [
                                               i(
-                                                "el-form-item",
+                                                "el-form-item", //P2P: Replace el-time-select with custom for especial days
                                                 {
                                                   attrs: {
                                                     prop:
