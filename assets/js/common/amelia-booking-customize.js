@@ -11457,6 +11457,7 @@ wpJsonpAmeliaBookingPlugin(
     ,
     ,
     ,
+    //1075: Main logic tab view for customization
     function (t, e, o) {
       "use strict";
       Object.defineProperty(e, "__esModule", { value: !0 });
@@ -11480,6 +11481,8 @@ wpJsonpAmeliaBookingPlugin(
         _ = o.n(y),
         C = o(966),
         F = o.n(C),
+        //P2P: Add conditionFields component
+        conditionFields = o.n(o(1259)),
         z =
           Object.assign ||
           function (t) {
@@ -11499,11 +11502,14 @@ wpJsonpAmeliaBookingPlugin(
           eventListForm: v.a,
           catalogForm: b.a,
           SelectTranslate: F.a,
+          //P2P: Add customerChildren component
+          ConditionFields: conditionFields.a,
         },
         mixins: [n.a, s.a, r.a, l.a],
         data: function () {
           return {
             formType: "stepByStepForm",
+            customFields: [],
             formTypeOptions: [
               {
                 label: this.$root.labels.form_type_step_by_step,
@@ -11567,6 +11573,8 @@ wpJsonpAmeliaBookingPlugin(
           };
         },
         created: function () {
+          // P2P: listen for event on fetched custom fields
+          this.$root.$on('custom-fields-fetched', this.onCustomFieldsFetched);
           this.changeFormType("stepByStepForm"),
             this.$root.settings.customization &&
             this.$root.settings.customization.forms
@@ -11585,6 +11593,13 @@ wpJsonpAmeliaBookingPlugin(
             this.inlineSVG();
         },
         methods: {
+          /**
+           * P2P Handler for custom-fields-fetched
+           * @param customFields
+           */
+          onCustomFieldsFetched(customFields) {
+            this.customFields =  customFields;
+          },
           languageChanged: function (t) {
             this.languageShortCode = t;
           },
@@ -11890,6 +11905,7 @@ wpJsonpAmeliaBookingPlugin(
       var i = o(685)(o(1077), o(1084), !1, null, null, null);
       t.exports = i.exports;
     },
+    //1076: custom fields logic
     function (t, e, o) {
       "use strict";
       Object.defineProperty(e, "__esModule", { value: !0 });
@@ -11953,6 +11969,7 @@ wpJsonpAmeliaBookingPlugin(
                     });
                   }),
                     (e.customFields = i),
+                    (e.$root.$emit('custom-fields-fetched', i)), // P2P: Emit event on fetched custom fields
                     (e.fetched = !0),
                     t &&
                       setTimeout(function () {
@@ -12352,6 +12369,7 @@ wpJsonpAmeliaBookingPlugin(
         components: { Draggable: a.a, DialogTranslate: r.a },
       };
     },
+    //1079: Custom field component
     function (t, e) {
       t.exports = {
         render: function () {
@@ -13208,6 +13226,7 @@ wpJsonpAmeliaBookingPlugin(
         staticRenderFns: [],
       };
     },
+    // : custom fields render
     function (t, e) {
       t.exports = {
         render: function () {
@@ -35186,6 +35205,7 @@ wpJsonpAmeliaBookingPlugin(
       var u = m;
       t.exports = u;
     },
+    //1258: Main render tab view for Customization
     function (t, e) {
       t.exports = {
         render: function () {
@@ -35213,7 +35233,7 @@ wpJsonpAmeliaBookingPlugin(
                   { staticClass: "am-customize am-section" },
                   [
                     o(
-                      "el-tabs",
+                      "el-tabs", //P2P: Add tab for conditional fields
                       {
                         model: {
                           value: t.activeTab,
@@ -35936,6 +35956,19 @@ wpJsonpAmeliaBookingPlugin(
                           ],
                           1
                         ),
+                        t._v(" "),
+                        o("el-tab-pane", //P2P: New conditional fields tab
+                        {
+                          attrs: {
+                            label: "Condition Fields",
+                            name: "conditionFields",
+                          },
+                        },
+                        [
+                          o("condition-fields", {
+                            attrs: { 'custom-fields': t.customFields }
+                          })
+                        ]),
                       ],
                       1
                     ),
@@ -35959,6 +35992,279 @@ wpJsonpAmeliaBookingPlugin(
               ],
               1
             ),
+          ]);
+        },
+        staticRenderFns: [],
+      };
+    },
+    /**
+     * //P2P: id: 1259
+     * Condition fields
+     * 1260: Component Logic
+     * 1261: Render Logic
+     */
+    function (t, e, o) {
+      var i = o(685)(o(1260), o(1261), false, null, null, null);
+      t.exports = i.exports;
+    },
+    /**
+     * Condition fields
+     * P2P: 1260 -> Component Logic
+     * @param t
+     * @param e
+     * @param o
+     */
+    function (t, e, o) {
+      "use strict";
+      Object.defineProperty(e, "__esModule", { value: true });
+
+      var conditionField = o.n(o(1262));
+
+      e.default = {
+        components: { ConditionField: conditionField.a },
+        mixins: [],
+        props: {
+          customFields: {
+            type: Array,
+            default: []
+          },
+        },
+        data() {
+          return {
+
+          };
+        },
+        created() {},
+        mounted() {},
+        methods: {},
+        computed: {},
+      };
+    },
+    /**
+     * Component for condition fields managements
+     * //P2P: 1261 -> Render Logic
+     * @param t
+     * @param e
+     */
+    function (t, e) {
+      t.exports = {
+        render() {
+          var t = this,
+            e = t.$createElement,
+            o = t._self._c || e;
+          return o("div", {
+            staticClass: 'am-custom-fields'
+          },[
+            o("el-alert", {
+              attrs: {
+                title: 'For the "if" part, you can only select Checkbox, Radio buttons and Selectbox fields',
+                type: 'info',
+                "show-icon": true,
+                closable: false
+              },
+            }),
+            o('condition-field', {
+              attrs: {
+                'is-new': true,
+                'custom-fields': t.customFields,
+              }
+            })
+          ]);
+        },
+        staticRenderFns: [],
+      };
+    },
+    /**
+     * //P2P: id: 1262
+     * Condition fields
+     * 1263: Component Logic
+     * 1264: Render Logic
+     */
+    function (t, e, o) {
+      var i = o(685)(o(1263), o(1264), false, null, null, null);
+      t.exports = i.exports;
+    },
+    /**
+     * Component for Condition field
+     * P2P: 1263 -> Component Logic
+     * @param t
+     * @param e
+     * @param o
+     */
+    function (t, e, o) {
+      "use strict";
+      Object.defineProperty(e, "__esModule", { value: true });
+      e.default = {
+        props: {
+          isNew: {
+            type: Boolean,
+            default: false
+          },
+          customFields: {
+            type: Array,
+            default: []
+          },
+        },
+        mixins: [],
+        data() {
+          return {
+            operators: [{
+              label: 'Equal',
+              value: 'equal'
+            }, {
+              label: 'Not Equal',
+              value: 'not-equal'
+            }],
+            model: {
+              id: null,
+              customFieldId: null,
+              customFieldCondition: null,
+              operator: 'equal',
+              value: null,
+            },
+            rules: {
+
+            }
+          };
+        },
+        created() {},
+        mounted() {},
+        methods: {
+          modelCreator(prop) {
+            var that = this;
+            return {
+              value: that.model[prop],
+              callback(val) {
+                that.$set(that.model, prop, val);
+              },
+              expression: `model.${prop}`,
+            };
+          },
+          save() {
+            console.log('custom saving', this.customFields);
+          }
+        },
+        computed: {},
+      };
+    },
+    /**
+     * Component for Condition field
+     * //P2P: 1264 -> Render Logic
+     * @param t
+     * @param e
+     */
+    function (t, e) {
+      t.exports = {
+        render() {
+          var t = this,
+            e = t.$createElement,
+            o = t._self._c || e;
+          return o("div", {
+            staticClass: 'am-custom-field',
+            staticStyle: {
+              marginTop: '10px'
+            },
+            style: {
+              paddingTop: t.isNew ? '20px' : '25px',
+              paddingBottom: t.isNew ? '5px' : '1px',
+            }
+          },[
+            o('h3', {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: t.isNew,
+                    expression: "isNew",
+                  },
+                ],
+            },
+            [
+              o('i', { staticStyle: { "margin-right": "5px" }, staticClass: "el-icon-circle-plus" }),
+              t._v('Add New Condition')
+            ]),
+            o('el-form', {
+              attrs: {
+                'label-position': 'left',
+                ref: "conditionFieldForm",
+                attrs: {
+                  model: t.model,
+                  "label-position": "top",
+                  id: "conditionFieldForm",
+                  rules: t.rules,
+                },
+                on: {
+                  submit(ev) {
+                    ev.preventDefault();
+                  },
+                },
+              }
+            },[
+              o('el-row', { attrs: { gutter: 10 } }, [
+                o('el-col', { attrs: { span: 7 } }, [
+                  o('el-form-item',
+                    {
+                      attrs: { label: 'Show', 'label-width': '45px', prop: 'customFieldId' },
+                    },
+                    [
+                      o('el-select', {
+                        model: t.modelCreator('customFieldId'),
+                      })
+                    ]
+                  ),
+                ]),
+                o('el-col', { attrs: { span: 7 } }, [
+                  o('el-form-item',
+                    {
+                      attrs: { label: 'if', 'label-width': '20px', prop: 'customFieldCondition' },
+                    },[
+                    o('el-select')
+                  ]),
+                ]),
+                o('el-col', { attrs: { span: 2 } }, [
+                  o('el-form-item',
+                    {
+                      attrs: { label: ' ','label-width': '1px', prop: 'operator' }
+                    }, [
+                    o('el-select', {
+                        model: t.modelCreator('operator'),
+                    },
+                    t.operators.map(({label, value}) =>
+                      o('el-option', { key: value, attrs: { label, value } } )
+                    ))
+                  ]),
+                ]),
+                o('el-col', { attrs: { span: 5 } }, [
+                  o('el-form-item',
+                    {
+                      attrs: { label: ' ', 'label-width': '1px', prop: 'value' }
+                    }, [
+                    o('el-select')
+                  ]),
+                ]),
+                o('el-col', { attrs: { span: 3 } }, [
+                  o('el-button',
+                    {
+                      attrs: { type: 'primary', icon: 'el-icon-check', circle: true },
+                      on: {
+                        click: t.save
+                      }
+                    }),
+                  o('el-button',
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: !t.isNew,
+                          expression: "!isNew",
+                        },
+                      ],
+                      attrs: { type: 'danger', icon: 'el-icon-delete', circle: true }
+                    }),
+                ]),
+              ])
+            ])
           ]);
         },
         staticRenderFns: [],
