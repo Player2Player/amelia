@@ -3603,6 +3603,11 @@ wpJsonpAmeliaBookingPlugin([1], {
         showCustomField: function (e) {
           return Array.isArray(e) ? e.length > 0 : !!e;
         },
+        //P2P: get location name
+        getLocationLabel(item) {
+          const location = this.options.entities.locations.find(e => e.id === item.locationId);
+          return location ? location.name : "";
+        },
         getCustomFieldLabel: function (e, t) {
           var i = this.options.entities.customFields.find(function (e) {
             return e.id === parseInt(t);
@@ -4969,6 +4974,50 @@ wpJsonpAmeliaBookingPlugin([1], {
                                                           "am-has-divider",
                                                       },
                                                       [
+                                                        i("el-row", //P2P: add location
+                                                          {
+                                                            class: {
+                                                              "am-hide-less-than-desktop":
+                                                                "customer" ===
+                                                                e.state
+                                                                  .cabinetType,
+                                                            },
+                                                          },
+                                                          [
+                                                            i(
+                                                              "p",
+                                                              {
+                                                                staticClass:
+                                                                  "am-data",
+                                                              },
+                                                              [
+                                                                e._v(
+                                                                  "\n                        " +
+                                                                  e._s("Location") +
+                                                                  ":\n                      "
+                                                                ),
+                                                              ]
+                                                            ),
+                                                            e._v(" "),
+                                                            i(
+                                                              "p",
+                                                              {
+                                                                staticClass:
+                                                                  "am-value",
+                                                              },
+                                                              [
+                                                                e._v(
+                                                                  "\n                        " +
+                                                                  e._s(
+                                                                    e.getLocationLabel(n)
+                                                                  ) +
+                                                                  "\n                      "
+                                                                ),
+                                                              ]
+                                                            ),
+                                                          ]
+                                                        ),
+                                                        e._v(" "),
                                                         i(
                                                           "el-row",
                                                           {

@@ -36141,10 +36141,13 @@ wpJsonpAmeliaBookingPlugin(
             };
           },
           save() {
-            console.log('custom saving', this.customFields);
           }
         },
-        computed: {},
+        computed: {
+          customFieldForConditions() {
+            return this.customFields.filter(x => );
+          },
+        },
       };
     },
     /**
@@ -36186,19 +36189,16 @@ wpJsonpAmeliaBookingPlugin(
             o('el-form', {
               attrs: {
                 'label-position': 'left',
-                ref: "conditionFieldForm",
-                attrs: {
-                  model: t.model,
-                  "label-position": "top",
-                  id: "conditionFieldForm",
-                  rules: t.rules,
+                id: "conditionFieldForm",
+                rules: t.rules,
+                model: t.model,
+              },
+              ref: "conditionFieldForm",
+              on: {
+                submit(ev) {
+                  ev.preventDefault();
                 },
-                on: {
-                  submit(ev) {
-                    ev.preventDefault();
-                  },
-                },
-              }
+              },
             },[
               o('el-row', { attrs: { gutter: 10 } }, [
                 o('el-col', { attrs: { span: 7 } }, [
@@ -36209,7 +36209,10 @@ wpJsonpAmeliaBookingPlugin(
                     [
                       o('el-select', {
                         model: t.modelCreator('customFieldId'),
-                      })
+                      },
+                      t.customFields.map(({label, id}) =>
+                        o('el-option', { key: id, attrs: { label, value: id } })
+                      ))
                     ]
                   ),
                 ]),
@@ -36230,7 +36233,7 @@ wpJsonpAmeliaBookingPlugin(
                         model: t.modelCreator('operator'),
                     },
                     t.operators.map(({label, value}) =>
-                      o('el-option', { key: value, attrs: { label, value } } )
+                      o('el-option', { key: value, attrs: { label, value } })
                     ))
                   ]),
                 ]),
