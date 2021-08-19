@@ -36108,6 +36108,8 @@ wpJsonpAmeliaBookingPlugin(
         mixins: [],
         data() {
           return {
+            conditionFieldTypes: ['select', 'checkbox', 'radio'],
+            conditionFieldValues: [],
             operators: [{
               label: 'Equal',
               value: 'equal'
@@ -36123,7 +36125,34 @@ wpJsonpAmeliaBookingPlugin(
               value: null,
             },
             rules: {
-
+              customFieldId: [
+                {
+                  required: true,
+                  message: "Please select a custom field",
+                  trigger: "submit",
+                },
+              ],
+              customFieldCondition: [
+                {
+                  required: true,
+                  message: "Please select a custom field",
+                  trigger: "submit",
+                },
+              ],
+              operator: [
+                {
+                  required: true,
+                  message: "Please select the operator",
+                  trigger: "submit",
+                },
+              ],
+              value: [
+                {
+                  required: true,
+                  message: "Please select the value",
+                  trigger: "submit",
+                },
+              ],
             }
           };
         },
@@ -36140,12 +36169,31 @@ wpJsonpAmeliaBookingPlugin(
               expression: `model.${prop}`,
             };
           },
+          scopedSlotError(creator) {
+            const props = {
+              staticStyle: {
+                'font-size': '10px',
+                'color':' #ff4949',
+                'margin-top': '5px',
+              },
+            }
+            return {
+              error: ({error}) => creator('div', props, [this._v(error)])
+            }
+          },
           save() {
-          }
+            this.$refs.conditionFieldForm.validate((isValid) => {
+              if (!isValid) return false;
+            });
+          },
+          onChangeCustomFieldCondition() {
+            const customField = this.customFields.find(x => x.id === this.model.customFieldCondition);
+            this.conditionFieldValues = customField ? customField.options : [];
+          },
         },
         computed: {
-          customFieldForConditions() {
-            return this.customFields.filter(x => );
+          customFieldsForCondition() {
+            return this.customFields.filter(x => this.conditionFieldTypes.includes(x.type));
           },
         },
       };
@@ -36188,6 +36236,7 @@ wpJsonpAmeliaBookingPlugin(
             ]),
             o('el-form', {
               attrs: {
+                'hide-required-asterisk': true,
                 'label-position': 'left',
                 id: "conditionFieldForm",
                 rules: t.rules,
@@ -36205,6 +36254,7 @@ wpJsonpAmeliaBookingPlugin(
                   o('el-form-item',
                     {
                       attrs: { label: 'Show', 'label-width': '45px', prop: 'customFieldId' },
+                      scopedSlots: t.scopedSlotError(o),
                     },
                     [
                       o('el-select', {
@@ -36220,14 +36270,24 @@ wpJsonpAmeliaBookingPlugin(
                   o('el-form-item',
                     {
                       attrs: { label: 'if', 'label-width': '20px', prop: 'customFieldCondition' },
+                      scopedSlots: t.scopedSlotError(o),
                     },[
-                    o('el-select')
-                  ]),
+                      o('el-select', {
+                        model: t.modelCreator('customFieldCondition'),
+                        on: {
+                          change: t.onChangeCustomFieldCondition
+                        },
+                      },
+                      t.customFieldsForCondition.map(({label, id}) =>
+                        o('el-option', { key: id, attrs: { label, value: id } })
+                      ))
+                   ]),
                 ]),
                 o('el-col', { attrs: { span: 2 } }, [
                   o('el-form-item',
                     {
-                      attrs: { label: ' ','label-width': '1px', prop: 'operator' }
+                      attrs: { label: ' ','label-width': '1px', prop: 'operator' },
+                      scopedSlots: t.scopedSlotError(o),
                     }, [
                     o('el-select', {
                         model: t.modelCreator('operator'),
@@ -36240,9 +36300,15 @@ wpJsonpAmeliaBookingPlugin(
                 o('el-col', { attrs: { span: 5 } }, [
                   o('el-form-item',
                     {
-                      attrs: { label: ' ', 'label-width': '1px', prop: 'value' }
+                      attrs: { label: ' ', 'label-width': '1px', prop: 'value' },
+                      scopedSlots: t.scopedSlotError(o),
                     }, [
-                    o('el-select')
+                    o('el-select', {
+                      model: t.modelCreator('value'),
+                    },
+                    t.conditionFieldValues.map(({label, id}) =>
+                      o('el-option', { key: id, attrs: { label } })
+                    ))
                   ]),
                 ]),
                 o('el-col', { attrs: { span: 3 } }, [

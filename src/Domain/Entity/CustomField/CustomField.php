@@ -43,6 +43,9 @@ class CustomField
     private $options;
 
     /** @var Collection */
+    private $conditions;
+
+    /** @var Collection */
     private $services;
 
     /** @var Collection */
@@ -183,6 +186,22 @@ class CustomField
     /**
      * @return Collection
      */
+    public function getConditions()
+    {
+        return $this->conditions;
+    }
+
+    /**
+     * @param Collection $conditions
+     */
+    public function setConditions($conditions)
+    {
+        $this->conditions = $conditions;
+    }
+
+    /**
+     * @return Collection
+     */
     public function getServices()
     {
         return $this->services;
@@ -224,6 +243,7 @@ class CustomField
             'required'     => $this->getRequired()->getValue(),
             'position'     => $this->getPosition()->getValue(),
             'options'      => $this->getOptions() ? $this->getOptions()->toArray() : [],
+            'conditions'   => $this->getConditions() ? $this->getConditions()->toArray() : [],
             'services'     => $this->getServices() ? $this->getServices()->toArray() : [],
             'events'       => $this->getEvents() ? $this->getEvents()->toArray() : [],
             'translations' => $this->getTranslations() ? $this->getTranslations()->getValue() : null,

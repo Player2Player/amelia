@@ -39,6 +39,8 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
     /** @var string */
     private $eventsTable;
 
+    /** @var string */
+    private $conditionsTable;
 
     /**
      * @param Connection $connection
@@ -48,6 +50,7 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
      * @param string     $serviceTable
      * @param string     $customFieldsEventsTable
      * @param string     $eventTable
+     * @param string     $conditionsTable
      */
     public function __construct(
         Connection $connection,
@@ -56,7 +59,8 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
         $customFieldsServicesTable,
         $serviceTable,
         $customFieldsEventsTable,
-        $eventTable
+        $eventTable,
+        $conditionsTable
     ) {
         parent::__construct($connection, $table);
         $this->customFieldsOptionsTable = $customFieldsOptionsTable;
@@ -64,6 +68,7 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
         $this->servicesTable = $serviceTable;
         $this->customFieldsEventsTable = $customFieldsEventsTable;
         $this->eventsTable = $eventTable;
+        $this->conditionsTable = $conditionsTable;
     }
 
     /**
@@ -171,6 +176,11 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
                     cfo.label AS cfo_label,
                     cfo.position AS cfo_position,
                     cfo.translations AS cfo_translations,
+                    cfc.id AS cfc_id,
+                    cfc.customFieldId AS cfc_custom_field_id,
+                    cfc.customFieldCondition AS cfc_custom_field_condition,
+                    cfc.operator AS cfc_operator,
+                    cfc.value AS cfc_value,
                     s.id AS s_id,
                     s.name AS s_name,
                     s.description AS s_description,
@@ -187,6 +197,7 @@ class CustomFieldRepository extends AbstractRepository implements CustomFieldRep
                     e.parentId AS e_parentId
                 FROM {$this->table} cf
                 LEFT JOIN {$this->customFieldsOptionsTable} cfo ON cfo.customFieldId = cf.id
+                LEFT JOIN {$this->conditionsTable} cfc ON cfc.customFieldId = cf.id
                 LEFT JOIN {$this->customFieldsServicesTable} cfs ON cfs.customFieldId = cf.id
                 LEFT JOIN {$this->customFieldsEventsTable} cfe ON cfe.customFieldId = cf.id
                 LEFT JOIN {$this->servicesTable} s ON s.id = cfs.serviceId

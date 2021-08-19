@@ -51,6 +51,17 @@ class CustomFieldFactory
             $customField->setOptions(new Collection($optionList));
         }
 
+        if (isset($data['conditions'])) {
+          $conditionList = [];
+          /** @var array $conditions */
+          $conditions = $data['conditions'];
+          foreach ($conditions as $condition) {
+              $conditionList[] = CustomFieldConditionFactory::create($condition);
+          }
+
+          $customField->setConditions(new Collection($conditionList));
+        }
+
         if (isset($data['translations'])) {
             $customField->setTranslations(new Json($data['translations']));
         }
@@ -97,6 +108,7 @@ class CustomFieldFactory
         foreach ($rows as $row) {
             $customFieldId = $row['cf_id'];
             $optionId = $row['cfo_id'];
+            $conditionId = $row['cfc_id'];
             $serviceId = $row['s_id'];
             $eventId = $row['e_id'];
 
@@ -113,6 +125,14 @@ class CustomFieldFactory
                 $customFields[$customFieldId]['options'][$optionId]['label'] = $row['cfo_label'];
                 $customFields[$customFieldId]['options'][$optionId]['position'] = $row['cfo_position'];
                 $customFields[$customFieldId]['options'][$optionId]['translations'] = $row['cfo_translations'];
+            }
+
+            if ($conditionId) {
+              $customFields[$customFieldId]['conditions'][$conditionId]['id'] = $row['cfc_id'];
+              $customFields[$customFieldId]['conditions'][$conditionId]['customFieldId'] = $row['cfc_custom_field_id'];
+              $customFields[$customFieldId]['conditions'][$conditionId]['customFieldCondition'] = $row['cfc_custom_field_condition'];
+              $customFields[$customFieldId]['conditions'][$conditionId]['operator'] = $row['cfc_operator'];
+              $customFields[$customFieldId]['conditions'][$conditionId]['value'] = $row['cfc_value'];
             }
 
             if ($serviceId) {
@@ -139,14 +159,16 @@ class CustomFieldFactory
         $customFieldsCollection = new Collection();
 
         foreach ($customFields as $customFieldKey => $customFieldArray) {
-            if (!array_key_exists('options', $customFieldArray)) {
-                $customFieldArray['options'] = [];
-            }
-
-            $customFieldsCollection->addItem(
-                self::create($customFieldArray),
-                $customFieldKey
-            );
+          if (!array_key_exists('options', $customFieldArray)) {
+              $customFieldArray['options'] = [];
+          }
+          if (!array_key_exists('conditions', $customFieldArray)) {
+              $customFieldArray['conditions'] = [];
+          }
+          $customFieldsCollection->addItem(
+            self::create($customFieldArray),
+            $customFieldKey
+          );
         }
 
         return $customFieldsCollection;

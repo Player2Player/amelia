@@ -274,7 +274,7 @@ $entries['domain.users.customerChild.repository'] = function (Container $c) {
   return new Repository\User\CustomerChildRepository(
       $c->getDatabaseConnection(),
       DB\User\Customer\CustomerChildTable::getTableName(),
-      DB\User\Customer\ChildServiceTable::getTableName(),
+      DB\User\Customer\ChildCategoryTable::getTableName(),
       DB\Bookable\CategoriesTable::getTableName()
   );
 };
@@ -356,7 +356,8 @@ $entries['domain.customField.repository'] = function (Container $c) {
         DB\CustomField\CustomFieldsServicesTable::getTableName(),
         DB\Bookable\ServicesTable::getTableName(),
         DB\CustomField\CustomFieldsEventsTable::getTableName(),
-        DB\Booking\EventsTable::getTableName()
+        DB\Booking\EventsTable::getTableName(),
+        DB\CustomField\CustomFieldsConditionsTable::getTableName()
     );
 };
 
@@ -365,6 +366,13 @@ $entries['domain.customFieldOption.repository'] = function (Container $c) {
         $c->getDatabaseConnection(),
         DB\CustomField\CustomFieldsOptionsTable::getTableName()
     );
+};
+
+$entries['domain.customFieldCondition.repository'] = function (Container $c) {
+  return new Repository\CustomField\CustomFieldConditionRepository(
+      $c->getDatabaseConnection(),
+      DB\CustomField\CustomFieldsConditionsTable::getTableName()
+  );
 };
 
 $entries['domain.customFieldService.repository'] = function (Container $c) {
