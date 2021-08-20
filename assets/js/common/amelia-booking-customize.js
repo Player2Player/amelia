@@ -36037,7 +36037,15 @@ wpJsonpAmeliaBookingPlugin(
         created() {},
         mounted() {},
         methods: {},
-        computed: {},
+        computed: {
+          conditions() {
+            return this.customFields
+              .reduce((acc, item) => {
+                acc.push(...item.conditions);
+                return acc;
+              }, []);
+          }
+        },
       };
     },
     /**
@@ -36068,7 +36076,20 @@ wpJsonpAmeliaBookingPlugin(
                 'is-new': true,
                 'custom-fields': t.customFields,
               }
-            })
+            }),
+            o('h3', [t._v('Conditions List')]),
+            o('div',
+              t.conditions.map(model =>
+                o('condition-field', {
+                  key: model.id,
+                  attrs: {
+                    model,
+                    'is-new': false,
+                    'custom-fields': t.customFields,
+                  }
+                })
+              )
+            ),
           ]);
         },
         staticRenderFns: [],
@@ -36104,6 +36125,16 @@ wpJsonpAmeliaBookingPlugin(
             type: Array,
             default: []
           },
+          model: {
+            type: Object,
+            default: {
+              id: null,
+              customFieldId: null,
+              customFieldCondition: null,
+              operator: 'equal',
+              value: null,
+            }
+          },
         },
         mixins: [],
         data() {
@@ -36117,13 +36148,6 @@ wpJsonpAmeliaBookingPlugin(
               label: 'Not Equal',
               value: 'not-equal'
             }],
-            model: {
-              id: null,
-              customFieldId: null,
-              customFieldCondition: null,
-              operator: 'equal',
-              value: null,
-            },
             rules: {
               customFieldId: [
                 {
@@ -36238,7 +36262,6 @@ wpJsonpAmeliaBookingPlugin(
               attrs: {
                 'hide-required-asterisk': true,
                 'label-position': 'left',
-                id: "conditionFieldForm",
                 rules: t.rules,
                 model: t.model,
               },

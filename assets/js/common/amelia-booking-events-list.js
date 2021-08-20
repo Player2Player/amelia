@@ -7203,6 +7203,34 @@ wpJsonpAmeliaBookingPlugin([20], {
             ? e.price
             : e.price - (e.price / 100) * e.discount;
         },
+        /**
+         * P2P: Verify if has conditions define it
+         * and if all are valid then display it  the custom field
+         * @param field
+         */
+        allConditionsRulesAreValid(field) {
+          const conditions = field.conditions;
+          if (!conditions.length) return true;
+
+          const bookingCustomFields = this.appointment.bookings[0].customFields;
+
+          for(const condition of conditions) {
+            const fieldCondition = this.customFields.find(x => x.id === condition.customFieldCondition)
+            if (!fieldCondition) continue;
+
+            switch (condition.operator) {
+              case 'equal':
+                if (bookingCustomFields[fieldCondition.id].value !== condition.value)
+                  return false;
+                break;
+              case 'not-equal':
+                if (bookingCustomFields[fieldCondition.id].value === condition.value)
+                  return false;
+                break;
+            };
+          }
+          return true;
+        },
         isBookableCustomFieldVisible: function (e) {
           switch (this.bookableType) {
             case "appointment":
@@ -9480,14 +9508,22 @@ wpJsonpAmeliaBookingPlugin([20], {
                           [
                             o(
                               "el-row",
-                              { attrs: { gutter: 24 } },
+                              { attrs: { gutter: 12 } },
                               [
                                 e._l(e.customFields, function (t, a) {
                                   return e.isBookableCustomFieldVisible(t)
                                     ? o(
                                         "el-col",
                                         {
-                                          key: t.id,
+                                          key: t.id, //P2P: Verify if all conditions are true for display it
+                                          directives: [
+                                            {
+                                              name: "show",
+                                              rawName: "v-show",
+                                              value: e.allConditionsRulesAreValid(t),
+                                              expression: "e.allConditionsRulesAreValid(t)",
+                                            },
+                                          ],
                                           ref:
                                             "customFields." + t.id + ".value",
                                           refInFor: !0,
