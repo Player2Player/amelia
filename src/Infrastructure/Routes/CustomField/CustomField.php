@@ -12,6 +12,9 @@ use AmeliaBooking\Application\Controller\CustomField\AddCustomFieldController;
 use AmeliaBooking\Application\Controller\CustomField\DeleteCustomFieldController;
 use AmeliaBooking\Application\Controller\CustomField\UpdateCustomFieldController;
 use AmeliaBooking\Application\Controller\CustomField\UpdateCustomFieldsPositionsController;
+use AmeliaBooking\Application\Controller\CustomField\AddCustomFieldConditionController;
+use AmeliaBooking\Application\Controller\CustomField\UpdateCustomFieldConditionController;
+use AmeliaBooking\Application\Controller\CustomField\DeleteCustomFieldConditionController;
 use Slim\App;
 
 /**
@@ -37,5 +40,11 @@ class CustomField
         $app->post('/fields/{id:[0-9]+}', UpdateCustomFieldController::class);
 
         $app->post('/fields/positions', UpdateCustomFieldsPositionsController::class);
+
+        $app->post('/fields/conditions', AddCustomFieldConditionController::class);
+
+        $app->post('/fields/conditions/delete/{id:[0-9]+}', DeleteCustomFieldConditionController::class);
+
+        $app->post('/fields/conditions/{id:[0-9]+}', UpdateCustomFieldConditionController::class);
     }
 }

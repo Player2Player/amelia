@@ -103,6 +103,9 @@ $entries['command.bus'] = function ($c) {
             CustomField\DeleteCustomFieldCommand::class               => new CustomField\DeleteCustomFieldCommandHandler($c),
             CustomField\UpdateCustomFieldCommand::class               => new CustomField\UpdateCustomFieldCommandHandler($c),
             CustomField\UpdateCustomFieldsPositionsCommand::class     => new CustomField\UpdateCustomFieldsPositionsCommandHandler($c),
+            CustomField\AddCustomFieldConditionCommand::class         => new CustomField\AddCustomFieldConditionCommandHandler($c),
+            CustomField\UpdateCustomFieldConditionCommand::class      => new CustomField\UpdateCustomFieldConditionCommandHandler($c),
+            CustomField\DeleteCustomFieldConditionCommand::class      => new CustomField\DeleteCustomFieldConditionCommandHandler($c),
             // Entities
             Entities\GetEntitiesCommand::class                        => new Entities\GetEntitiesCommandHandler($c),
             // Google

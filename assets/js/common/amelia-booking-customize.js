@@ -36036,7 +36036,20 @@ wpJsonpAmeliaBookingPlugin(
         },
         created() {},
         mounted() {},
-        methods: {},
+        methods: {
+          onSavedData(model, isNew) {
+            const customField = this.customFields.find(x => x.id === model.customFieldId);
+            if (!customField) return;
+            if (isNew) {
+              customField.conditions.push(model);
+            }
+            else {
+              const conditionIndex = customField.conditions.findIndex(x => x.id === model.id);
+              if (conditionIndex < 0) return;
+              customField.conditions[conditionIndex] = model;
+            }
+          },
+        },
         computed: {
           conditions() {
             return this.customFields
@@ -36075,7 +36088,10 @@ wpJsonpAmeliaBookingPlugin(
               attrs: {
                 'is-new': true,
                 'custom-fields': t.customFields,
-              }
+              },
+              on: {
+                'saved-data': t.onSavedData
+              },
             }),
             o('h3', [t._v('Conditions List')]),
             o('div',
@@ -36115,6 +36131,7 @@ wpJsonpAmeliaBookingPlugin(
     function (t, e, o) {
       "use strict";
       Object.defineProperty(e, "__esModule", { value: true });
+      var r = o(691);
       e.default = {
         props: {
           isNew: {
@@ -36136,11 +36153,12 @@ wpJsonpAmeliaBookingPlugin(
             }
           },
         },
-        mixins: [],
+        mixins: [r.a],
         data() {
           return {
             conditionFieldTypes: ['select', 'checkbox', 'radio'],
             conditionFieldValues: [],
+            saving: false,
             operators: [{
               label: 'Equal',
               value: 'equal'
@@ -36208,6 +36226,25 @@ wpJsonpAmeliaBookingPlugin(
           save() {
             this.$refs.conditionFieldForm.validate((isValid) => {
               if (!isValid) return false;
+              const urlId = this.isNew ? '' : `/${this.model.id}`;
+              this.saving = true;
+              this.$http
+                .post(this.$root.getAjaxUrl + `/fields/conditions${urlId}`, this.model)
+                .then(e => {
+                  this.notify(
+                    this.$root.labels.success,
+                    "Custom field condition saved",
+                    "success"
+                  );
+                  this.model.id = e.data.data.customFieldCondition.id;
+                  this.$emit('saved-data', this.model, this.isNew);
+                })
+                .catch(e => {
+                  this.notify(this.$root.labels.error, e.message, "error");
+                })
+                .finally(() => {
+                  this.saving = false;
+                });
             });
           },
           onChangeCustomFieldCondition() {
@@ -36330,14 +36367,19 @@ wpJsonpAmeliaBookingPlugin(
                       model: t.modelCreator('value'),
                     },
                     t.conditionFieldValues.map(({label, id}) =>
-                      o('el-option', { key: id, attrs: { label } })
+                      o('el-option', { key: id, attrs: { label, value: label } })
                     ))
                   ]),
                 ]),
                 o('el-col', { attrs: { span: 3 } }, [
                   o('el-button',
                     {
-                      attrs: { type: 'primary', icon: 'el-icon-check', circle: true },
+                      attrs:
+                        { type: 'primary',
+                          icon: 'el-icon-check',
+                          circle: true,
+                          loading: t.saving,
+                        },
                       on: {
                         click: t.save
                       }
