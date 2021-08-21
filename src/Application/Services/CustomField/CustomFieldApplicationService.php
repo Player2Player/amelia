@@ -13,6 +13,7 @@ use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponRepository;
 use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldEventRepository;
 use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldOptionRepository;
+use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldConditionRepository;
 use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldServiceRepository;
 
 /**
@@ -75,11 +76,17 @@ class CustomFieldApplicationService
         /** @var CustomFieldOptionRepository $customFieldOptionRepository */
         $customFieldOptionRepository = $this->container->get('domain.customFieldOption.repository');
 
+        /** @var CustomFieldConditionRepository $customFieldConditionRepository */
+        $customFieldConditionRepository = $this->container->get('domain.customFieldCondition.repository');
+
+        $id = $customField->getId()->getValue();
         return
-            $customFieldServiceRepository->deleteByEntityId($customField->getId()->getValue(), 'customFieldId') &&
-            $customFieldEventRepository->deleteByEntityId($customField->getId()->getValue(), 'customFieldId') &&
-            $customFieldOptionRepository->deleteByEntityId($customField->getId()->getValue(), 'customFieldId') &&
-            $customFieldRepository->delete($customField->getId()->getValue());
+            $customFieldServiceRepository->deleteByEntityId($id, 'customFieldId') &&
+            $customFieldEventRepository->deleteByEntityId($id, 'customFieldId') &&
+            $customFieldOptionRepository->deleteByEntityId($id, 'customFieldId') &&
+            $customFieldConditionRepository->deleteByEntityId($id, 'customFieldId') &&
+            $customFieldConditionRepository->deleteByEntityId($id, 'customFieldCondition') &&
+            $customFieldRepository->delete($id);
     }
 
     /**

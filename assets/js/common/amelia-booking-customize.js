@@ -36049,6 +36049,15 @@ wpJsonpAmeliaBookingPlugin(
               customField.conditions[conditionIndex] = model;
             }
           },
+          onDeleted(model) {
+            const customField = this.customFields.find(x => x.id === model.customFieldId);
+            if (!customField) return;
+
+            const conditionIndex = customField.conditions.findIndex(x => x.id === model.id);
+            if (conditionIndex < 0) return;
+
+            customField.conditions.splice(conditionIndex, 1);
+          },
         },
         computed: {
           conditions() {
@@ -36102,7 +36111,11 @@ wpJsonpAmeliaBookingPlugin(
                     model,
                     'is-new': false,
                     'custom-fields': t.customFields,
-                  }
+                  },
+                  on: {
+                    'saved-data': t.onSavedData,
+                    deleted: t.onDeleted
+                  },
                 })
               )
             ),
@@ -36159,6 +36172,7 @@ wpJsonpAmeliaBookingPlugin(
             conditionFieldTypes: ['select', 'checkbox', 'radio'],
             conditionFieldValues: [],
             saving: false,
+            deleting: false,
             operators: [{
               label: 'Equal',
               value: 'equal'
@@ -36199,7 +36213,11 @@ wpJsonpAmeliaBookingPlugin(
           };
         },
         created() {},
-        mounted() {},
+        mounted() {
+          if (!this.isNew) {
+            this.setConditionFieldValues();
+          }
+        },
         methods: {
           modelCreator(prop) {
             var that = this;
@@ -36247,9 +36265,31 @@ wpJsonpAmeliaBookingPlugin(
                 });
             });
           },
-          onChangeCustomFieldCondition() {
+          deleteCondition() {
+            this.deleting = true;
+            this.$http
+              .post(this.$root.getAjaxUrl + `/fields/conditions/delete/${this.model.id}`)
+              .then(e => {
+                this.notify(
+                  this.$root.labels.success,
+                  "Custom field condition deleted",
+                  "success"
+                );
+                this.$emit('deleted', this.model);
+              })
+              .catch(e => {
+                this.notify(this.$root.labels.error, e.message, "error");
+              })
+              .finally(() => {
+                this.deleting = false;
+              });
+          },
+          setConditionFieldValues() {
             const customField = this.customFields.find(x => x.id === this.model.customFieldCondition);
             this.conditionFieldValues = customField ? customField.options : [];
+          },
+          onChangeCustomFieldCondition() {
+            this.setConditionFieldValues();
           },
         },
         computed: {
@@ -36384,18 +36424,40 @@ wpJsonpAmeliaBookingPlugin(
                         click: t.save
                       }
                     }),
-                  o('el-button',
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: !t.isNew,
-                          expression: "!isNew",
+                  o('el-popconfirm', {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: !t.isNew,
+                        expression: "!isNew",
+                      },
+                    ],
+                    staticStyle: {
+                      marginLeft: '5px',
+                    },
+                    attrs: {
+                      title: 'Are you sure to delete this ?',
+                      'confirm-button-text': 'Yes',
+                      'cancel-button-text': 'No',
+                      icon: 'el-icon-info',
+                      'icon-color': 'red'
+                    },
+                    on: {
+                      onConfirm: t.deleteCondition
+                    },
+                  }, [
+                    o('el-button',
+                      {
+                        attrs: {
+                          type: 'danger',
+                          icon: 'el-icon-delete',
+                          circle: true,
+                          loading: t.deleting
                         },
-                      ],
-                      attrs: { type: 'danger', icon: 'el-icon-delete', circle: true }
-                    }),
+                        slot: 'reference'
+                      }),
+                  ]),
                 ]),
               ])
             ])
