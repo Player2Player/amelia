@@ -46,11 +46,12 @@ class AutoUpdateHook
         // Get the remote info
         $remoteInformation = self::getRemoteInformation($purchaseCode, $envatoTokenEmail);
 
-        // If a newer version is available, add the update
+        // P2P: Comment this for avoiding autoaupdate
+        /* If a newer version is available, add the update
         if ($remoteInformation && version_compare(AMELIA_VERSION, $remoteInformation->new_version, '<')) {
             $transient->response[AMELIA_PLUGIN_SLUG] = $remoteInformation;
         }
-
+        */
         return $transient;
     }
 

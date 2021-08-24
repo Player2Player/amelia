@@ -36041,7 +36041,7 @@ wpJsonpAmeliaBookingPlugin(
             const customField = this.customFields.find(x => x.id === model.customFieldId);
             if (!customField) return;
             if (isNew) {
-              customField.conditions.push(model);
+              customField.conditions.push(Object.assign({}, model));
             }
             else {
               const conditionIndex = customField.conditions.findIndex(x => x.id === model.id);
@@ -36241,6 +36241,15 @@ wpJsonpAmeliaBookingPlugin(
               error: ({error}) => creator('div', props, [this._v(error)])
             }
           },
+          getEmptyModel() {
+            return {
+              id: null,
+              customFieldId: null,
+              customFieldCondition: null,
+              operator: 'equal',
+              value: null,
+            };
+          },
           save() {
             this.$refs.conditionFieldForm.validate((isValid) => {
               if (!isValid) return false;
@@ -36256,6 +36265,9 @@ wpJsonpAmeliaBookingPlugin(
                   );
                   this.model.id = e.data.data.customFieldCondition.id;
                   this.$emit('saved-data', this.model, this.isNew);
+                  if (this.isNew) {
+                    this.model = this.getEmptyModel();
+                  }
                 })
                 .catch(e => {
                   this.notify(this.$root.labels.error, e.message, "error");
