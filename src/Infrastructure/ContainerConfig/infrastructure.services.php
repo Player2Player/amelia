@@ -158,6 +158,8 @@ $entries['infrastructure.recaptcha.service'] = function ($c) {
  *
  * @return RequestValidator
  */
-$entries['infrastructure.twilio.requestValidator'] = function () {
-  return new AmeliaBooking\Infrastructure\Services\Twilio\RequestValidator();
+$entries['infrastructure.twilio.requestValidator'] = function ($c) {
+  return new AmeliaBooking\Infrastructure\Services\Twilio\RequestValidator(
+    $c->get('domain.settings.service')
+  );
 };

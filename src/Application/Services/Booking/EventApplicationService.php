@@ -2,6 +2,7 @@
 
 namespace AmeliaBooking\Application\Services\Booking;
 
+use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Application\Services\Gallery\GalleryApplicationService;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
@@ -731,6 +732,12 @@ class EventApplicationService
         /** @var GalleryApplicationService $galleryService */
         $galleryService = $this->container->get('application.gallery.service');
 
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+
+        /** @var CustomFieldEventRepository $customFieldEventRepository */
+        $customFieldEventRepository = $this->container->get('domain.customFieldEvent.repository');
+
         // create location slug from name
         $slug = sanitize_title($event->getName()->getValue());
         $slug = substr($slug, 0, Slug::MAX_LENGTH);
@@ -765,6 +772,12 @@ class EventApplicationService
         /** @var Provider $provider */
         foreach ($event->getProviders()->getItems() as $provider) {
             $eventProvidersRepository->add($event, $provider);
+        }
+
+        //P2P: Add default custom fields for events
+        $customFields = $settingsService->getSetting('p2p', 'defaultCustomFields');
+        foreach($customFields['events'] as $customFieldId) {
+          $customFieldEventRepository->add($customFieldId, $eventId);
         }
 
         $galleryService->manageGalleryForEntityAdd($event->getGallery(), $event->getId()->getValue());

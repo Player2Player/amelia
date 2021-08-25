@@ -41,10 +41,16 @@ class TwilioAPIService
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $options = json_decode(get_option('p2p_settings'));
-        $this->account = $options->twilio->user;
-        $this->authToken = $options->twilio->auth;
-        $this->from = $options->twilio->from;
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+        $options = $settingsService->getSetting('p2p', 'twilio');   
+        
+        if (!$options) 
+          throw new \Exception("Must setup twilio options in p2p_settings json string");
+  
+        $this->account = $options['user'];
+        $this->authToken = $options['auth'];
+        $this->from = $options['from'];
     }
 
     /**

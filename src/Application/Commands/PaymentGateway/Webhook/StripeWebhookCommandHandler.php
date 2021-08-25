@@ -7,6 +7,7 @@ use AmeliaBooking\Infrastructure\Repository\Payment\StripeLogRepository;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\Services\Notification\MailServiceInterface;
+use AmeliaBooking\Domain\Services\Settings\SettingsService;
 use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaStripe\Webhook;
 use AmeliaStripe\Stripe;
@@ -39,14 +40,16 @@ class StripeWebhookCommandHandler extends CommandHandler
     
     $result = new CommandResult();
     $event = null;
-    $stripeSettings = $this->container->get('domain.settings.service')->getSetting('payments', 'stripe');
-    $options = json_decode(get_option('p2p_settings'));
+    /** @var SettingsService $settingsService */
+    $settingsService = $this->container->get('domain.settings.service');
+    $stripeSettings = $settingsService->getSetting('payments', 'stripe');
+    $options = $settingsService->getCategorySettings('p2p');
     
-    if (!isset($options->stripe)) 
+    if (!$options || !isset($options['stripe'])) 
       throw new \Exception("Must setup option stripe in p2p_settings json string");
     
-    $this->stripeOptions = $options->stripe;
-    $endpointSecret = $this->stripeOptions->webhook;
+    $this->stripeOptions = $options['stripe'];
+    $endpointSecret = $this->stripeOptions['webhook'];
     Stripe::setApiKey(
         $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
     );
@@ -89,21 +92,21 @@ class StripeWebhookCommandHandler extends CommandHandler
   protected function handlePaymentIntentFailed($event) {
     $this->addEvent($event);
     $object = $event->data->object;
-    $emailData = $this->stripeOptions->paymentFailed;
+    $emailData = $this->stripeOptions['paymentFailed'];
     $amount = round($object->amount / 100, 2);
     $metadata = $this->serializeToUl($object->metadata, 'No metadata');    
     $paymentError = $this->serializeToUl($object->last_payment_error, 'No error detail');
-    $content = str_replace("%description%", $object->description ?: 'No description', $emailData->template);
+    $content = str_replace("%description%", $object->description ?: 'No description', $emailData['template']);
     $content = str_replace("%metadata%", $metadata, $content);
     $content = str_replace("%error%", $paymentError, $content);
     $content = str_replace("%amount%", $amount, $content);
     /** @var MailServiceInterface $mailService */
     $mailService = $this->getContainer()->get('infrastructure.mail.service');
     $mailService->send(
-      $emailData->to,
-      $emailData->subject,
+      $emailData['to'],
+      $emailData['subject'],
       $content,
-      $emailData->bcc
+      $emailData['bcc']
     );
   }
 

@@ -2,6 +2,8 @@
 
 namespace AmeliaBooking\Infrastructure\Services\Twilio;
 
+use AmeliaBooking\Domain\Services\Settings\SettingsService;
+
 // Const for URL twilio webhook
 if (!defined('WEBHOOK_ACTION_URL')) {
   define('WEBHOOK_ACTION_URL', AMELIA_ACTION_URL . '/twilio/sms');
@@ -25,12 +27,14 @@ class RequestValidator {
     /**
      * constructor
      * @access public
-     * @param string $authToken the auth token of the Twilio user's account
-     * Sets the account auth token to be used by the rest of the class
+     * @param SettingService $settingsService
      */
-    public function __construct() {
-      $options = json_decode(get_option('p2p_settings'));
-      $this->authToken = $options->twilio->token;
+    public function __construct(SettingsService $settingsService) {
+      $options = $settingsService->getSetting('p2p', 'twilio');
+      if (!$options) 
+        throw new \Exception("Must setup twilio options in p2p_settings json string");
+
+      $this->authToken = $options['token'];
     }
 
     /**
