@@ -198,8 +198,10 @@ class HelperService
     }
 
     public function cleanCustomTemplatesCache() {
-      $options = json_decode(get_option('p2p_settings'));
-      foreach($options->templates as $postId) {
+      /** @var SettingsService $settingsService */
+      $settingsService = $this->container->get('domain.settings.service');
+
+      foreach($settingsService->getSetting('p2p', 'templates')  as $postId) {
         clean_post_cache($postId);
       }
     }

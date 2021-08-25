@@ -33,7 +33,9 @@ class SettingsStorage implements SettingsStorageInterface
     public function __construct()
     {
         $this->locationService = new CurrentLocation();
+        $p2pSettings = json_decode(get_option('p2p_settings'), true);
         $this->settingsCache = json_decode(get_option('amelia_settings'), true);
+        $this->settingsCache['p2p'] = $p2pSettings;
         foreach (self::$wpSettings as $ameliaSetting => $wpSetting) {
             $this->settingsCache['wordpress'][$ameliaSetting] = get_option($wpSetting);
         }
@@ -284,6 +286,7 @@ class SettingsStorage implements SettingsStorageInterface
         $this->settingsCache[$settingCategoryKey][$settingKey] = $settingValue;
         $settingsCopy = $this->settingsCache;
         unset($settingsCopy['wordpress']);
+        unset($settingsCopy['p2p']);
         update_option('amelia_settings', json_encode($settingsCopy));
     }
 
@@ -298,6 +301,7 @@ class SettingsStorage implements SettingsStorageInterface
         $this->settingsCache[$settingCategoryKey] = $settingValues;
         $settingsCopy = $this->settingsCache;
         unset($settingsCopy['wordpress']);
+        unset($settingsCopy['p2p']);
         update_option('amelia_settings', json_encode($settingsCopy));
     }
 
@@ -313,6 +317,7 @@ class SettingsStorage implements SettingsStorageInterface
         }
         $settingsCopy = $this->settingsCache;
         unset($settingsCopy['wordpress']);
+        unset($settingsCopy['p2p']);
         update_option('amelia_settings', json_encode($settingsCopy));
     }
 }
