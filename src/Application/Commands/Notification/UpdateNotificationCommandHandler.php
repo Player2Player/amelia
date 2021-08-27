@@ -9,6 +9,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Notification\Notification;
 use AmeliaBooking\Domain\Factory\Notification\NotificationFactory;
+use AmeliaBooking\Domain\ValueObjects\String\NotificationType;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
@@ -59,30 +60,33 @@ class UpdateNotificationCommandHandler extends CommandHandler
         $currentNotification = $notificationRepo->getById($notificationId);
 
         $content = $command->getField('content');
+        
+        $type = $currentNotification->getType()->getValue();
+        if ($type === NotificationType::EMAIL)  {  
+          $parsedContent = null;
+          try {
+              $parsedContent = class_exists('DOMDocument') ? $this->parseContent($content) : $content;
+          } 
+          catch (\Exception $e)  {
+            //ignore parse html content exception    
+          }
 
-        $parsedContent = null;
-
-        try {
-            $parsedContent = class_exists('DOMDocument') ? $this->parseContent($content) : $content;
-        } catch (\Exception $e) {
-            $content = $command->getField('content');
+          $content = str_replace(
+              [
+                  'class="ql-align-center"',
+                  'class="ql-align-right"',
+                  'class="ql-align-left"',
+                  'class="ql-align-justify"'
+              ],
+              [
+                  'style="text-align: center;"',
+                  'style="text-align: right;"',
+                  'style="text-align: left;"',
+                  'class="text-align: justify"'
+              ],
+              $parsedContent ?: $content
+          );
         }
-
-        $content = str_replace(
-            [
-                'class="ql-align-center"',
-                'class="ql-align-right"',
-                'class="ql-align-left"',
-                'class="ql-align-justify"'
-            ],
-            [
-                'style="text-align: center;"',
-                'style="text-align: right;"',
-                'style="text-align: left;"',
-                'class="text-align: justify"'
-            ],
-            $parsedContent ?: $content
-        );
 
         $notification = NotificationFactory::create([
             'name'         => $currentNotification->getName()->getValue(),
@@ -110,7 +114,7 @@ class UpdateNotificationCommandHandler extends CommandHandler
             $result->setMessage('Successfully updated notification.');
             $result->setData([
                 Entities::NOTIFICATION => $notification->toArray(),
-                'update'               => $parsedContent !== null
+                'update'               => true
             ]);
         }
 

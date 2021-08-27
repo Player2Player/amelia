@@ -21,6 +21,7 @@ wpJsonpAmeliaBookingPlugin([9], {
         return {
           fetched: !1,
           notifications: [],
+          customers: [], //P2P: customers
           notificationTab: "email",
           options: {
             entities: { customFields: [] },
@@ -55,7 +56,7 @@ wpJsonpAmeliaBookingPlugin([9], {
           this.$http
             .get(this.$root.getAjaxUrl + "/entities", {
               params: {
-                types: ["custom_fields", "categories", "coupons", "settings"],
+                types: ["custom_fields", "categories", "coupons", "settings", "customers"],
               },
             })
             .then(function (t) {
@@ -63,6 +64,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                 (e.options.fetched = !0),
                 (e.options.settings.general.usedLanguages =
                   t.data.data.settings.general.usedLanguages),
+                (e.customers = t.data.data.customers),
                 (e.languagesData = t.data.data.settings.languages),
                 e.getNotifications();
             })
@@ -576,6 +578,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                     [
                       "customer_birthday_greeting",
                       "customer_account_recovery",
+                      "p2p_customer_event", //P2P: Exclude from list custom notification
                     ].indexOf(n.name)
                 );
               });
@@ -16805,6 +16808,13 @@ wpJsonpAmeliaBookingPlugin([9], {
       a = n.n(r);
     t.default = {
       props: {
+        //P2P: Add customers prop
+        customers: {
+          default() {
+            return [];
+          },
+          type: Array,
+        },
         categories: {
           default: function () {
             return [];
@@ -17687,6 +17697,13 @@ wpJsonpAmeliaBookingPlugin([9], {
     t.default = {
       mixins: [g.a, v.a, y.a, b.a, _.a],
       props: {
+        //P2P: Add customers prop
+        customers: {
+          default() {
+            return [];
+          },
+          type: Array,
+        },
         categories: {
           default: function () {
             return [];
@@ -17816,7 +17833,7 @@ wpJsonpAmeliaBookingPlugin([9], {
         Pricing: u.a,
         Payments: d.a,
         UserProfile: h.a,
-        BulkSms: bulkSms.a,
+        BulkSms: bulkSms.a, //P2P: Bulk SMS Component
         DialogRechargeBalance: i.a,
         quillEditor: m.quillEditor,
       },
@@ -20203,6 +20220,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                                   notifications: e.notifications,
                                   categories: e.categories,
                                   customFields: e.customFields,
+                                  customers: e.customers, //P2P: Add customers
                                   coupons: e.coupons,
                                   user: e.user,
                                   type: "sms",
@@ -20266,7 +20284,14 @@ wpJsonpAmeliaBookingPlugin([9], {
                         { attrs: { name: "fadeIn" } },
                         [
                           "bulk" === e.navigationActive
-                            ? n("bulk-sms")
+                            ? n("bulk-sms", {
+                              attrs: {
+                                notification: e.notifications.find(x => x.name === 'p2p_customer_event'),
+                                categories: e.categories,
+                                customFields: e.customFields,
+                                customers: e.customers,
+                              },
+                            })
                             : e._e(),
                         ]
                       ),
@@ -20334,6 +20359,7 @@ wpJsonpAmeliaBookingPlugin([9], {
               ? n("authorization")
               : n("dashboard", {
                   attrs: {
+                    customers: e.customers,
                     notifications: e.notifications,
                     categories: e.categories,
                     customFields: e.customFields,
@@ -20708,6 +20734,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                                 "sms" === e.notificationTab
                                   ? n("sms-notifications", {
                                       attrs: {
+                                        customers: e.customers, //P2P: Add customers prop
                                         notifications: e.notifications,
                                         categories:
                                           e.options.entities.categories,
@@ -26939,38 +26966,139 @@ wpJsonpAmeliaBookingPlugin([9], {
       s = (n.n(a), n(691)),
       l = n(975),
       c = n(687),
-      u = n(1040),
-      f = n.n(u),
-      d = n(1043),
-      p = n.n(d),
-      h = n(696),
-      m = n.n(h),
       g = n(884),
       v = n(900),
       y = n.n(v);
     t.default = {
       mixins: [l.a, o.a, s.a, c.a, g.a],
-      props: {},
+      components: {
+        InlinePlaceholders: y.a,
+      },
+      props: {
+        notification: {
+          type: Object,
+          default() {
+            return {
+              content: '',
+              id: null,
+            };
+          },
+        },
+        customers: {
+          default() {
+            return [];
+          },
+          type: Array,
+        },
+        categories: {
+          default() {
+            return [];
+          },
+          type: Array,
+        },
+        customFields: {
+          default() {
+            return [];
+          },
+          type: Array,
+        },
+      },
       data() {
         return {
-          notification: {},
-          notificationContent: 'This is a test of custom bulk sms notification',
+          bulkNotificationModal: false,
+          bulkNotificationLoading: false,
+          disabledSendBulkNotification: false,
+          isUpdating: false,
+          bulkNotification : {
+            recipientPhones: [],
+          },
+          rules: {
+
+          },
+          inlinePlaceholdersNames: [
+            "customerPlaceholders",
+            "companyPlaceholders",
+            "couponsPlaceholders",
+            "eventPlaceholders",
+            "customFieldsPlaceholders",
+            "employeePlaceholders",
+            "locationPlaceholders",
+          ],
+          excludedPlaceholders: {
+            customerPlaceholders: [],
+            employeePlaceholders: ["%employee_panel_url%"],
+            appointmentPlaceholders: [
+              "%zoom_host_url%",
+              "%coupon_used%",
+              "%booked_customer%",
+              "%reservation_name%",
+              "%reservation_description%",
+              "%reservation_name%",
+              "%reservation_description%",
+              "%package_appointments_details%"
+            ],
+            eventPlaceholders: [
+              "%zoom_host_url_date%",
+              "%zoom_host_url_date_time%",
+              "%reservation_name%",
+              "%reservation_description%"
+            ],
+          },
         };
       },
-      mounted(){
-
+      mounted() {
       },
       methods: {
+        openBulkNotificationModal() {
+          this.bulkNotificationModal = true;
+        },
+        sendBulkNotification() {
 
+        },
+        updateNotification() {
+          this.isUpdating = true,
+          this.$http
+            .post(
+              this.$root.getAjaxUrl +
+              "/notifications/" +
+              this.notification.id,
+              this.notification
+            )
+            .then((t) => {
+              if (!t.data.data.update) return;
+              this.notification.content = t.data.data.notification.content;
+              this.notify(
+                this.$root.labels.success,
+                this.$root.labels.notification_saved,
+                "success"
+              );
+            })
+            .catch(() => {
+              this.notify(
+                this.$root.labels.error,
+                this.$root.labels.notification_not_saved,
+                "error"
+              );
+            })
+            .finally(() => {
+              this.isUpdating = false;
+            });
+        },
       },
       watch: {
-
       },
       computed: {
-
-      },
-      components: {
-
+        customersActive() {
+          return this.customers.reduce((acc, current) => {
+            if (current.status !== 'visible') return acc;
+            const fullName = `${current.firstName} ${current.lastName}`;
+            const phone = current.phone || 'N/A';
+            acc.push({
+              id: current.id, phoneLabel: phone, fullName, phone: current.phone,
+            });
+            return acc;
+          }, []);
+        }
       },
     }
   },
@@ -26983,8 +27111,7 @@ wpJsonpAmeliaBookingPlugin([9], {
 
         return n("div",
           [
-            n(
-              "el-row",
+            n("el-row",
               { staticClass: "am-customize-notifications" },
               [
                 n("el-col", { attrs: { md: 24 } },
@@ -27025,28 +27152,262 @@ wpJsonpAmeliaBookingPlugin([9], {
                                     placeholder: "",
                                   },
                                   model: {
-                                    value: e.notificationContent,
+                                    value: e.notification.content,
                                     callback(t) {
-                                      e.notificationContent = t;
+                                      e.notification.content = t;
                                     },
-                                    expression: "notificationContent",
+                                    expression: "notification.content",
                                   },
                                 })
                               ]
                             ),
                             e._v(" "),
-
-
+                            n("el-form-item",
+                              [
+                                e._v(
+                                  "\n                " +
+                                  e._s(
+                                    e.$root.labels.insert_email_placeholders
+                                  ) +
+                                  ":\n              "
+                                ),
+                                n(
+                                  "el-tooltip",
+                                  { attrs: { placement: "top" } },
+                                  [
+                                    n("div", {
+                                      attrs: { slot: "content" },
+                                      domProps: {
+                                        innerHTML: e._s(
+                                          e.$root.labels
+                                            .insert_email_placeholders_tooltip
+                                        ),
+                                      },
+                                      slot: "content",
+                                    }),
+                                    e._v(" "),
+                                    n("i", {
+                                      staticClass:
+                                        "el-icon-question am-tooltip-icon",
+                                    }),
+                                  ]
+                                ),
+                                e._v(" "),
+                                n("inline-placeholders", {
+                                  attrs: {
+                                    placeholdersNames: e.inlinePlaceholdersNames,
+                                    excludedPlaceholders: e.excludedPlaceholders,
+                                    customFields: e.customFields,
+                                    categories: e.categories,
+                                    coupons: [],
+                                    userTypeTab: "customer",
+                                  },
+                                }),
+                              ]
+                            ),
+                            e._v(" "),
+                            n("hr"),
+                            e._v(" "),
+                            n("el-row",
+                              {
+                                staticClass: "am-email-form-settings__cancel-save",
+                                attrs: { gutter: 16 },
+                              },
+                              [
+                                n("el-col", { attrs: { span: 12 } },
+                                [
+                                n("div",
+                                  [
+                                    n("el-button",
+                                      {
+                                        attrs: { size: "small", type: "primary", },
+                                        on: {
+                                          click: e.openBulkNotificationModal,
+                                        },
+                                      },
+                                      [
+                                        e._v(
+                                          "\n                    " +
+                                          e._s("Send SMS") +
+                                          "\n                  "
+                                        ),
+                                      ]
+                                    ),
+                                  ]
+                                )
+                                ]
+                                ),
+                                e._v(" "),
+                                n("el-col", { attrs: { span: 12 } }, [
+                                  n(
+                                    "div",
+                                    { staticClass: "align-right" },
+                                    [
+                                      n("el-button",
+                                        {
+                                          attrs: {
+                                            loading: e.isUpdating,
+                                            size: "small",
+                                            type: "primary",
+                                          },
+                                          on: {
+                                            click(t) {
+                                              return e.updateNotification();
+                                            },
+                                          },
+                                        },
+                                        [
+                                          e._v(
+                                            "\n                    " +
+                                            e._s(e.$root.labels.save) +
+                                            "\n                  "
+                                          ),
+                                        ]
+                                      ),
+                                    ]
+                                  ),
+                                ]),
+                              ]
+                            )
                           ]
                         )
                       ]
                     )
                   ]
                 ),
-              ],
-              1
+              ]
             ),
             e._v(" "),
+            n("el-dialog",
+              {
+                staticClass: "am-pop-modal",
+                attrs: {
+                  title: 'Send Bulk SMSs',
+                  visible: e.bulkNotificationModal,
+                },
+                on: {
+                  "update:visible": function (t) {
+                    e.bulkNotificationModal = t;
+                  },
+                },
+              },
+              [
+                !e.bulkNotificationModal ? e._e() : n("el-form",
+                  {
+                    ref: "bulkNotification",
+                    attrs: {
+                      model: e.bulkNotification,
+                      rules: e.rules,
+                      "label-position": "top",
+                    },
+                    on: {
+                      submit(t) {
+                        return (
+                          t.preventDefault(), e.sendBulkNotification(t)
+                        );
+                      },
+                    },
+                  },
+                  [
+                    n("el-form-item",
+                      {
+                        attrs: {
+                          label: 'Select Customers Recipients Phones',
+                          prop: "recipientPhones",
+                        },
+                      },
+                      [
+                        n("el-select",
+                          {
+                            attrs: {
+                              multiple: true,
+                              filterable: true,
+                              "collapse-tags": true,
+                            },
+                            model: {
+                              value: e.bulkNotification.recipientPhones,
+                              callback(val) {
+                                e.$set(
+                                  e.bulkNotification,
+                                  "recipientPhones",
+                                  val
+                                );
+                              },
+                              expression: "bulkNotification.recipientPhones",
+                            },
+                          },
+                          e.customersActive.map(item => n("el-option",
+                            {
+                              key: item.id,
+                              attrs: {
+                                label: item.fullName,
+                                value: item.id,
+                                disabled: !item.phone
+                              },
+                            },
+                            [
+                              n('span', {staticStyle: {float: "left"}}, [e._v(item.fullName)]),
+                              n('span',
+                                {
+                                  staticStyle: {
+                                    float: "right", color: "#8492a6", "font-size": "13px", "margin-right": "15px",
+                                  }
+                                },
+                                [e._v(item.phoneLabel)]
+                              )
+                            ]
+                          ))
+                        )
+                      ]
+                    )
+                  ]
+                ),
+                e._v(" "),
+                n("span",
+                  {
+                    staticClass: "dialog-footer",
+                    attrs: { slot: "footer" },
+                    slot: "footer",
+                  },
+                  [
+                    n("el-button",
+                      {
+                        attrs: { size: "small" },
+                        on: {
+                          click(t) {
+                            e.bulkNotificationModal = false;
+                          },
+                        },
+                      },
+                      [
+                        e._v(
+                          "\n        " +
+                          e._s(e.$root.labels.cancel) +
+                          "\n      "
+                        ),
+                      ]
+                    ),
+                    e._v(" "),
+                    n("el-button",
+                      {
+                        attrs: {
+                          size: "small",
+                          type: "primary",
+                          loading: e.bulkNotificationLoading,
+                          disabled: e.disabledSendBulkNotification,
+                        },
+                        on: { click: e.sendBulkNotification },
+                      },
+                      [
+                        e._v(
+                          "\n        " + e._s(e.$root.labels.send) + "\n      "
+                        ),
+                      ]
+                    ),
+                  ]
+                ),
+              ]
+            )
           ]
         );
       },
