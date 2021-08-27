@@ -17682,6 +17682,7 @@ wpJsonpAmeliaBookingPlugin([9], {
       v = n(884),
       y = n(686),
       b = n(691),
+      bulkSms = n.n(n(1075)), //P2P: Bulk SMS Component
       _ = n(976);
     t.default = {
       mixins: [g.a, v.a, y.a, b.a, _.a],
@@ -17815,6 +17816,7 @@ wpJsonpAmeliaBookingPlugin([9], {
         Pricing: u.a,
         Payments: d.a,
         UserProfile: h.a,
+        BulkSms: bulkSms.a,
         DialogRechargeBalance: i.a,
         quillEditor: m.quillEditor,
       },
@@ -20142,6 +20144,25 @@ wpJsonpAmeliaBookingPlugin([9], {
                         ),
                       ]
                     ),
+                    e._v(" "), //P2P: add nav item for bulk sms
+                    n("div",
+                      {
+                        staticClass: "am-sms-dashboard-nav-item",
+                        class: ["bulk" === e.navigationActive ? "active" : ""],
+                        on: {
+                          click: function (t) {
+                            e.navigationActive = "bulk";
+                          },
+                        },
+                      },
+                      [
+                        e._v(
+                          "\n          " +
+                          e._s("Bulk SMS") +
+                          "\n        "
+                        ),
+                      ]
+                    ),
                   ]),
                   e._v(" "),
                   n(
@@ -20239,6 +20260,15 @@ wpJsonpAmeliaBookingPlugin([9], {
                             : e._e(),
                         ],
                         1
+                      ),
+                      e._v(" "), //P2P: Bulk SMS
+                      n("transition",
+                        { attrs: { name: "fadeIn" } },
+                        [
+                          "bulk" === e.navigationActive
+                            ? n("bulk-sms")
+                            : e._e(),
+                        ]
                       ),
                     ],
                     1
@@ -26887,6 +26917,140 @@ wpJsonpAmeliaBookingPlugin([9], {
           return document.body.clientWidth;
         },
       },
+    };
+  },
+  /**
+   * //P2P: Bulk SMS component
+   * @param e
+   * @param t
+   * @param n
+   */
+  1075: function (e, t, n) {
+    var o = n(685)(n(1076), n(1077), !1, null, null, null);
+    e.exports = o.exports;
+  },
+  1076: function (e, t, n) {
+    "use strict";
+    Object.defineProperty(t, "__esModule", { value: !0 });
+    var o = n(692),
+      i = n(702),
+      r = n.n(i),
+      a = n(931),
+      s = (n.n(a), n(691)),
+      l = n(975),
+      c = n(687),
+      u = n(1040),
+      f = n.n(u),
+      d = n(1043),
+      p = n.n(d),
+      h = n(696),
+      m = n.n(h),
+      g = n(884),
+      v = n(900),
+      y = n.n(v);
+    t.default = {
+      mixins: [l.a, o.a, s.a, c.a, g.a],
+      props: {},
+      data() {
+        return {
+          notification: {},
+          notificationContent: 'This is a test of custom bulk sms notification',
+        };
+      },
+      mounted(){
+
+      },
+      methods: {
+
+      },
+      watch: {
+
+      },
+      computed: {
+
+      },
+      components: {
+
+      },
+    }
+  },
+  1077: function (e, t) {
+    e.exports = {
+      render() {
+        var e = this,
+          t = e.$createElement,
+          n = e._self._c || t;
+
+        return n("div",
+          [
+            n(
+              "el-row",
+              { staticClass: "am-customize-notifications" },
+              [
+                n("el-col", { attrs: { md: 24 } },
+                  [
+                    n("div",
+                      { staticClass: "am-section am-email-form-settings" },
+                      [
+                        n("el-form",
+                          {
+                            ref: "notification",
+                            attrs: { model: e.notification },
+                          },
+                          [
+                            n("el-row",
+                              { attrs: { gutter: 16 } },
+                              [
+                                n("el-col", { attrs: { span: 24 } }, [
+                                  n("div", [
+                                    n("h2", [
+                                      e._v(e._s("Custom Notification")),
+                                    ]),
+                                  ]),
+                                ])
+                              ]
+                            ),
+                            e._v(" "),
+                            n("el-form-item",
+                              {
+                                attrs: {
+                                  label: e.$root.labels.message_colon,
+                                },
+                              },
+                              [
+                                n("el-input", {
+                                  attrs: {
+                                    type: "textarea",
+                                    rows: 7,
+                                    placeholder: "",
+                                  },
+                                  model: {
+                                    value: e.notificationContent,
+                                    callback(t) {
+                                      e.notificationContent = t;
+                                    },
+                                    expression: "notificationContent",
+                                  },
+                                })
+                              ]
+                            ),
+                            e._v(" "),
+
+
+                          ]
+                        )
+                      ]
+                    )
+                  ]
+                ),
+              ],
+              1
+            ),
+            e._v(" "),
+          ]
+        );
+      },
+      staticRenderFns: [],
     };
   },
 });
