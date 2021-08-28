@@ -27013,7 +27013,13 @@ wpJsonpAmeliaBookingPlugin([9], {
             recipientPhones: [],
           },
           rules: {
-
+            recipientPhones: [
+              {
+                required: true,
+                message: this.$root.labels.enter_recipient_phone_warning,
+                trigger: "submit",
+              }
+            ],
           },
           inlinePlaceholdersNames: [
             "customerPlaceholders",
@@ -27053,7 +27059,48 @@ wpJsonpAmeliaBookingPlugin([9], {
           this.bulkNotificationModal = true;
         },
         sendBulkNotification() {
-
+          this.$refs.bulkNotification.validate(isValid => {
+            if (!isValid) return false;
+            this.bulkNotificationLoading = true;
+            this.$http
+              .post(this.$root.getAjaxUrl + "/notifications/sms", {
+                action: 'bulk',
+                data: this.bulkNotification.recipientPhones,
+              })
+              .then(e => {
+                if ("OK" === e.data.data.status) {
+                 this.onSendNotificationSuccess();
+                }
+                else {
+                  this.onSendNotificationError();
+                }
+              })
+              .catch(e => {
+                this.onSendNotificationError();
+                console.log(e);
+              });
+          });
+        },
+        onSendNotificationSuccess() {
+          this.$refs.bulkNotification.clearValidation();
+          this.bulkNotificationModal = false;
+          this.bulkNotificationLoading = false;
+          this.bulkNotification = {
+            recipientPhones: []
+          };
+          this.notify(
+            this.$root.labels.success,
+            "Sms notifications sended",
+            "success"
+          );
+        },
+        onSendNotificationError() {
+          this.bulkNotificationLoading = false;
+          this.notify(
+            this.$root.labels.error,
+            "Error sending the notifications",
+            "error"
+          );
         },
         updateNotification() {
           this.isUpdating = true,
