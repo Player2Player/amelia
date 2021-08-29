@@ -3,6 +3,7 @@
 namespace AmeliaBooking\Application\Commands\Notification;
 
 use AmeliaBooking\Application\Commands\CommandHandler;
+use AmeliaBooking\Application\Common\Exceptions\AccessDeniedException;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
@@ -14,6 +15,7 @@ use AmeliaBooking\Infrastructure\Repository\Notification\NotificationRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Application\Services\Notification\TwilioAPIService;
 use Interop\Container\Exception\ContainerException;
+use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\ValueObjects\String\NotificationType;
 
 /**
@@ -32,6 +34,11 @@ class SendBulkSmsCommandHandler extends CommandHandler
      */
     public function handle(SendBulkSmsCommand $command)
     {
+        
+        if (!$this->getContainer()->getPermissionsService()->currentUserCanWrite(Entities::NOTIFICATIONS)) {
+          throw new AccessDeniedException('You are not allowed to send bulk sms');
+        }
+
         $result = new CommandResult();
 
         $apiResponse = null;
