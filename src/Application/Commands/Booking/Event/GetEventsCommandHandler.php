@@ -108,10 +108,13 @@ class GetEventsCommandHandler extends CommandHandler
             }
         }
 
-        $filteredEventIds = $eventRepository->getFilteredIds(
-            $params,
-            $settingsDS->getSetting('general', 'itemsPerPage')
-        );
+        $filteredEventIds = null;
+        if (!isset($params['openEvents'])) {
+          $filteredEventIds = $eventRepository->getFilteredIds(
+              $params,
+              $settingsDS->getSetting('general', 'itemsPerPage')
+          );
+        }
 
         if ($isCabinetPage) {
             $params['fetchCoupons'] = true;
@@ -122,9 +125,14 @@ class GetEventsCommandHandler extends CommandHandler
         }
 
         /** @var Collection $events */
-        $events = $filteredEventIds ?
-            $eventRepository->getFiltered(array_merge($params, ['dates' => [], 'ids' => array_column($filteredEventIds, 'id')])) :
-            new Collection();
+        $events = new Collection();
+        
+        if ($filteredEventIds) {
+          $events = $eventRepository->getFiltered(array_merge($params, ['dates' => [], 'ids' => array_column($filteredEventIds, 'id')]));
+        }
+        else if ($params['openEvents']) {
+          $events = $eventRepository->getBookingOpenEvents();
+        }
 
         $currentDateTime = DateTimeService::getNowDateTimeObject();
 
@@ -228,7 +236,7 @@ class GetEventsCommandHandler extends CommandHandler
         $result->setData(
             [
                 Entities::EVENTS => $eventsArray,
-                'count'          => !$isCalendarPage ? (int)$eventRepository->getFilteredIdsCount($params) : null
+                'count'          => !$isCalendarPage && !isset($params['openEvents']) ? (int)$eventRepository->getFilteredIdsCount($params) : null
             ]
         );
 
