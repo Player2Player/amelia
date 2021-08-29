@@ -27009,6 +27009,8 @@ wpJsonpAmeliaBookingPlugin([9], {
           bulkNotificationLoading: false,
           disabledSendBulkNotification: false,
           isUpdating: false,
+          fetched: false,
+          events: [],
           bulkNotification : {
             recipientPhones: [],
             eventId: null,
@@ -27063,6 +27065,16 @@ wpJsonpAmeliaBookingPlugin([9], {
         };
       },
       mounted() {
+      },
+      created() {
+        if (this.fetched) return;
+
+        this.$http
+          .get(this.$root.getAjaxUrl + "/events", { params: {openEvents: true} })
+          .then(response => {
+            this.events = response.data.data.events;
+            this.fetched = true;
+          })
       },
       methods: {
         openBulkNotificationModal() {
@@ -27425,6 +27437,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                           {
                             attrs: {
                               filterable: true,
+                              clearable: true
                             },
                             model: {
                               value: e.bulkNotification.eventId,
@@ -27438,9 +27451,13 @@ wpJsonpAmeliaBookingPlugin([9], {
                               expression: "bulkNotification.eventId",
                             },
                           },
-                          [
-
-                          ]
+                          e.events.map(item => n("el-option", {
+                            key: item.id,
+                            attrs: {
+                              label: item.name,
+                              value: item.id
+                            }
+                          }))
                         ),
                       ]
                     )
