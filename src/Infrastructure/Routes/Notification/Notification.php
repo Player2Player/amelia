@@ -15,6 +15,7 @@ use AmeliaBooking\Application\Controller\Notification\UpdateNotificationControll
 use AmeliaBooking\Application\Controller\Notification\UpdateNotificationStatusController;
 use AmeliaBooking\Application\Controller\Notification\UpdateSMSNotificationHistoryController;
 use AmeliaBooking\Application\Controller\Notification\TwilioSMSWebhookController;
+use AmeliaBooking\Application\Controller\Notification\SendBulkSmsController;
 use Slim\App;
 
 /**
@@ -40,6 +41,8 @@ class Notification
         $app->get('/notifications/scheduled/send', SendScheduledNotificationsController::class);
 
         $app->post('/notifications/sms', SendAmeliaSmsApiRequestController::class);
+
+        $app->post('/notifications/sms/bulk', SendBulkSmsController::class);
 
         $app->post('/notifications/sms/history/{id:[0-9]+}', UpdateSMSNotificationHistoryController::class);
 

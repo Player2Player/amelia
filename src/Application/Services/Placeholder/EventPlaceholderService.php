@@ -167,7 +167,7 @@ class EventPlaceholderService extends PlaceholderService
      * @throws \Interop\Container\Exception\ContainerException
      * @throws \Exception
      */
-    private function getEventData($event, $bookingKey = null, $token = null, $type = null)
+    public function getEventData($event, $bookingKey = null, $token = null, $type = null)
     {
         /** @var HelperService $helperService */
         $helperService = $this->container->get('application.helper.service');

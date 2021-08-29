@@ -81,11 +81,17 @@ class NotificationLogRepository extends AbstractRepository
     public function add($notification, $user, $appointmentId = null, $eventId = null)
     {
         $notificationData = $notification->toArray();
-        $userData = $user->toArray();
+        if ($user instanceof AbstractUser) {
+          $userData = $user->toArray();
+          $userId =  $userData['id'];
+        }
+        else {
+          $userId = $user;
+        }
 
         $params = [
             ':notificationId' => $notificationData['id'],
-            ':userId'         => $userData['id'],
+            ':userId'         => $userId,
             ':appointmentId'  => $appointmentId,
             ':eventId'        => $eventId,
             ':sentDateTime'   => DateTimeService::getNowDateTimeInUtc()

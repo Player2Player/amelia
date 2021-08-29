@@ -27011,6 +27011,7 @@ wpJsonpAmeliaBookingPlugin([9], {
           isUpdating: false,
           bulkNotification : {
             recipientPhones: [],
+            eventId: null,
           },
           rules: {
             recipientPhones: [
@@ -27024,10 +27025,7 @@ wpJsonpAmeliaBookingPlugin([9], {
           inlinePlaceholdersNames: [
             "customerPlaceholders",
             "companyPlaceholders",
-            "couponsPlaceholders",
             "eventPlaceholders",
-            "customFieldsPlaceholders",
-            "employeePlaceholders",
             "locationPlaceholders",
           ],
           excludedPlaceholders: {
@@ -27044,8 +27042,20 @@ wpJsonpAmeliaBookingPlugin([9], {
               "%package_appointments_details%"
             ],
             eventPlaceholders: [
+              "%attendee_code%",
+              "%event_cancel_url%",
+              "%event_periods%",
+              "%event_period_date%",
+              "%event_period_date_time%",
+              "%event_deposit_payment%",
+              "%zoom_join_url_date%",
+              "%zoom_join_url_date_time%",
+              "%employee_name_email_phone%",
               "%zoom_host_url_date%",
               "%zoom_host_url_date_time%",
+              "%coupon_used%",
+              "%number_of_persons%",
+              "%time_zone%",
               "%reservation_name%",
               "%reservation_description%"
             ],
@@ -27063,17 +27073,12 @@ wpJsonpAmeliaBookingPlugin([9], {
             if (!isValid) return false;
             this.bulkNotificationLoading = true;
             this.$http
-              .post(this.$root.getAjaxUrl + "/notifications/sms", {
-                action: 'bulk',
-                data: this.bulkNotification.recipientPhones,
+              .post(this.$root.getAjaxUrl + "/notifications/sms/bulk", {
+                customers: this.bulkNotification.recipientPhones,
+                eventId: this.bulkNotification.eventId,
               })
               .then(e => {
-                if ("OK" === e.data.data.status) {
-                 this.onSendNotificationSuccess();
-                }
-                else {
-                  this.onSendNotificationError();
-                }
+                this.onSendNotificationSuccess();
               })
               .catch(e => {
                 this.onSendNotificationError();
@@ -27082,11 +27087,12 @@ wpJsonpAmeliaBookingPlugin([9], {
           });
         },
         onSendNotificationSuccess() {
-          this.$refs.bulkNotification.clearValidation();
+          this.$refs.bulkNotification.clearValidate();
           this.bulkNotificationModal = false;
           this.bulkNotificationLoading = false;
           this.bulkNotification = {
-            recipientPhones: []
+            recipientPhones: [],
+            eventId: null,
           };
           this.notify(
             this.$root.labels.success,
@@ -27404,7 +27410,38 @@ wpJsonpAmeliaBookingPlugin([9], {
                               )
                             ]
                           ))
-                        )
+                        ),
+                      ]
+                    ),
+                    n("el-form-item",
+                      {
+                        attrs: {
+                          label: 'Select the event related (optional)',
+                          prop: "eventId",
+                        },
+                      },
+                      [
+                        n("el-select",
+                          {
+                            attrs: {
+                              filterable: true,
+                            },
+                            model: {
+                              value: e.bulkNotification.eventId,
+                              callback(val) {
+                                e.$set(
+                                  e.bulkNotification,
+                                  "eventId",
+                                  val
+                                );
+                              },
+                              expression: "bulkNotification.eventId",
+                            },
+                          },
+                          [
+
+                          ]
+                        ),
                       ]
                     )
                   ]
