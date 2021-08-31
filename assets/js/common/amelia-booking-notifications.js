@@ -27062,6 +27062,8 @@ wpJsonpAmeliaBookingPlugin([9], {
               "%reservation_description%"
             ],
           },
+          loadingEvent: false,
+          lastEventLoaded: { id: null },
         };
       },
       mounted() {
@@ -27120,6 +27122,30 @@ wpJsonpAmeliaBookingPlugin([9], {
             "error"
           );
         },
+        loadEvent() {
+          if (!this.bulkNotification.eventId) return;
+          if (this.lastEventLoaded.id === this.bulkNotification.eventId) {
+            this.bulkNotification.recipientPhones = this.lastEventLoaded.bookings.map(x => x.customerId);
+            return;
+          }
+
+          this.loadingEvent = true;
+          this.$http
+            .get(
+              this.$root.getAjaxUrl +
+              "/events/" +
+              this.bulkNotification.eventId
+            )
+            .then(response => {
+              const event = response.data.data.event;
+              const bookings = event.bookings || [];
+              this.bulkNotification.recipientPhones = bookings.map(x => x.customerId);
+              this.lastEventLoaded = event;
+            })
+            .finally(() => {
+              this.loadingEvent = false;
+            });
+        },
         updateNotification() {
           this.isUpdating = true,
           this.$http
@@ -27153,6 +27179,9 @@ wpJsonpAmeliaBookingPlugin([9], {
       watch: {
       },
       computed: {
+        disabledLoadEvent() {
+          return !this.bulkNotification.eventId || this.loadingEvent;
+        },
         customersActive() {
           return this.customers.reduce((acc, current) => {
             if (current.status !== 'visible') return acc;
@@ -27460,7 +27489,22 @@ wpJsonpAmeliaBookingPlugin([9], {
                           }))
                         ),
                       ]
-                    )
+                    ),
+                    n("el-button",
+                      {
+                        attrs: { size: "small", loading: e.loadingEvent, disabled: e.disabledLoadEvent  },
+                        on: {
+                          click: e.loadEvent,
+                        },
+                      },
+                      [
+                        e._v(
+                          "\n        " +
+                          e._s("Select booking customers") +
+                          "\n      "
+                        ),
+                      ]
+                    ),
                   ]
                 ),
                 e._v(" "),
