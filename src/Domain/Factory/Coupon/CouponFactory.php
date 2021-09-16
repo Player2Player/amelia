@@ -116,7 +116,7 @@ class CouponFactory
         if (isset($data['noLimit'])) {
           $coupon->setNoLimit(new BooleanValueObject($data['noLimit']));
           if ($data['noLimit']) {
-            $coupon->setLimit(0);
+            $coupon->setLimit(new WholeNumber(0));
           }
         }
 
@@ -151,6 +151,24 @@ class CouponFactory
             $coupons[$couponId]['notificationInterval'] = $row['coupon_notificationInterval'];
             $coupons[$couponId]['notificationRecurring'] = $row['coupon_notificationRecurring'];
             $coupons[$couponId]['status'] = $row['coupon_status'];
+            //setting up new props  
+            $coupons[$couponId]['autoApply'] = $row['coupon_autoApply'];
+            $coupons[$couponId]['description'] = $row['coupon_description'];
+            $coupons[$couponId]['appointmentsFree'] = $row['coupon_appointmentsFree'];
+            $coupons[$couponId]['appointmentsMin'] = $row['coupon_appointmentsMin'];
+            $coupons[$couponId]['appointmentsMax'] = $row['coupon_appointmentsMax'];
+            $coupons[$couponId]['noLimit'] = $row['coupon_noLimit'];
+            if ($row['coupon_validFrom']) {
+              $start = $row['coupon_validFrom'];
+              $end   = $row['coupon_validTo'];
+              $coupons[$couponId]['dateRange'] = [
+                'start' => $start,
+                'end'   => $end
+              ];  
+            }
+            else {
+              $coupons[$couponId]['dateRange'] = null;
+            }
 
             if ($bookingId) {
                 $coupons[$couponId]['bookings'][$bookingId] = $bookingId;

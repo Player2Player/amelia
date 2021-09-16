@@ -373,6 +373,20 @@ wpJsonpAmeliaBookingPlugin([17], {
               })),
                 (e.coupon = o),
                 (e.couponFetched = !0);
+              // p2p: map validFrom & validTo to dateRange
+              if (e.coupon.validFrom) {
+                e.coupon.neverExpire = false;
+                e.coupon.dateRange = {
+                  start: new Date(e.coupon.validFrom),
+                  end: new Date(e.coupon.validTo),
+                };
+              }
+              else {
+                e.coupon.neverExpire = true;
+                e.coupon.dateRange = null;
+              }
+              delete e.coupon.validFrom;
+              delete e.coupon.validTo;
             })
             .catch(function (t) {
               console.log(t.message);
@@ -4676,7 +4690,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                               e._v(" "),
                                               i(
                                                 "el-col",
-                                                { attrs: { lg: 7 } },
+                                                { attrs: { lg: 5 } },
                                                 [
                                                   i("p", [
                                                     e._v(
@@ -4690,7 +4704,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                               e._v(" "),
                                               i(
                                                 "el-col",
-                                                { attrs: { lg: 7 } },
+                                                { attrs: { lg: 5 } },
                                                 [
                                                   i("p", [
                                                     e._v(
@@ -4701,8 +4715,21 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                   ]),
                                                 ]
                                               ),
-                                            ],
-                                            1
+                                              e._v(" "), //p2p: add appointmentsFree prop
+                                              i(
+                                                "el-col",
+                                                { attrs: { lg: 4 } },
+                                                [
+                                                  i("p", [
+                                                    e._v(
+                                                      e._s(
+                                                        "Free(#)"
+                                                      ) + ":"
+                                                    ),
+                                                  ]),
+                                                ]
+                                              ),
+                                            ]
                                           ),
                                         ],
                                         1
@@ -4917,16 +4944,22 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                           ),
                                                         ]
                                                       ),
-                                                      e._v(" "),
-                                                      i("h4", [
+                                                      e._v(" "), //p2p: format if autoapply is true
+                                                      !t.autoApply
+                                                      ? i("h4", [
                                                         e._v(e._s(t.code)),
-                                                      ]),
+                                                      ])
+                                                      : i("el-tag", { attrs: {effect: "dark"} },
+                                                        [
+                                                          e._v(e._s(`Auto: ${t.code}`)),
+                                                        ]
+                                                      ),
                                                     ]
                                                   ),
                                                   e._v(" "),
                                                   i(
                                                     "el-col",
-                                                    { attrs: { lg: 7, sm: 5 } },
+                                                    { attrs: { lg: 5, sm: 5 } },
                                                     [
                                                       i(
                                                         "p",
@@ -4952,7 +4985,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                   e._v(" "),
                                                   i(
                                                     "el-col",
-                                                    { attrs: { lg: 7, sm: 5 } },
+                                                    { attrs: { lg: 5, sm: 5 } },
                                                     [
                                                       i(
                                                         "p",
@@ -4981,11 +5014,38 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                       ]),
                                                     ]
                                                   ),
-                                                ],
-                                                1
+                                                  e._v(" "),
+                                                  i(
+                                                    "el-col",
+                                                    { attrs: { lg: 4, sm: 4 } },
+                                                    [
+                                                      i(
+                                                        "p",
+                                                        {
+                                                          staticClass:
+                                                            "am-col-title",
+                                                        },
+                                                        [
+                                                          e._v(
+                                                            e._s(
+                                                              "Free(#)"
+                                                            ) + ":"
+                                                          ),
+                                                        ]
+                                                      ),
+                                                      e._v(" "),
+                                                      i("h4", [
+                                                        e._v(
+                                                          e._s(
+                                                            t.appointmentsFree
+                                                          )
+                                                        ),
+                                                      ]),
+                                                    ]
+                                                  ),
+                                                ]
                                               ),
-                                            ],
-                                            1
+                                            ]
                                           ),
                                           e._v(" "),
                                           i(
@@ -5114,9 +5174,15 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                         ]
                                                       ),
                                                       e._v(" "),
-                                                      i("h4", [
+                                                      !t.noLimit
+                                                      ? i("h4", [
                                                         e._v(e._s(t.limit)),
-                                                      ]),
+                                                      ])
+                                                      : i("el-tag", { attrs: {effect: "plain", type: "success"} },
+                                                        [
+                                                          e._v(e._s("No limit")),
+                                                        ]
+                                                      ),
                                                     ]
                                                   ),
                                                   e._v(" "),

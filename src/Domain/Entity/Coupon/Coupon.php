@@ -10,7 +10,6 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\DiscountFixedValue;
 use AmeliaBooking\Domain\ValueObjects\DiscountPercentageValue;
-use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\WholeNumber;
 use AmeliaBooking\Domain\ValueObjects\String\CouponCode;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
@@ -532,8 +531,8 @@ class Coupon
             'appointmentsFree'      => $this->getAppointmentsFree() ? $this->getAppointmentsFree()->getValue() : 0,
             'appointmentsMin'       => $this->getAppointmentsMin() ? $this->getAppointmentsMin()->getValue() : 0,
             'appointmentsMax'       => $this->getAppointmentsMax() ? $this->getAppointmentsMax()->getValue() : 0,
-            'validFrom'             => $this->getValidFrom() ? $this->getValidFrom()->getValue()->format('Y-m-d H:i:s') : null,
-            'validTo'               => $this->getValidTo() ? $this->getValidTo()->getValue()->format('Y-m-d H:i:s') : null,
+            'validFrom'             => $this->getValidFrom() ? $this->getValidFrom()->getValue()->format('c') : null,
+            'validTo'               => $this->getValidTo() ? $this->getValidTo()->getValue()->format('c') : null,
             'noLimit'               => $this->getNoLimit() ? $this->getNoLimit()->getValue() : 0,
         ];
     }

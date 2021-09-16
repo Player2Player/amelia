@@ -143,6 +143,14 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
             ':status'                => $data['status'],
             ':notificationInterval'  => $data['notificationInterval'],
             ':notificationRecurring' => $data['notificationRecurring'] ? 1 : 0,
+            ':autoApply'             => $data['autoApply'] ? 1 : 0,
+            ':description'           => $data['description'],
+            ':appointmentsFree'      => $data['appointmentsFree'],
+            ':appointmentsMin'       => $data['appointmentsMin'],
+            ':appointmentsMax'       => $data['appointmentsMax'],
+            ':validFrom'             => $data['validFrom'] ? DateTimeService::getCustomDateTimeInUtc($data['validFrom']) : null,
+            ':validTo'               => $data['validTo'] ? DateTimeService::getCustomDateTimeInUtc($data['validTo']) : null,
+            ':noLimit'               => $data['noLimit'] ? 1 : 0,
             ':id'                    => $id,
         ];
 
@@ -157,7 +165,15 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                 `customerLimit`         = :customerLimit,
                 `status`                = :status,
                 `notificationInterval`  = :notificationInterval,
-                `notificationRecurring` = :notificationRecurring
+                `notificationRecurring` = :notificationRecurring,
+                `autoApply` = :autoApply,
+                `description` = :description, 
+                `appointmentsFree` = :appointmentsFree, 
+                `appointmentsMin` = :appointmentsMin, 
+                `appointmentsMax` = :appointmentsMax, 
+                `validFrom` = :validFrom, 
+                `validTo` = :validTo, 
+                `noLimit` = :noLimit  
                 WHERE
                 id = :id"
             );
@@ -195,6 +211,14 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                     c.notificationInterval AS coupon_notificationInterval,
                     c.notificationRecurring AS coupon_notificationRecurring,
                     c.status AS coupon_status,
+                    c.autoApply AS coupon_autoApply,
+                    c.description AS coupon_description,
+                    c.appointmentsFree AS coupon_appointmentsFree,
+                    c.appointmentsMin AS coupon_appointmentsMin,
+                    c.appointmentsMax AS coupon_appointmentsMax,
+                    c.validFrom AS coupon_validFrom,
+                    c.validTo AS coupon_validTo,
+                    c.noLimit AS coupon_noLimit,
                     s.id AS service_id,
                     s.price AS service_price,
                     s.minCapacity AS service_minCapacity,
@@ -300,7 +324,15 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                     c.customerLimit AS coupon_customerLimit,
                     c.notificationInterval AS coupon_notificationInterval,
                     c.notificationRecurring AS coupon_notificationRecurring,
-                    c.status AS coupon_status
+                    c.status AS coupon_status,
+                    c.autoApply AS coupon_autoApply,
+                    c.description AS coupon_description,
+                    c.appointmentsFree AS coupon_appointmentsFree,
+                    c.appointmentsMin AS coupon_appointmentsMin,
+                    c.appointmentsMax AS coupon_appointmentsMax,
+                    c.validFrom AS coupon_validFrom,
+                    c.validTo AS coupon_validTo,
+                    c.noLimit AS coupon_noLimit
                 FROM {$this->table} c
                 {$where}
                 {$limit}"
@@ -484,6 +516,14 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                     c.notificationInterval AS coupon_notificationInterval,
                     c.notificationRecurring AS coupon_notificationRecurring,
                     c.status AS coupon_status,
+                    c.autoApply AS coupon_autoApply,
+                    c.description AS coupon_description,
+                    c.appointmentsFree AS coupon_appointmentsFree,
+                    c.appointmentsMin AS coupon_appointmentsMin,
+                    c.appointmentsMax AS coupon_appointmentsMax,
+                    c.validFrom AS coupon_validFrom,
+                    c.validTo AS coupon_validTo,
+                    c.noLimit AS coupon_noLimit,
                     
                     {$entitiesFields}
                     
