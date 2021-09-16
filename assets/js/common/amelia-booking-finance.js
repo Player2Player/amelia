@@ -9662,6 +9662,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                   e.updateStash && e.updateStashEntities({});
               })
               .catch(function (t) {
+                e.notify("Error", "Unhandle error on saving coupon", "error");
                 t.response && e.onError("", t.response.data.data);
               });
         },

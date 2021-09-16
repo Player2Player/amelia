@@ -14,7 +14,7 @@ use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\DiscountFixedValue;
 use AmeliaBooking\Domain\ValueObjects\DiscountPercentageValue;
-use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
+use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\WholeNumber;
 use AmeliaBooking\Domain\ValueObjects\String\CouponCode;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
@@ -40,7 +40,7 @@ class CouponFactory
             new CouponCode($data['code']),
             new DiscountPercentageValue($data['discount']),
             new DiscountFixedValue($data['deduction']),
-            new PositiveInteger($data['limit']),
+            new WholeNumber($data['limit']),
             new Status($data['status'])
         );
 
@@ -95,24 +95,29 @@ class CouponFactory
         }
 
         if (isset($data['appointmentsFree'])) {
-          $coupon->setAppointmentsFree(new PositiveInteger($data['appointmentsFree']));
+          $coupon->setAppointmentsFree(new WholeNumber($data['appointmentsFree']));
         }
 
         if (isset($data['appointmentsMin'])) {
-          $coupon->setAppointmentsMin(new PositiveInteger($data['appointmentsMin']));
+          $coupon->setAppointmentsMin(new WholeNumber($data['appointmentsMin']));
         }
 
         if (isset($data['appointmentsMax'])) {
-          $coupon->setAppointmentsMax(new PositiveInteger($data['appointmentsMax']));
+          $coupon->setAppointmentsMax(new WholeNumber($data['appointmentsMax']));
         }
 
         if (!$data['neverExpire'] && isset($data['dateRange'])) {
-          $coupon->setValidFrom(new DateTimeValue($data['dateRange']['start']));
-          $coupon->setValidTo(new DateTimeValue($data['dateRange']['end']));
+          $start = DateTimeService::getCustomDateTimeObjectInUtc($data['dateRange']['start']);
+          $end = DateTimeService::getCustomDateTimeObjectInUtc($data['dateRange']['end']);
+          $coupon->setValidFrom(new DateTimeValue($start));
+          $coupon->setValidTo(new DateTimeValue($end));
         }
 
         if (isset($data['noLimit'])) {
           $coupon->setNoLimit(new BooleanValueObject($data['noLimit']));
+          if ($data['noLimit']) {
+            $coupon->setLimit(0);
+          }
         }
 
         $coupon->setServiceList($serviceList);

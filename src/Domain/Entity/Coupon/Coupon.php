@@ -37,7 +37,7 @@ class Coupon
     /** @var DiscountFixedValue */
     private $deduction;
 
-    /** @var PositiveInteger */
+    /** @var WholeNumber */
     private $limit;
 
     /** @var WholeNumber */
@@ -67,17 +67,17 @@ class Coupon
     private $description;
 
     /**
-     *  @var PositiveInteger 
+     *  @var WholeNumber 
      */
     private $appointmentsFree;
 
     /** 
-     * @var PositiveInteger 
+     * @var WholeNumber 
      */
     private $appointmentsMin;
 
     /**
-     * @var PositiveInteger 
+     * @var WholeNumber 
      */
     private $appointmentsMax;
 
@@ -108,14 +108,14 @@ class Coupon
      * @param CouponCode              $code
      * @param DiscountPercentageValue $discount
      * @param DiscountFixedValue      $deduction
-     * @param PositiveInteger         $limit
+     * @param WholeNumber         $limit
      * @param Status                  $status
      */
     public function __construct(
         CouponCode $code,
         DiscountPercentageValue $discount,
         DiscountFixedValue $deduction,
-        PositiveInteger $limit,
+        WholeNumber $limit,
         Status $status
     ) {
         $this->code = $code;
@@ -190,7 +190,7 @@ class Coupon
     }
 
     /**
-     * @return PositiveInteger
+     * @return WholeNumber
      */
     public function getLimit()
     {
@@ -198,7 +198,7 @@ class Coupon
     }
 
     /**
-     * @param PositiveInteger $limit
+     * @param WholeNumber $limit
      */
     public function setLimit($limit)
     {
@@ -368,7 +368,7 @@ class Coupon
     /**
      * Get the value of appointmentsFree
      *
-     * @return  PositiveInteger
+     * @return  WholeNumber
      */ 
     public function getAppointmentsFree()
     {
@@ -378,11 +378,11 @@ class Coupon
     /**
      * Set the value of appointmentsFree
      *
-     * @param  PositiveInteger  $appointmentsFree
+     * @param  WholeNumber  $appointmentsFree
      *
      * @return  self
      */ 
-    public function setAppointmentsFree(PositiveInteger $appointmentsFree)
+    public function setAppointmentsFree(WholeNumber $appointmentsFree)
     {
         $this->appointmentsFree = $appointmentsFree;
 
@@ -392,7 +392,7 @@ class Coupon
     /**
      * Get the value of appointmentsMin
      *
-     * @return  PositiveInteger
+     * @return  WholeNumber
      */ 
     public function getAppointmentsMin()
     {
@@ -402,11 +402,11 @@ class Coupon
     /**
      * Set the value of appointmentsMin
      *
-     * @param  PositiveInteger  $appointmentsMin
+     * @param  WholeNumber  $appointmentsMin
      *
      * @return  self
      */ 
-    public function setAppointmentsMin(PositiveInteger $appointmentsMin)
+    public function setAppointmentsMin(WholeNumber $appointmentsMin)
     {
         $this->appointmentsMin = $appointmentsMin;
 
@@ -416,7 +416,7 @@ class Coupon
     /**
      * Get the value of appointmentsMax
      *
-     * @return  PositiveInteger
+     * @return  WholeNumber
      */ 
     public function getAppointmentsMax()
     {
@@ -426,11 +426,11 @@ class Coupon
     /**
      * Set the value of appointmentsMax
      *
-     * @param  PositiveInteger  $appointmentsMax
+     * @param  WholeNumber  $appointmentsMax
      *
      * @return  self
      */ 
-    public function setAppointmentsMax(PositiveInteger $appointmentsMax)
+    public function setAppointmentsMax(WholeNumber $appointmentsMax)
     {
         $this->appointmentsMax = $appointmentsMax;
 
