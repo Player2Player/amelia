@@ -11,6 +11,7 @@ use AmeliaBooking\Domain\Entity\Coupon\Coupon;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Factory\Booking\Event\EventFactory;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
+use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\DiscountFixedValue;
 use AmeliaBooking\Domain\ValueObjects\DiscountPercentageValue;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
@@ -18,6 +19,7 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\WholeNumber;
 use AmeliaBooking\Domain\ValueObjects\String\CouponCode;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
 
 /**
  * Class CouponFactory
@@ -82,6 +84,35 @@ class CouponFactory
 
         if (isset($data['used'])) {
             $coupon->setUsed(new WholeNumber($data['used']));
+        }
+
+        if (isset($data['autoApply'])) {
+          $coupon->setAutoApply(new BooleanValueObject($data['autoApply']));
+        }
+
+        if (isset($data['description'])) {
+          $coupon->setDescription(new Name($data['description']));
+        }
+
+        if (isset($data['appointmentsFree'])) {
+          $coupon->setAppointmentsFree(new PositiveInteger($data['appointmentsFree']));
+        }
+
+        if (isset($data['appointmentsMin'])) {
+          $coupon->setAppointmentsMin(new PositiveInteger($data['appointmentsMin']));
+        }
+
+        if (isset($data['appointmentsMax'])) {
+          $coupon->setAppointmentsMax(new PositiveInteger($data['appointmentsMax']));
+        }
+
+        if (!$data['neverExpire'] && isset($data['dateRange'])) {
+          $coupon->setValidFrom(new DateTimeValue($data['dateRange']['start']));
+          $coupon->setValidTo(new DateTimeValue($data['dateRange']['end']));
+        }
+
+        if (isset($data['noLimit'])) {
+          $coupon->setNoLimit(new BooleanValueObject($data['noLimit']));
         }
 
         $coupon->setServiceList($serviceList);

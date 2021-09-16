@@ -463,6 +463,7 @@ wpJsonpAmeliaBookingPlugin([17], {
               )),
             this.filterCoupons();
         },
+        //p2p: init new properties
         getInitCouponObject: function () {
           return {
             id: 0,
@@ -476,6 +477,14 @@ wpJsonpAmeliaBookingPlugin([17], {
             notificationRecurring: !1,
             serviceList: [],
             eventList: [],
+            autoApply: false,
+            neverExpire: true,
+            description: "",
+            appointmentsFree: 0,
+            appointmentsMin: 0,
+            appointmentsMax: 0,
+            noLimit: false,
+            dateRange: null,
           };
         },
         getPaymentStatusNiceName: function (t) {
@@ -565,7 +574,7 @@ wpJsonpAmeliaBookingPlugin([17], {
       data: function () {
         var t = this,
           e = function (e, o, i) {
-            0 === t.coupon.discount && 0 === t.coupon.deduction
+            0 === t.coupon.discount && 0 === t.coupon.deduction && t.coupon.appointmentsFree === 0
               ? i(new Error(t.$root.labels.no_coupon_amount))
               : i();
           },
@@ -573,13 +582,18 @@ wpJsonpAmeliaBookingPlugin([17], {
             0 === t.coupon.serviceList.length && 0 === t.coupon.eventList.length
               ? i(new Error(t.$root.labels.no_entities_selected))
               : i();
+          },
+          isPositive = (prop, propName) => (e, o, i) => {
+            t.coupon[prop] < 0
+              ? i(new Error(`${propName} must be at least 0`))
+              : i();
           };
         return {
           couponTabs: "details",
           allServicesSelected: !1,
           allEventsSelected: !1,
           dialogLoading: !0,
-          rules: {
+          rules: { //p2p: add rules for new props
             code: [
               {
                 required: !0,
@@ -589,12 +603,25 @@ wpJsonpAmeliaBookingPlugin([17], {
             ],
             discount: [{ validator: e, trigger: "submit" }],
             deduction: [{ validator: e, trigger: "submit" }],
+            appointmentsFree: [{ validator: e, trigger: "submit" }],
             services: [{ validator: o, trigger: "submit" }],
+            appointmentsMin: [{ validator: isPositive("appointmentsMin", "Min Appointments"), trigger: "submit" }],
+            appointmentsMax: [{ validator: isPositive("appointmentsMax", "Max Appointments"), trigger: "submit" }],
+            dateRange: [
+              {
+                validator(e, o, i) {
+                  !t.coupon.neverExpire && !t.coupon.dateRange
+                    ? i(new Error("Valid Period is required"))
+                    : i();
+                },
+                trigger: "submit",
+              },
+            ],
             events: [{ validator: o, trigger: "submit" }],
             limit: [
               {
                 validator: function (e, o, i) {
-                  t.coupon.limit <= 0
+                  !t.coupon.noLimit && t.coupon.limit <= 0
                     ? i(new Error(t.$root.labels.coupon_usage_limit_validation))
                     : i();
                 },
@@ -623,10 +650,19 @@ wpJsonpAmeliaBookingPlugin([17], {
             (null !== this.coupon && 0 === this.coupon.id)) &&
             (this.dialogLoading = !1);
         },
+        //p2p: Add new coupon properties
         getParsedEntity: function () {
           return {
             id: this.coupon.id,
             code: this.coupon.code,
+            description: this.coupon.description,
+            appointmentsFree: this.coupon.appointmentsFree,
+            appointmentsMin: this.coupon.appointmentsMin,
+            appointmentsMax: this.coupon.appointmentsMax,
+            autoApply: this.coupon.autoApply,
+            dateRange: this.coupon.dateRange,
+            noLimit: this.coupon.noLimit,
+            neverExpire: this.coupon.neverExpire,
             discount: this.coupon.discount,
             deduction: this.coupon.deduction,
             limit: this.coupon.limit,
@@ -669,6 +705,7 @@ wpJsonpAmeliaBookingPlugin([17], {
       components: { DialogActions: n.a },
     };
   },
+  //p2p: Render coupon
   1262: function (t, e) {
     t.exports = {
       render: function () {
@@ -852,10 +889,143 @@ wpJsonpAmeliaBookingPlugin([17], {
                                         expression: "coupon.code",
                                       },
                                     }),
-                                  ],
-                                  1
+                                  ]
                                 ),
-                                t._v(" "),
+                                t._v(" "), //p2p: Add new input for autoApply
+                                o(
+                                  "el-form-item",
+                                  {
+                                    attrs: {
+                                      prop: "autoApply",
+                                    },
+                                    staticStyle: {
+                                      marginBottom: '15px',
+                                    },
+                                  },
+                                  [
+                                    o("el-checkbox", {
+                                      attrs: {
+                                        id: "coupon_autoApply",
+                                      },
+                                      on: {
+                                        input: function (e) {
+                                          return t.clearValidation();
+                                        },
+                                      },
+                                      model: {
+                                        value: t.coupon.autoApply,
+                                        callback: function (e) {
+                                          t.$set(t.coupon, "autoApply", e);
+                                        },
+                                        expression: "coupon.autoApply",
+                                      },
+                                    },
+                                      [
+                                        o("label", {
+                                            attrs: {
+                                              "for": "coupon_autoApply",
+                                            }
+                                          },
+                                          [
+                                            t._v(
+                                              t._s("Auto apply")
+                                            ),
+                                            o(
+                                              "el-tooltip",
+                                              {
+                                                attrs: { placement: "top" },
+                                                staticStyle: {
+                                                  marginLeft: "5px",
+                                                }
+                                              },
+                                              [
+                                                o("div", {
+                                                  attrs: { slot: "content" },
+                                                  domProps: {
+                                                    innerHTML: t._s(
+                                                      "Determine if the coupon is auto apply in the checkout process"
+                                                    ),
+                                                  },
+                                                  slot: "content",
+                                                }),
+                                                t._v(" "),
+                                                o("i", {
+                                                  staticClass:
+                                                    "el-icon-question am-tooltip-icon",
+                                                }),
+                                              ]
+                                            ),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                  ]
+                                ),
+                                t._v(" "), //p2p: Add new input for description
+                                o(
+                                  "el-form-item",
+                                  {
+                                    attrs: {
+                                      label: "placeholder",
+                                      prop: "description",
+                                    },
+                                  },
+                                  [
+                                    o(
+                                      "label",
+                                      {
+                                        attrs: { slot: "label" },
+                                        slot: "label",
+                                      },
+                                      [
+                                        t._v(
+                                          "\n              " +
+                                          t._s("Description") +
+                                          ":\n              "
+                                        ),
+                                        o(
+                                          "el-tooltip",
+                                          { attrs: { placement: "top" } },
+                                          [
+                                            o("div", {
+                                              attrs: { slot: "content" },
+                                              domProps: {
+                                                innerHTML: t._s(
+                                                  "Input a description for your coupon or promotion"
+                                                ),
+                                              },
+                                              slot: "content",
+                                            }),
+                                            t._v(" "),
+                                            o("i", {
+                                              staticClass:
+                                                "el-icon-question am-tooltip-icon",
+                                            }),
+                                          ]
+                                        ),
+                                      ],
+                                      1
+                                    ),
+                                    t._v(" "),
+                                    o("el-input", {
+                                      attrs: {
+                                        placeholder: "Description",
+                                      },
+                                      on: {
+                                        input: function (e) {
+                                          return t.clearValidation();
+                                        },
+                                      },
+                                      model: {
+                                        value: t.coupon.description,
+                                        callback: function (e) {
+                                          t.$set(t.coupon, "description", e);
+                                        },
+                                        expression: "coupon.description",
+                                      },
+                                    }),
+                                  ]
+                                ),
                                 o(
                                   "el-row",
                                   { attrs: { gutter: 20 } },
@@ -893,11 +1063,9 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                 expression: "coupon.discount",
                                               },
                                             }),
-                                          ],
-                                          1
+                                          ]
                                         ),
-                                      ],
-                                      1
+                                      ]
                                     ),
                                     t._v(" "),
                                     o(
@@ -939,11 +1107,467 @@ wpJsonpAmeliaBookingPlugin([17], {
                                           ],
                                           1
                                         ),
-                                      ],
-                                      1
+                                      ]
                                     ),
-                                  ],
-                                  1
+                                  ]
+                                ),
+                                t._v(" "), //p2p: add appointmentsFree property
+                                o(
+                                  "el-form-item",
+                                  {
+                                    attrs: {
+                                      label: "placeholder",
+                                      prop: "appointmentsFree",
+                                    },
+                                  },
+                                  [
+                                    o(
+                                      "label",
+                                      {
+                                        attrs: { slot: "label" },
+                                        slot: "label",
+                                      },
+                                      [
+                                        t._v(
+                                          "\n              " +
+                                          t._s("Free Appointments") +
+                                          ":\n              "
+                                        ),
+                                        o(
+                                          "el-tooltip",
+                                          { attrs: { placement: "top" } },
+                                          [
+                                            o("div", {
+                                              attrs: { slot: "content" },
+                                              domProps: {
+                                                innerHTML: t._s(
+                                                  "The number of free appointments to get with the coupon"
+                                                ),
+                                              },
+                                              slot: "content",
+                                            }),
+                                            t._v(" "),
+                                            o("i", {
+                                              staticClass:
+                                                "el-icon-question am-tooltip-icon",
+                                            }),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                    t._v(" "),
+                                    o("el-input-number", {
+                                      attrs: { min: 0, max: 100 },
+                                      on: {
+                                        input: function (e) {
+                                          return t.clearValidation();
+                                        },
+                                        change: t.limitChanged,
+                                      },
+                                      model: {
+                                        value: t.coupon.appointmentsFree,
+                                        callback: function (e) {
+                                          t.$set(t.coupon, "appointmentsFree", e);
+                                        },
+                                        expression: "coupon.appointmentsFree",
+                                      },
+                                    }),
+                                  ]
+                                ),
+                                t._v(" "), //p2p: add appointmentsMin & max property
+                                o("el-row",
+                                  {
+                                    attrs: { gutter: 20 }
+                                  },
+                                  [
+                                    o(
+                                      "el-col",
+                                      { attrs: { span: 12 } },
+                                      [
+                                        o(
+                                          "el-form-item",
+                                          {
+                                            attrs: {
+                                              label: "placeholder",
+                                              prop: "appointmentsMin",
+                                            },
+                                          },
+                                          [
+                                            o(
+                                              "label",
+                                              {
+                                                attrs: { slot: "label" },
+                                                slot: "label",
+                                              },
+                                              [
+                                                t._v(
+                                                  "\n              " +
+                                                  t._s("Min Appointments") +
+                                                  ":\n              "
+                                                ),
+                                                o(
+                                                  "el-tooltip",
+                                                  { attrs: { placement: "top" } },
+                                                  [
+                                                    o("div", {
+                                                      attrs: { slot: "content" },
+                                                      domProps: {
+                                                        innerHTML: t._s(
+                                                          "The number of minimum appointments for applying to the coupon"
+                                                        ),
+                                                      },
+                                                      slot: "content",
+                                                    }),
+                                                    t._v(" "),
+                                                    o("i", {
+                                                      staticClass:
+                                                        "el-icon-question am-tooltip-icon",
+                                                    }),
+                                                  ]
+                                                ),
+                                              ],
+                                              1
+                                            ),
+                                            t._v(" "),
+                                            o("el-input-number", {
+                                              attrs: { min: 0, max: 100 },
+                                              on: {
+                                                input: function (e) {
+                                                  return t.clearValidation();
+                                                },
+                                                change: t.limitChanged,
+                                              },
+                                              model: {
+                                                value: t.coupon.appointmentsMin,
+                                                callback: function (e) {
+                                                  t.$set(t.coupon, "appointmentsMin", e);
+                                                },
+                                                expression: "coupon.appointmentsMin",
+                                              },
+                                            }),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                    t._v(" "),
+                                    o(
+                                      "el-col",
+                                      { attrs: { span: 12 } },
+                                      [
+                                        o(
+                                          "el-form-item",
+                                          {
+                                            attrs: {
+                                              label: "placeholder",
+                                              prop: "appointmentsMax",
+                                            },
+                                          },
+                                          [
+                                            o(
+                                              "label",
+                                              {
+                                                attrs: { slot: "label" },
+                                                slot: "label",
+                                              },
+                                              [
+                                                t._v(
+                                                  "\n              " +
+                                                  t._s("Max Appointments") +
+                                                  ":\n              "
+                                                ),
+                                                o(
+                                                  "el-tooltip",
+                                                  { attrs: { placement: "top" } },
+                                                  [
+                                                    o("div", {
+                                                      attrs: { slot: "content" },
+                                                      domProps: {
+                                                        innerHTML: t._s(
+                                                          "The number of maximum appointments for applying to the coupon"
+                                                        ),
+                                                      },
+                                                      slot: "content",
+                                                    }),
+                                                    t._v(" "),
+                                                    o("i", {
+                                                      staticClass:
+                                                        "el-icon-question am-tooltip-icon",
+                                                    }),
+                                                  ]
+                                                ),
+                                              ],
+                                              1
+                                            ),
+                                            t._v(" "),
+                                            o("el-input-number", {
+                                              attrs: { min: 0, max: 100 },
+                                              on: {
+                                                input: function (e) {
+                                                  return t.clearValidation();
+                                                },
+                                                change: t.limitChanged,
+                                              },
+                                              model: {
+                                                value: t.coupon.appointmentsMax,
+                                                callback: function (e) {
+                                                  t.$set(t.coupon, "appointmentsMax", e);
+                                                },
+                                                expression: "coupon.appointmentsMax",
+                                              },
+                                            }),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                  ]
+                                ),
+                                t._v(" "), //p2p: Add new input for neverExpire
+                                o(
+                                  "el-form-item",
+                                  {
+                                    attrs: {
+                                      prop: "neverExpire",
+                                    },
+                                    staticStyle: {
+                                      marginBottom: '15px',
+                                    },
+                                  },
+                                  [
+                                    o("el-checkbox", {
+                                        attrs: {
+                                          name: "coupon_neverExpire",
+                                        },
+                                        on: {
+                                          input: t.clearValidation,
+                                          change(checked) {
+                                            if (checked)
+                                              t.coupon.dateRange = null;
+                                          }
+                                        },
+                                        model: {
+                                          value: t.coupon.neverExpire,
+                                          callback: function (e) {
+                                            t.$set(t.coupon, "neverExpire", e);
+                                          },
+                                          expression: "coupon.neverExpire",
+                                        },
+                                      },
+                                      [
+                                        o("label", {
+                                            attrs: {
+                                              "for": "coupon_neverExpire",
+                                            }
+                                          },
+                                          [
+                                            t._v(
+                                              t._s("Never Expire")
+                                            ),
+                                            o(
+                                              "el-tooltip",
+                                              {
+                                                attrs: { placement: "top" },
+                                                staticStyle: {
+                                                  marginLeft: "5px",
+                                                }
+                                              },
+                                              [
+                                                o("div", {
+                                                  attrs: { slot: "content" },
+                                                  domProps: {
+                                                    innerHTML: t._s(
+                                                      "Determine that the coupon never expires"
+                                                    ),
+                                                  },
+                                                  slot: "content",
+                                                }),
+                                                t._v(" "),
+                                                o("i", {
+                                                  staticClass:
+                                                    "el-icon-question am-tooltip-icon",
+                                                }),
+                                              ]
+                                            ),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                  ]
+                                ),
+                                t._v(" "), //p2p: add validFrom & validTo property
+                                o(
+                                  "el-row",
+                                  { attrs: { gutter: 20 } },
+                                  [
+                                    o(
+                                      "el-col",
+                                      {
+                                        staticClass: "v-calendar-column",
+                                        staticStyle: { overflow: "visible" },
+                                        attrs: { sm: 24 },
+                                      },
+                                      [
+                                        o(
+                                          "el-form-item",
+                                          {
+                                            attrs: {
+                                              label: "placeholder",
+                                              prop: "dateRange",
+                                            },
+                                          },
+                                          [
+                                            o(
+                                              "label",
+                                              {
+                                                attrs: { slot: "label" },
+                                                slot: "label",
+                                              },
+                                              [
+                                                t._v(
+                                                  "\n              " +
+                                                  t._s("Valid Period") +
+                                                  ":\n              "
+                                                ),
+                                                o(
+                                                  "el-tooltip",
+                                                  { attrs: { placement: "top" } },
+                                                  [
+                                                    o("div", {
+                                                      attrs: { slot: "content" },
+                                                      domProps: {
+                                                        innerHTML: t._s(
+                                                          "Select the date period for the coupon validation"
+                                                        ),
+                                                      },
+                                                      slot: "content",
+                                                    }),
+                                                    t._v(" "),
+                                                    o("i", {
+                                                      staticClass:
+                                                        "el-icon-question am-tooltip-icon",
+                                                    }),
+                                                  ]
+                                                ),
+                                              ]
+                                            ),
+                                            t._v(" "),
+                                            o("v-date-picker", {
+                                              staticStyle: { "margin-bottom": "20px" },
+                                              attrs: {
+                                                mode: "range",
+                                                "popover-visibility": t.coupon.neverExpire ? "hidden" : "focus",
+                                                "popover-direction": "bottom",
+                                                "popover-align":
+                                                  t.screenWidth < 768 ? "center" : "left",
+                                                "tint-color": t.isCabinet
+                                                  ? t.$root.settings.customization
+                                                    .primaryColor
+                                                  : "#1A84EE",
+                                                "show-day-popover": false,
+                                                "input-props": {
+                                                  class: "el-input__inner",
+                                                  readonly: true,
+                                                  disabled: t.coupon.neverExpire
+                                                },
+                                                "is-expanded": false,
+                                                "is-required": true,
+                                                "input-class": "el-input__inner",
+                                                formats: t.vCalendarFormats,
+                                                "available-dates": {
+                                                  start: this.$moment()
+                                                    .subtract(1, "days")
+                                                    .toDate(),
+                                                },
+                                              },
+                                              on: {
+                                                input: t.clearValidation
+                                              },
+                                              model: {
+                                                value: t.coupon.dateRange,
+                                                callback: function (val) {
+                                                  t.$set(
+                                                    t.coupon,
+                                                    "dateRange",
+                                                    val
+                                                  );
+                                                },
+                                                expression: "coupon.dateRange",
+                                              },
+                                            }),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                  ]
+                                ),
+                                t._v(" "), //p2p: Add new input for noLimit
+                                o(
+                                  "el-form-item",
+                                  {
+                                    attrs: {
+                                      prop: "noLimit",
+                                    },
+                                    staticStyle: {
+                                      marginBottom: '15px',
+                                    },
+                                  },
+                                  [
+                                    o("el-checkbox", {
+                                        attrs: {
+                                          name: "coupon_noLimit",
+                                        },
+                                        on: {
+                                          input: function (e) {
+                                            return t.clearValidation();
+                                          },
+                                        },
+                                        model: {
+                                          value: t.coupon.noLimit,
+                                          callback: function (e) {
+                                            t.$set(t.coupon, "noLimit", e);
+                                          },
+                                          expression: "coupon.noLimit",
+                                        },
+                                      },
+                                      [
+                                        o("label", {
+                                            attrs: {
+                                              "for": "coupon_noLimit",
+                                            }
+                                          },
+                                          [
+                                            t._v(
+                                              t._s("No Usage Limit")
+                                            ),
+                                            o(
+                                              "el-tooltip",
+                                              {
+                                                attrs: { placement: "top" },
+                                                staticStyle: {
+                                                  marginLeft: "5px",
+                                                }
+                                              },
+                                              [
+                                                o("div", {
+                                                  attrs: { slot: "content" },
+                                                  domProps: {
+                                                    innerHTML: t._s(
+                                                      "There is not usage limit for the coupon"
+                                                    ),
+                                                  },
+                                                  slot: "content",
+                                                }),
+                                                t._v(" "),
+                                                o("i", {
+                                                  staticClass:
+                                                    "el-icon-question am-tooltip-icon",
+                                                }),
+                                              ]
+                                            ),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                  ]
                                 ),
                                 t._v(" "),
                                 o(
@@ -993,7 +1617,12 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                     t._v(" "),
                                     o("el-input-number", {
-                                      attrs: { min: 0, max: 1e13 },
+                                      attrs:
+                                        {
+                                          min: 0,
+                                          max: 1e13,
+                                          disabled: t.coupon.noLimit
+                                        },
                                       on: {
                                         input: function (e) {
                                           return t.clearValidation();
@@ -1008,8 +1637,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                         expression: "coupon.limit",
                                       },
                                     }),
-                                  ],
-                                  1
+                                  ]
                                 ),
                                 t._v(" "),
                                 t.coupon.limit >= 100

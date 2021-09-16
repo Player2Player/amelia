@@ -13,6 +13,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Connection;
 use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
 use AmeliaBooking\Domain\Repository\Coupon\CouponRepositoryInterface;
+use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 
 /**
@@ -86,6 +87,14 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
             ':status'                => $data['status'],
             ':notificationInterval'  => $data['notificationInterval'],
             ':notificationRecurring' => $data['notificationRecurring'] ? 1 : 0,
+            ':autoApply'             => $data['autoApply'] ? 1 : 0,
+            ':description'           => $data['description'],
+            ':appointmentsFree'      => $data['appointmentsFree'],
+            ':appointmentsMin'       => $data['appointmentsMin'],
+            ':appointmentsMax'       => $data['appointmentsMax'],
+            ':validFrom'             => $data['validFrom'] ? DateTimeService::getCustomDateTimeInUtc($data['validFrom']) : null,
+            ':validTo'               => $data['validTo'] ? DateTimeService::getCustomDateTimeInUtc($data['validTo']) : null,
+            ':noLimit'               => $data['noLimit'] ? 1 : 0,
         ];
 
         try {
@@ -93,9 +102,11 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                 "INSERT INTO
                 {$this->table} 
                 (
-                `code`, `discount`, `deduction`, `limit`, `customerLimit`, `status`, `notificationInterval`, `notificationRecurring`  
+                `code`, `discount`, `deduction`, `limit`, `customerLimit`, `status`, `notificationInterval`, `notificationRecurring`,
+                `autoApply`, `description`, `appointmentsFree`, `appointmentsMin`, `appointmentsMax`, `validFrom`, `validTo`, `noLimit`  
                 ) VALUES (
-                :code, :discount, :deduction, :limit, :customerLimit, :status, :notificationInterval, :notificationRecurring  
+                :code, :discount, :deduction, :limit, :customerLimit, :status, :notificationInterval, :notificationRecurring,
+                :autoApply, :description, :appointmentsFree, :appointmentsMin, :appointmentsMax, :validFrom, :validTo, :noLimit
                 )"
             );
 

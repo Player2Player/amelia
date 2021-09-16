@@ -14,6 +14,8 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\WholeNumber;
 use AmeliaBooking\Domain\ValueObjects\String\CouponCode;
 use AmeliaBooking\Domain\ValueObjects\String\Status;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
+use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 
 /**
@@ -52,6 +54,47 @@ class Coupon
 
     /** @var Status */
     private $status;
+
+    /** 
+     * @var BooleanValueObject 
+     * 
+     */
+    private $autoApply;
+
+    /**
+     *  @var Name 
+     */
+    private $description;
+
+    /**
+     *  @var PositiveInteger 
+     */
+    private $appointmentsFree;
+
+    /** 
+     * @var PositiveInteger 
+     */
+    private $appointmentsMin;
+
+    /**
+     * @var PositiveInteger 
+     */
+    private $appointmentsMax;
+
+    /**
+     * @var DateTimeValue 
+     */
+    private $validFrom;
+
+    /** 
+     * @var DateTimeValue 
+     */
+    private $validTo;
+
+    /**
+     * @var BooleanValueObject
+     */
+    private $noLimit;
 
     /** @var Collection */
     private $serviceList;
@@ -275,6 +318,198 @@ class Coupon
     }
 
     /**
+     * Get the value of autoApply
+     *
+     * @return  BooleanValueObject
+     */ 
+    public function getAutoApply()
+    {
+        return $this->autoApply;
+    }
+
+    /**
+     * Set the value of autoApply
+     *
+     * @param  BooleanValueObject  $autoApply
+     *
+     * @return  self
+     */ 
+    public function setAutoApply(BooleanValueObject $autoApply)
+    {
+        $this->autoApply = $autoApply;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of description
+     *
+     * @return  Name
+     */ 
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set the value of description
+     *
+     * @param  Name  $description
+     *
+     * @return  self
+     */ 
+    public function setDescription(Name $description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of appointmentsFree
+     *
+     * @return  PositiveInteger
+     */ 
+    public function getAppointmentsFree()
+    {
+        return $this->appointmentsFree;
+    }
+
+    /**
+     * Set the value of appointmentsFree
+     *
+     * @param  PositiveInteger  $appointmentsFree
+     *
+     * @return  self
+     */ 
+    public function setAppointmentsFree(PositiveInteger $appointmentsFree)
+    {
+        $this->appointmentsFree = $appointmentsFree;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of appointmentsMin
+     *
+     * @return  PositiveInteger
+     */ 
+    public function getAppointmentsMin()
+    {
+        return $this->appointmentsMin;
+    }
+
+    /**
+     * Set the value of appointmentsMin
+     *
+     * @param  PositiveInteger  $appointmentsMin
+     *
+     * @return  self
+     */ 
+    public function setAppointmentsMin(PositiveInteger $appointmentsMin)
+    {
+        $this->appointmentsMin = $appointmentsMin;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of appointmentsMax
+     *
+     * @return  PositiveInteger
+     */ 
+    public function getAppointmentsMax()
+    {
+        return $this->appointmentsMax;
+    }
+
+    /**
+     * Set the value of appointmentsMax
+     *
+     * @param  PositiveInteger  $appointmentsMax
+     *
+     * @return  self
+     */ 
+    public function setAppointmentsMax(PositiveInteger $appointmentsMax)
+    {
+        $this->appointmentsMax = $appointmentsMax;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of validFrom
+     *
+     * @return  DateTimeValue
+     */ 
+    public function getValidFrom()
+    {
+        return $this->validFrom;
+    }
+
+    /**
+     * Set the value of validFrom
+     *
+     * @param  DateTimeValue  $validFrom
+     *
+     * @return  self
+     */ 
+    public function setValidFrom(DateTimeValue $validFrom)
+    {
+        $this->validFrom = $validFrom;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of validTo
+     *
+     * @return  DateTimeValue
+     */ 
+    public function getValidTo()
+    {
+        return $this->validTo;
+    }
+
+    /**
+     * Set the value of validTo
+     *
+     * @param  DateTimeValue  $validTo
+     *
+     * @return  self
+     */ 
+    public function setValidTo(DateTimeValue $validTo)
+    {
+        $this->validTo = $validTo;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of noLimit
+     *
+     * @return  BooleanValueObject
+     */ 
+    public function getNoLimit()
+    {
+        return $this->noLimit;
+    }
+
+    /**
+     * Set the value of noLimit
+     *
+     * @param  BooleanValueObject  $noLimit
+     *
+     * @return  self
+     */ 
+    public function setNoLimit(BooleanValueObject $noLimit)
+    {
+        $this->noLimit = $noLimit;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
@@ -292,6 +527,15 @@ class Coupon
             'status'                => $this->getStatus()->getValue(),
             'serviceList'           => $this->getServiceList() ? $this->getServiceList()->toArray() : [],
             'eventList'             => $this->getEventList() ? $this->getEventList()->toArray() : [],
+            'autoApply'             => $this->getAutoApply() ? $this->getAutoApply()->getValue() : 0,
+            'description'           => $this->getDescription() ? $this->getDescription()->getValue() : "",
+            'appointmentsFree'      => $this->getAppointmentsFree() ? $this->getAppointmentsFree()->getValue() : 0,
+            'appointmentsMin'       => $this->getAppointmentsMin() ? $this->getAppointmentsMin()->getValue() : 0,
+            'appointmentsMax'       => $this->getAppointmentsMax() ? $this->getAppointmentsMax()->getValue() : 0,
+            'validFrom'             => $this->getValidFrom() ? $this->getValidFrom()->getValue()->format('Y-m-d H:i:s') : null,
+            'validTo'               => $this->getValidTo() ? $this->getValidTo()->getValue()->format('Y-m-d H:i:s') : null,
+            'noLimit'               => $this->getNoLimit() ? $this->getNoLimit()->getValue() : 0,
         ];
     }
+
 }
