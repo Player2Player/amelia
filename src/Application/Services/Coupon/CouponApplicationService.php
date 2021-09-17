@@ -227,9 +227,14 @@ class CouponApplicationService
                 break;
         }
 
-        if ($inspectCoupon && ($coupon->getStatus()->getValue() === 'hidden' ||
-                ($coupon && $coupon->getUsed()->getValue() >= $coupon->getLimit()->getValue())
-        )) {
+        //p2p: TODO: Validate by validFrom and validTo props
+        if ($inspectCoupon && $coupon && ( $coupon->getStatus()->getValue() === 'hidden' ||
+              ( !$coupon->getNoLimit()->getValue() &&
+                $coupon->getUsed()->getValue() >= $coupon->getLimit()->getValue()
+              )
+            )
+          )
+        {
             throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
         }
 

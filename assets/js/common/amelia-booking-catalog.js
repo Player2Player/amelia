@@ -9426,6 +9426,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             recaptcha: "",
             files: {},
           },
+          fetchingCoupon: false,
           fetched: !0,
           paid: !1,
           headerErrorMessage: "",
@@ -9485,8 +9486,9 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                   var o = document
                     .getElementsByClassName("am-add-coupon-field")[0]
                     .getElementsByClassName("el-input__suffix")[0];
+                  //p2p: set fetchingCoupon
                   e.coupon.code
-                    ? ((e.coupon.code = e.coupon.code.trim()),
+                    ? ((e.coupon.code = e.coupon.code.trim(), e.fetchingCoupon = true),
                       e.$http
                         .post(e.$root.getAjaxUrl + "/coupons/validate", {
                           code: e.coupon.code,
@@ -9512,6 +9514,9 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                               ? a(new Error(e.$root.labels.coupon_invalid))
                               : a(),
                             void 0 !== o && (o.style.visibility = "hidden");
+                        })
+                        .finally(() => {
+                          e.fetchingCoupon = false;
                         }))
                     : (void 0 !== o && (o.style.visibility = "hidden"), a());
                 },
@@ -9571,6 +9576,9 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           setTimeout(function () {
             i.scrollView("am-confirm-booking", "start");
           }, 1200);
+
+        //p2p: TODO: getting auto apply coupon by date by valid period
+        // console.log('loading checkout');
       },
       updated: function () {
         !0 === this.clearValidate &&
@@ -13263,7 +13271,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                                           },
                                                         },
                                                         [
-                                                          i("el-button", {
+                                                          i("el-button", { //p2p: add loading prop to get coupon button
                                                             staticClass:
                                                               "am-add-coupon-button",
                                                             style:
@@ -13278,6 +13286,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                                               slot: "append",
                                                               size: "mini",
                                                               icon: "el-icon-check",
+                                                              loading: e.fetchingCoupon,
                                                               disabled:
                                                                 !e.coupon
                                                                   .code ||
