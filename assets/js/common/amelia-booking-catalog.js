@@ -13301,11 +13301,9 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                                             },
                                                             slot: "append",
                                                           }),
-                                                        ],
-                                                        1
+                                                        ]
                                                       ),
-                                                    ],
-                                                    1
+                                                    ]
                                                   ),
                                                 ],
                                                 1
@@ -13316,6 +13314,35 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                         ],
                                         1
                                       )
+                                    : e._e(),
+                                  e._v(" "), //p2p: add row with coupon description
+                                  e.$root.settings.payments.coupons &&
+                                  e.bookable.price > 0 && e.coupon && e.coupon.description
+                                    ? i("el-row",
+                                      {
+                                        staticClass:
+                                          "am-add-coupon am-flex-row-middle-align",
+                                        attrs: { gutter: 0 },
+                                      },
+                                      [
+                                        i("el-col",
+                                          {
+                                            staticStyle: {
+                                              color: "#63a4e6",
+                                              "font-size": "12px",
+                                            },
+                                            offset: 12,
+                                          },
+                                          [
+                                            e._v(
+                                              e._s(
+                                                e.coupon.description
+                                              )
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
                                     : e._e(),
                                   e._v(" "),
                                   i(

@@ -374,15 +374,13 @@ wpJsonpAmeliaBookingPlugin([17], {
                 (e.coupon = o),
                 (e.couponFetched = !0);
               // p2p: map validFrom & validTo to dateRange
-              if (e.coupon.validFrom) {
-                e.coupon.neverExpire = false;
+              if (!e.coupon.neverExpire) {
                 e.coupon.dateRange = {
                   start: new Date(e.coupon.validFrom),
                   end: new Date(e.coupon.validTo),
                 };
               }
               else {
-                e.coupon.neverExpire = true;
                 e.coupon.dateRange = null;
               }
               delete e.coupon.validFrom;

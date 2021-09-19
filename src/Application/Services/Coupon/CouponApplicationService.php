@@ -12,6 +12,7 @@ use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
@@ -226,8 +227,7 @@ class CouponApplicationService
 
                 break;
         }
-
-        //p2p: TODO: Validate by validFrom and validTo props
+        
         if ($inspectCoupon && $coupon && ( $coupon->getStatus()->getValue() === 'hidden' ||
               ( !$coupon->getNoLimit()->getValue() &&
                 $coupon->getUsed()->getValue() >= $coupon->getLimit()->getValue()
@@ -235,6 +235,18 @@ class CouponApplicationService
             )
           )
         {
+            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+        }
+
+        //p2p: Validate by validFrom and validTo props
+        if ($inspectCoupon && $coupon && !$coupon->getNeverExpire())
+        {
+          $now = DateTimeService::getNowDateTimeObjectInUtc();
+          $validFrom = $coupon->getValidFrom()->getValue()->format('Y-m-d') . ' 00:00:00';  
+          $validTo = $coupon->getValidTo()->getValue()->format('Y-m-d') . ' 23:59:00';
+          $fromDateTime = DateTimeService::getCustomDateTimeObjectInUtc($validFrom);
+          $toDateTime = DateTimeService::getCustomDateTimeObjectInUtc($validTo);
+          if ($now < $fromDateTime || $now > $toDateTime)
             throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
         }
 

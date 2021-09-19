@@ -470,6 +470,12 @@ class Coupon
         return $this->validTo;
     }
 
+    /** @return Boolean */
+    public function getNeverExpire()
+    {
+        return !$this->validFrom && !$this->validTo;
+    }
+
     /**
      * Set the value of validTo
      *
@@ -534,6 +540,7 @@ class Coupon
             'validFrom'             => $this->getValidFrom() ? $this->getValidFrom()->getValue()->format('c') : null,
             'validTo'               => $this->getValidTo() ? $this->getValidTo()->getValue()->format('c') : null,
             'noLimit'               => $this->getNoLimit() ? $this->getNoLimit()->getValue() : 0,
+            'neverExpire'           => $this->getNeverExpire(),
         ];
     }
 
