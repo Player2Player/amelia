@@ -8,6 +8,7 @@ namespace AmeliaBooking\Infrastructure\Routes\Coupon;
 
 use AmeliaBooking\Application\Controller\Coupon\AddCouponController;
 use AmeliaBooking\Application\Controller\Coupon\DeleteCouponController;
+use AmeliaBooking\Application\Controller\Coupon\GetAutoApplyCouponController;
 use AmeliaBooking\Application\Controller\Coupon\GetCouponController;
 use AmeliaBooking\Application\Controller\Coupon\GetCouponsController;
 use AmeliaBooking\Application\Controller\Coupon\UpdateCouponController;
@@ -42,5 +43,7 @@ class Coupon
         $app->get('/coupons/validate', GetValidCouponController::class);
 
         $app->post('/coupons/validate', GetValidCouponController::class);
+
+        $app->get('/coupons/auto-apply', GetAutoApplyCouponController::class);
     }
 }

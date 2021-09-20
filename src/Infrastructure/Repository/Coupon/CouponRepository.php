@@ -460,6 +460,17 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                 $params[':code'] = $criteria['code'];
             }
 
+            if (isset($criteria['autoApply'])) {
+              $autoApply = true;
+              $params[':now'] = DateTimeService::getNowDateTimeInUtc();
+              $params[':autoApply'] = 1;
+              $where[] = 'c.autoApply = :autoApply';
+              $where[] = "(c.validFrom IS NULL OR
+                (:now BETWEEN DATE_FORMAT(c.validFrom, '%Y-%m-%d %H:%i:%s') AND DATE_FORMAT(c.validTo, '%Y-%m-%d %H:%i:%s'))
+                )
+              ";
+            }
+
             if (!empty($criteria['couponIds'])) {
                 $couponIdsParams = [];
 
@@ -505,6 +516,10 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
 
             $where = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
+            $orderBy = "";
+            if ($autoApply) {
+              $orderBy = " ORDER BY c.id DESC LIMIT 1";
+            }
             $statement = $this->connection->prepare(
                 "SELECT
                     c.id AS coupon_id,
@@ -531,7 +546,7 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                 FROM {$this->table} c
                 LEFT JOIN {$this->bookingsTable} cb ON cb.couponId = c.id
                 {$entitiesJoin}
-                $where"
+                $where $orderBy"
             );
 
             $statement->execute($params);

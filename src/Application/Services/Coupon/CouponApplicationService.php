@@ -195,6 +195,45 @@ class CouponApplicationService
         return $coupon;
     }
 
+     /**
+     * p2p: Get autoapply valid coupon
+     * 
+     * @param int    $entityId
+     * @param string $entityType
+     *
+     * @return Coupon
+     *
+     * @throws ContainerValueNotFoundException
+     * @throws InvalidArgumentException
+     * @throws QueryExecutionException
+     * @throws CouponUnknownException
+     * @throws CouponInvalidException
+     */
+    public function getAutoApplyCoupon($entityId, $entityType) 
+    {
+        /** @var CouponRepository $couponRepository */
+        $couponRepository = $this->container->get('domain.coupon.repository');
+        $criteria = ['autoApply' => true];
+
+        switch ($entityType) {
+          case Entities::APPOINTMENT:
+              $criteria['serviceId'] = $entityId;
+              break;
+          case Entities::EVENT:
+              $criteria['eventId'] = $entityId;
+              break;
+        }
+
+        $coupons = $couponRepository->getAllByCriteria($criteria);
+
+        /** @var Coupon $coupon */
+        $coupon = $coupons->length() ? $coupons->getItem($coupons->keys()[0]) : null;
+
+        $this->inspectCoupon($coupon, $entityId, $entityType, null, true);
+
+        return $coupon;
+    }
+
     /** @noinspection MoreThanThreeArgumentsInspection */
     /**
      * @param Coupon $coupon

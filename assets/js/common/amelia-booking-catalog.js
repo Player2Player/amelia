@@ -9586,6 +9586,10 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           this.handleResize();
       },
       methods: {
+        //p2p: get auto apply coupon
+        getAutoApplyCoupon() {
+          
+        },
         getComponentProps: function () {
           return {
             phonePopulated: this.phonePopulated ? 1 : 0,
@@ -10050,7 +10054,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             i = this.getExtrasPrice(1),
             a = { instant: 0, postponed: 0 },
             o = this.couponLimit;
-          if (o) {
+          if (o || this.coupon.noLimit) {
             var n = this.basePriceMultipleValue * this.bookable.price + i,
               s = (n / 100) * this.coupon.discount + this.coupon.deduction;
             (a.instant = s),

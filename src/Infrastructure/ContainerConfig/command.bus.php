@@ -94,6 +94,7 @@ $entries['command.bus'] = function ($c) {
             Coupon\GetCouponCommand::class                            => new Coupon\GetCouponCommandHandler($c),
             Coupon\GetCouponsCommand::class                           => new Coupon\GetCouponsCommandHandler($c),
             Coupon\GetValidCouponCommand::class                       => new Coupon\GetValidCouponCommandHandler($c),
+            Coupon\GetAutoApplyCouponCommand::class                   => new Coupon\GetAutoApplyCouponCommandHandler($c),
             Coupon\UpdateCouponCommand::class                         => new Coupon\UpdateCouponCommandHandler($c),
             Coupon\UpdateCouponStatusCommand::class                   => new Coupon\UpdateCouponStatusCommandHandler($c),
             // CustomField
