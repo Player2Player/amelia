@@ -50,7 +50,8 @@ class GetAutoApplyCouponCommandHandler extends CommandHandler
             /** @var Coupon $coupon */
             $coupon = $couponAS->getAutoApplyCoupon(
                 $command->getField('id'),
-                $command->getField('type')
+                $command->getField('type'),
+                $command->getField('count')
             );
 
             $coupon->setServiceList(new Collection());

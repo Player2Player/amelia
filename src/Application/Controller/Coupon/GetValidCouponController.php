@@ -26,7 +26,8 @@ class GetValidCouponController extends Controller
         'code',
         'id',
         'type',
-        'user'
+        'user',
+        'count',
     ];
 
     /**

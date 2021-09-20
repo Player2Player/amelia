@@ -21,6 +21,7 @@ class GetAutoApplyCouponController extends Controller
     public $allowedFields = [
         'id',
         'type',
+        'count'
     ];
 
     /**

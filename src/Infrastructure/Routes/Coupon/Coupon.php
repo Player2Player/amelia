@@ -44,6 +44,6 @@ class Coupon
 
         $app->post('/coupons/validate', GetValidCouponController::class);
 
-        $app->get('/coupons/auto-apply', GetAutoApplyCouponController::class);
+        $app->post('/coupons/auto-apply', GetAutoApplyCouponController::class);
     }
 }

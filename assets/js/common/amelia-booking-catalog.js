@@ -9577,8 +9577,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             i.scrollView("am-confirm-booking", "start");
           }, 1200);
 
-        //p2p: TODO: getting auto apply coupon by date by valid period
-        // console.log('loading checkout');
+        //p2p: auto apply
+        this.getAutoApplyCoupon();
       },
       updated: function () {
         !0 === this.clearValidate &&
@@ -9588,7 +9588,20 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
       methods: {
         //p2p: get auto apply coupon
         getAutoApplyCoupon() {
-          
+          this.$http
+            .post(this.$root.getAjaxUrl + "/coupons/auto-apply", {
+              id: this.bookable.id,
+              type: this.bookableType,
+              count: this.recurringData.length
+                ? this.recurringData.length + 1
+                : 1,
+            })
+            .then(response => {
+              (this.coupon = response.data.data.coupon),
+                (this.couponLimit = 0),
+              void 0 !== o && (o.style.visibility = "visible"),
+                a();
+            });
         },
         getComponentProps: function () {
           return {
@@ -10056,7 +10069,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             o = this.couponLimit;
           if (o || this.coupon.noLimit) {
             var n = this.basePriceMultipleValue * this.bookable.price + i,
-              s = (n / 100) * this.coupon.discount + this.coupon.deduction;
+              s = (n / 100) * this.coupon.discount + this.coupon.deduction + this.coupon.appointmentsFree * this.bookable.price;
             (a.instant = s),
               o--,
               this.recurringData.forEach(function (e, r) {
@@ -13358,13 +13371,14 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                           rawName: "v-show",
                                           value:
                                             e.$root.settings.payments.coupons &&
+                                            !e.coupon.noLimit  &&
                                             e.recurringData.length &&
                                             e.couponLimit <
                                               e.recurringData.length + 1 &&
                                             (e.coupon.discount ||
                                               e.coupon.deduction),
                                           expression:
-                                            "$root.settings.payments.coupons && recurringData.length && couponLimit < recurringData.length + 1 && (coupon.discount || coupon.deduction)",
+                                            "$root.settings.payments.coupons && !coupon.noLimit && recurringData.length && couponLimit < recurringData.length + 1 && (coupon.discount || coupon.deduction)",
                                         },
                                       ],
                                       staticClass: "am-coupon-limit",

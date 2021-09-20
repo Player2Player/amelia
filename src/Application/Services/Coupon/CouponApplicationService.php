@@ -180,7 +180,7 @@ class CouponApplicationService
      * @throws CouponUnknownException
      * @throws CouponInvalidException
      */
-    public function processCoupon($couponCode, $entityId, $entityType, $userId, $inspectCoupon)
+    public function processCoupon($couponCode, $entityId, $entityType, $userId, $inspectCoupon, $count = 0)
     {
         /** @var CouponRepository $couponRepository */
         $couponRepository = $this->container->get('domain.coupon.repository');
@@ -190,7 +190,7 @@ class CouponApplicationService
         /** @var Coupon $coupon */
         $coupon = $coupons->length() ? $coupons->getItem($coupons->keys()[0]) : null;
 
-        $this->inspectCoupon($coupon, $entityId, $entityType, $userId, $inspectCoupon);
+        $this->inspectCoupon($coupon, $entityId, $entityType, $userId, $inspectCoupon, $count);
 
         return $coupon;
     }
@@ -209,7 +209,7 @@ class CouponApplicationService
      * @throws CouponUnknownException
      * @throws CouponInvalidException
      */
-    public function getAutoApplyCoupon($entityId, $entityType) 
+    public function getAutoApplyCoupon($entityId, $entityType, $count) 
     {
         /** @var CouponRepository $couponRepository */
         $couponRepository = $this->container->get('domain.coupon.repository');
@@ -229,7 +229,7 @@ class CouponApplicationService
         /** @var Coupon $coupon */
         $coupon = $coupons->length() ? $coupons->getItem($coupons->keys()[0]) : null;
 
-        $this->inspectCoupon($coupon, $entityId, $entityType, null, true);
+        $this->inspectCoupon($coupon, $entityId, $entityType, null, true, $count);
 
         return $coupon;
     }
@@ -250,7 +250,7 @@ class CouponApplicationService
      * @throws QueryExecutionException
      * @throws InvalidArgumentException
      */
-    public function inspectCoupon($coupon, $entityId, $entityType, $userId, $inspectCoupon)
+    public function inspectCoupon($coupon, $entityId, $entityType, $userId, $inspectCoupon, $count = 0)
     {
         switch ($entityType) {
             case Entities::APPOINTMENT:
@@ -274,6 +274,17 @@ class CouponApplicationService
             )
           )
         {
+            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+        }
+
+        //p2p: validate appointmentsMin and appointmentsMax
+        if ($inspectCoupon && $coupon && $count > 0) {
+          $min = $coupon->getAppointmentsMin()->getValue();
+          $max = $coupon->getAppointmentsMax()->getValue();
+          if ($max === 0 && $min > 0 && $count < $min)
+            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+
+          if ($max > 0 && ($count < $min || $count > $max))  
             throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
         }
 

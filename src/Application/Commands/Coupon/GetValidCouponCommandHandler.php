@@ -70,7 +70,8 @@ class GetValidCouponCommandHandler extends CommandHandler
                 $command->getField('id'),
                 $command->getField('type'),
                 ($user && $user->getId()) ? $user->getId()->getValue() : null,
-                true
+                true,
+                $command->getField('count')
             );
 
             $coupon->setServiceList(new Collection());
