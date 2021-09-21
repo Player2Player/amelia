@@ -18601,25 +18601,24 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                   (e.showTimes = !1);
               }, 200);
         },
+        //p2p: allow select provider from coaches section
         selectProvider(provider) {
+          if (this.appointment.providerId === provider.id) return;
+
           this.appointment.providerId = provider.id;
+          this.changeEmployee();
         },
-        changeEmployee: function () {
-          var e = this,
-            t = arguments.length > 0 && void 0 !== arguments[0] && arguments[0];
-          this.handleCapacity(!0, !1),
-            this.calendarVisible && this.getTimeSlots(),
-            t &&
-              !this.appointment.providerId &&
-              (this.cancelRecurringSetup(),
-              setTimeout(function () {
-                (e.selectedDate = null),
-                  e.closePicker(),
-                  e.resetAppointment(),
-                  e.unSelectTime(),
-                  (e.activeRecurringSetup = !1),
-                  (e.showTimes = !1);
-              }, 200));
+        changeEmployee: function (value) {
+          if (this.appointment.providerId) {
+            this.handleCapacity(true, false);
+            if (this.calendarVisible)
+              this.getTimeSlots();
+          }
+          else {
+            this.anyEmployeeVisibility
+              ? (this.appointment.providerId = 0)
+              : (this.appointment.providerId = null);
+          }
         },
         changeLocation: function () {
           var e = this,
@@ -20475,20 +20474,13 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                   {
                     attrs: {
                       loading: !e.fetched,
-                      clearable:
-                        !e.anyEmployeeVisibility ||
-                        0 !== e.appointment.providerId,
+                      clearable: e.anyEmployeeVisibility,
                       "popper-class": e.$root.settings.customization.forms
                         ? "am-dropdown-" + e.classIdentifier
                         : "",
                       placeholder: "",
                     },
                     on: {
-                      clear: function (t) {
-                        e.anyEmployeeVisibility
-                          ? (e.appointment.providerId = 0)
-                          : (e.appointment.providerId = null);
-                      },
                       change: e.changeEmployee,
                     },
                     model: {
