@@ -88,7 +88,8 @@ class GetValidCouponCommandHandler extends CommandHandler
             $result->setResult(CommandResult::RESULT_ERROR);
             $result->setMessage($e->getMessage());
             $result->setData([
-                'couponInvalid' => true
+                'couponInvalid' => true,
+                'coupon' => $e->getCouponDescription(),
             ]);
 
             return $result;

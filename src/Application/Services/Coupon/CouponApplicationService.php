@@ -281,11 +281,17 @@ class CouponApplicationService
         if ($inspectCoupon && $coupon && $count > 0) {
           $min = $coupon->getAppointmentsMin()->getValue();
           $max = $coupon->getAppointmentsMax()->getValue();
-          if ($max === 0 && $min > 0 && $count < $min)
-            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+          if ($max === 0 && $min > 0 && $count < $min) {
+            $exc = new CouponInvalidException("For appying must booking at least $min lessons");
+            $exc->setCouponDescription($coupon->getDescription()->getValue());
+            throw $exc;
+          }
 
-          if ($max > 0 && ($count < $min || $count > $max))  
-            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+          if ($max > 0 && ($count < $min || $count > $max))  {
+            $exc = new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+            $exc->setCouponDescription("For appying must booking from $min and to $max lessons");
+            throw $exc;
+          }
         }
 
         //p2p: Validate by validFrom and validTo props

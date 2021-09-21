@@ -9371,6 +9371,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
         trigger: null,
         passedCategoryId: null,
         couponCode: "",
+        coupon: {},
         paymentGateway: "",
         queryParams: {},
         status: null,
@@ -9417,7 +9418,6 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           hoverCancel: !1,
           columnsLg: 12,
           couponLimit: 0,
-          coupon: { code: "", discount: 0, deduction: 0 },
           clearValidate: !0,
           errors: {
             email: "",
@@ -9506,14 +9506,11 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                             a();
                         })
                         .catch(function (t) {
-                          (e.coupon.discount = 0),
-                            (e.coupon.deduction = 0),
-                            !0 === t.response.data.data.couponUnknown
-                              ? a(new Error(e.$root.labels.coupon_unknown))
-                              : !0 === t.response.data.data.couponInvalid
-                              ? a(new Error(e.$root.labels.coupon_invalid))
-                              : a(),
-                            void 0 !== o && (o.style.visibility = "hidden");
+                          e.coupon.discount = 0;
+                          e.coupon.deduction = 0;
+                          e.coupon.appointmentsFree = 0;
+                          a(new Error(t.response.data.message));
+                          void 0 !== o && (o.style.visibility = "hidden");
                         })
                         .finally(() => {
                           e.fetchingCoupon = false;
@@ -9546,7 +9543,6 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
         "failed" === this.status &&
           ((this.headerErrorMessage = this.$root.labels.payment_error),
           (this.headerErrorShow = !0)),
-          (this.coupon.code = this.couponCode),
           "event" === this.bookableType && this.useGlobalCustomization,
           this.setBookableConfirmStyle(!1),
           this.setBookableCancelStyle(!1),
@@ -9576,9 +9572,6 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           setTimeout(function () {
             i.scrollView("am-confirm-booking", "start");
           }, 1200);
-
-        //p2p: auto apply
-        this.getAutoApplyCoupon();
       },
       updated: function () {
         !0 === this.clearValidate &&
@@ -9586,23 +9579,6 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           this.handleResize();
       },
       methods: {
-        //p2p: get auto apply coupon
-        getAutoApplyCoupon() {
-          this.$http
-            .post(this.$root.getAjaxUrl + "/coupons/auto-apply", {
-              id: this.bookable.id,
-              type: this.bookableType,
-              count: this.recurringData.length
-                ? this.recurringData.length + 1
-                : 1,
-            })
-            .then(response => {
-              (this.coupon = response.data.data.coupon),
-                (this.couponLimit = 0),
-              void 0 !== o && (o.style.visibility = "visible"),
-                a();
-            });
-        },
         getComponentProps: function () {
           return {
             phonePopulated: this.phonePopulated ? 1 : 0,
@@ -10070,20 +10046,9 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           if (o || this.coupon.noLimit) {
             var n = this.basePriceMultipleValue * this.bookable.price + i,
               s = (n / 100) * this.coupon.discount + this.coupon.deduction + this.coupon.appointmentsFree * this.bookable.price;
-            (a.instant = s),
-              o--,
-              this.recurringData.forEach(function (e, r) {
-                o &&
-                  ((n = t.basePriceMultipleValue * e.price + i),
-                  (s = (n / 100) * t.coupon.discount + t.coupon.deduction),
-                  (a[
-                    r < t.instantPaymentBookingsCount - 1
-                      ? "instant"
-                      : "postponed"
-                  ] += s),
-                  o--);
-              });
+            a.instant = s;
           }
+
           return a[e];
         },
         getTotalPrice: function () {
@@ -13248,6 +13213,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                                       i(
                                                         "el-input",
                                                         {
+                                                          ref: "couponCode",
                                                           staticClass:
                                                             "am-add-coupon-field",
                                                           style:
@@ -18226,6 +18192,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
         id: { default: "am-step-booking" },
         showService: { type: Boolean, default: !0 },
         passedService: { default: function () {}, type: Object },
+        providerSelected: { default: function () {}, type: Object },
+        coupon: { default: { code: "", description: "", }, type: Object },
         passedPackage: { default: function () {}, type: Object },
         passedCategory: { default: function () {}, type: Object },
         passedEntities: { default: function () {}, type: Object },
@@ -18632,6 +18600,9 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                   (e.activeRecurringSetup = !1),
                   (e.showTimes = !1);
               }, 200);
+        },
+        selectProvider(provider) {
+          this.appointment.providerId = provider.id;
         },
         changeEmployee: function () {
           var e = this,
@@ -22459,6 +22430,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                           dialogClass: "am-confirm-booking am-scroll",
                           "form-type": e.formType,
                           "forms-data": e.forms[e.formType],
+                          coupon: e.coupon,
                         },
                         on: {
                           confirmedBooking: e.confirmedBooking,
@@ -22883,6 +22855,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
         return {
           id: "am-step-booking-catalog",
           category: {},
+          coupon: { description: "", id: null },
+          providerSelected: { id: null },
           fetchedService: !1,
           service: { extras: [], gallery: [], providers: [] },
           responseEntities: {
@@ -22973,11 +22947,30 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             }
           );
         }
+
+        if (this.fetchedService) {
+          this.getAutoApplyCoupon();
+        }
       },
       updated: function () {
         this.handleResize();
       },
       methods: {
+        //p2p: get auto apply coupon
+        getAutoApplyCoupon() {
+          this.$http
+            .post(this.$root.getAjaxUrl + "/coupons/auto-apply", {
+              id: this.service.id,
+              type: "appointment",
+              count: "0",
+            })
+            .then(response => {
+              this.coupon = response.data.data.coupon;
+            })
+            .catch(() => {
+              this.coupon = { id: null, description: "" };
+            });
+        },
         fetchedEntities: function () {
           var e = this,
             t = this.options.entities.categories.find(function (t) {
@@ -23597,8 +23590,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                               { 
                                 on: {
                                    "selectemployee": function(provider) {
-                                     if (t.$children[2] && t.$children[2].appointment) 
-                                      t.$children[2].appointment.providerId = provider.id;
+                                     t.providerSelected = provider;
+                                     t.$refs.booking.selectProvider(provider);
                                    },
                                 },  
                                 attrs: {
@@ -23610,15 +23603,42 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                                   },
                                 })
                               : t._e(),
-                            t._v(" "),
+                            t._v(" "), //p2p TODO: add row for displaying booking info
+                            t.fetchedService && this.coupon.id
+                              ? a("el-row",
+                                {
+                                  staticStyle: {
+                                    marginTop: "-35px",
+                                  },
+                                },
+                                [
+                                a("el-col", {} ,
+                                  [
+                                    a("el-alert",
+                                      {
+                                        attrs: {
+                                          type: "warning",
+                                          closable: false,
+                                          title: this.coupon.description
+                                        }
+                                      }
+                                    )
+                                  ]
+                                )
+                                ]
+                              )
+                              : t._e(),
                             t.fetchedService
                               ? a("booking", {
+                                  ref: "booking",
                                   attrs: {
                                     id: t.id,
                                     "form-type": "catalogForm",
+                                    coupon: t.coupon,
                                     passedService: t.service,
                                     passedCategory: t.category,
                                     passedEntities: t.options.entities,
+                                    providerSelected: t.providerSelected,
                                     passedEntitiesRelations:
                                       t.options.entitiesRelations,
                                     showService: !1,
