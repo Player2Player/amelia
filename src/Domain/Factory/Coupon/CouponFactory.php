@@ -117,6 +117,7 @@ class CouponFactory
           $coupon->setNoLimit(new BooleanValueObject($data['noLimit']));
           if ($data['noLimit']) {
             $coupon->setLimit(new WholeNumber(0));
+            $coupon->setCustomerLimit(new WholeNumber(0));
           }
         }
 

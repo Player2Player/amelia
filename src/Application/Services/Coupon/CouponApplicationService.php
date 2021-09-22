@@ -5,6 +5,7 @@ namespace AmeliaBooking\Application\Services\Coupon;
 use AmeliaBooking\Domain\Common\Exceptions\CouponInvalidException;
 use AmeliaBooking\Domain\Common\Exceptions\CouponUnknownException;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
+use AmeliaBooking\Domain\Entity\Location\Location;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Coupon\Coupon;
 use AmeliaBooking\Domain\Entity\Entities;
@@ -66,14 +67,14 @@ class CouponApplicationService
         /** @var CouponEventRepository $couponEventRepo */
         $couponEventRepo = $this->container->get('domain.coupon.event.repository');
 
-        /** @var CouponLocationRepository $couponLocationRepository */
+        /** @var CouponLocationRepository $couponLocationRepo */
         $couponLocationRepo = $this->container->get('domain.coupon.location.repository');
 
         $couponId = $couponRepository->add($coupon);
 
         $coupon->setId(new Id($couponId));
 
-        /** @var Service $service */
+        /** @var Location $location */
         foreach ($coupon->getLocationList()->getItems() as $location) {
           $couponLocationRepo->add($coupon, $location);
         }

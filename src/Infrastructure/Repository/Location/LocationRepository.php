@@ -286,7 +286,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
             $ids = ' AND l.id IN (' . rtrim($ids, ', ') . ')';
         }
 
-        $limit = $this->getLimit(
+        $limit = is_null($itemsPerPage) ? '' :  $this->getLimit(
             !empty($criteria['page']) ? (int)$criteria['page'] : 0,
             (int)$itemsPerPage
         );
@@ -309,7 +309,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                 LEFT JOIN {$this->providerLocationTable} pl ON pl.locationId = l.id
                 LEFT JOIN {$this->providerServicesTable}  ps ON ps.userId = pl.userId
                 LEFT JOIN {$this->servicesTable} s ON s.id = ps.serviceId
-                WHERE 1 = 1 $search $services
+                WHERE 1 = 1 $search $services $ids
                 GROUP BY l.id
                 {$order}
                 {$limit}"

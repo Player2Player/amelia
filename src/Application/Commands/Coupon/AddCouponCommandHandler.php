@@ -89,7 +89,7 @@ class AddCouponCommandHandler extends CommandHandler
         /** @var Collection $locations */
         $locations = $command->getFields()['locations'] ? $locationRepository->getFiltered([
           'ids' => $command->getFields()['locations']
-        ], 0) : new Collection();
+        ], null) : new Collection();
 
         $coupon->setLocationList($locations);
 

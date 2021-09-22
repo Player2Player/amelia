@@ -251,7 +251,7 @@ wpJsonpAmeliaBookingPlugin([17], {
             this.$http
               .get(this.$root.getAjaxUrl + "/entities", {
                 params: {
-                  types: ["categories", "employees", "events", "packages"],
+                  types: ["categories", "employees", "events", "packages", "locations"],
                 },
               })
               .then(function (e) {
@@ -489,6 +489,7 @@ wpJsonpAmeliaBookingPlugin([17], {
             notificationRecurring: !1,
             serviceList: [],
             eventList: [],
+            locationList: [],
             autoApply: false,
             neverExpire: true,
             description: "",
@@ -582,7 +583,7 @@ wpJsonpAmeliaBookingPlugin([17], {
       r = o(689);
     e.default = {
       mixins: [s.a, a.a, r.a],
-      props: { coupon: null, couponFetched: !1, services: null, events: null },
+      props: { coupon: null, couponFetched: !1, services: null, events: null, locations: null, },
       data: function () {
         var t = this,
           e = function (e, o, i) {
@@ -595,6 +596,11 @@ wpJsonpAmeliaBookingPlugin([17], {
               ? i(new Error(t.$root.labels.no_entities_selected))
               : i();
           },
+          locationValidator =  (e, o, i) => {
+            !t.coupon.locationList.length
+              ? i(new Error("Select at least one location"))
+              : i();
+          },
           isPositive = (prop, propName) => (e, o, i) => {
             t.coupon[prop] < 0
               ? i(new Error(`${propName} must be at least 0`))
@@ -602,8 +608,9 @@ wpJsonpAmeliaBookingPlugin([17], {
           };
         return {
           couponTabs: "details",
-          allServicesSelected: !1,
-          allEventsSelected: !1,
+          allServicesSelected: false,
+          allEventsSelected: false,
+          allLocationsSelected: false,
           dialogLoading: !0,
           rules: { //p2p: add rules for new props
             code: [
@@ -617,6 +624,7 @@ wpJsonpAmeliaBookingPlugin([17], {
             deduction: [{ validator: e, trigger: "submit" }],
             appointmentsFree: [{ validator: e, trigger: "submit" }],
             services: [{ validator: o, trigger: "submit" }],
+            locations: [{ validator: locationValidator, trigger: "submit" }],
             appointmentsMin: [{ validator: isPositive("appointmentsMin", "Min Appointments"), trigger: "submit" }],
             appointmentsMax: [{ validator: isPositive("appointmentsMax", "Max Appointments"), trigger: "submit" }],
             dateRange: [
@@ -682,12 +690,9 @@ wpJsonpAmeliaBookingPlugin([17], {
             notificationInterval: this.coupon.notificationInterval,
             notificationRecurring: this.coupon.notificationRecurring,
             status: this.coupon.status,
-            events: this.coupon.eventList.map(function (t) {
-              return t.id;
-            }),
-            services: this.coupon.serviceList.map(function (t) {
-              return t.id;
-            }),
+            events: this.coupon.eventList.map(t => t.id),
+            services: this.coupon.serviceList.map(t => t.id),
+            locations: this.coupon.locationList.map(t => t.id),
           };
         },
         closeDialog: function () {
@@ -703,6 +708,12 @@ wpJsonpAmeliaBookingPlugin([17], {
           this.coupon.eventList = (this.allEventsSelected =
             !this.allEventsSelected)
             ? this.events
+            : [];
+        },
+        allLocationsSelection: function () {
+          this.coupon.locationList = (this.allLocationsSelected =
+            !this.allLocationsSelected)
+            ? this.locations
             : [];
         },
         clearValidation: function () {
@@ -933,11 +944,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                       },
                                     },
                                       [
-                                        o("label", {
-                                            attrs: {
-                                              "for": "coupon_autoApply",
-                                            }
-                                          },
+                                        o("span",
                                           [
                                             t._v(
                                               t._s("Auto apply")
@@ -1365,11 +1372,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                         },
                                       },
                                       [
-                                        o("label", {
-                                            attrs: {
-                                              "for": "coupon_neverExpire",
-                                            }
-                                          },
+                                        o("span",
                                           [
                                             t._v(
                                               t._s("Never Expire")
@@ -1541,11 +1544,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                         },
                                       },
                                       [
-                                        o("label", {
-                                            attrs: {
-                                              "for": "coupon_noLimit",
-                                            }
-                                          },
+                                        o("span",
                                           [
                                             t._v(
                                               t._s("No Usage Limit")
@@ -1651,166 +1650,191 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     }),
                                   ]
                                 ),
-                                t._v(" "),
-                                t.coupon.limit >= 100
-                                  ? o(
-                                      "el-form-item",
+                                t._v(" "), //p2p: add customer limit
+                                o(
+                                  "el-form-item",
+                                  {
+                                    attrs: {
+                                      label: "placeholder",
+                                      prop: "customerLimit",
+                                    },
+                                  },
+                                  [
+                                    o(
+                                      "label",
                                       {
-                                        attrs: {
-                                          label: "placeholder",
-                                          prop: "customerLimit",
-                                        },
+                                        attrs: { slot: "label" },
+                                        slot: "label",
                                       },
                                       [
-                                        o(
-                                          "label",
-                                          {
-                                            attrs: { slot: "label" },
-                                            slot: "label",
-                                          },
-                                          [
-                                            t._v(
-                                              "\n              " +
-                                                t._s(
-                                                  t.$root.labels
-                                                    .usage_customer_limit
-                                                ) +
-                                                ":\n              "
-                                            ),
-                                            o(
-                                              "el-tooltip",
-                                              { attrs: { placement: "top" } },
-                                              [
-                                                o("div", {
-                                                  attrs: { slot: "content" },
-                                                  domProps: {
-                                                    innerHTML: t._s(
-                                                      t.$root.labels
-                                                        .usage_customer_limit_tooltip
-                                                    ),
-                                                  },
-                                                  slot: "content",
-                                                }),
-                                                t._v(" "),
-                                                o("i", {
-                                                  staticClass:
-                                                    "el-icon-question am-tooltip-icon",
-                                                }),
-                                              ]
-                                            ),
-                                          ],
-                                          1
+                                        t._v(
+                                          "\n              " +
+                                          t._s(
+                                            t.$root.labels
+                                              .usage_customer_limit
+                                          ) +
+                                          ":\n              "
                                         ),
-                                        t._v(" "),
-                                        o("el-input-number", {
+                                        o(
+                                          "el-tooltip",
+                                          { attrs: { placement: "top" } },
+                                          [
+                                            o("div", {
+                                              attrs: { slot: "content" },
+                                              domProps: {
+                                                innerHTML: t._s(
+                                                  t.$root.labels
+                                                    .usage_customer_limit_tooltip
+                                                ),
+                                              },
+                                              slot: "content",
+                                            }),
+                                            t._v(" "),
+                                            o("i", {
+                                              staticClass:
+                                                "el-icon-question am-tooltip-icon",
+                                            }),
+                                          ]
+                                        ),
+                                      ],
+                                      1
+                                    ),
+                                    t._v(" "),
+                                    o("el-input-number", {
+                                      attrs: {
+                                        min: 0,
+                                        max: t.coupon.limit,
+                                        disabled: t.coupon.noLimit,
+                                      },
+                                      on: {
+                                        input: function (e) {
+                                          return t.clearValidation();
+                                        },
+                                      },
+                                      model: {
+                                        value: t.coupon.customerLimit,
+                                        callback: function (e) {
+                                          t.$set(
+                                            t.coupon,
+                                            "customerLimit",
+                                            e
+                                          );
+                                        },
+                                        expression: "coupon.customerLimit",
+                                      },
+                                    }),
+                                  ]
+                                ),
+                                t._v(" "), //p2p: add locations
+                                t.locations.length
+                                  ? o(
+                                    "el-form-item",
+                                    {
+                                      attrs: {
+                                        label: "placeholder",
+                                        prop: "locations",
+                                      },
+                                    },
+                                    [
+                                      o(
+                                        "label",
+                                        {
+                                          attrs: { slot: "label" },
+                                          slot: "label",
+                                        },
+                                        [
+                                          t._v(
+                                            "\n              " +
+                                            t._s(t.$root.labels.locations) +
+                                            ":\n              "
+                                          ),
+                                          o(
+                                            "el-tooltip",
+                                            { attrs: { placement: "top" } },
+                                            [
+                                              o("div", {
+                                                attrs: { slot: "content" },
+                                                domProps: {
+                                                  innerHTML: t._s(
+                                                    "Select the locations for which the coupon can be used."
+                                                  ),
+                                                },
+                                                slot: "content",
+                                              }),
+                                              t._v(" "),
+                                              o("i", {
+                                                staticClass:
+                                                  "el-icon-question am-tooltip-icon",
+                                              }),
+                                            ]
+                                          ),
+                                        ],
+                                        1
+                                      ),
+                                      t._v(" "),
+                                      o(
+                                        "el-select",
+                                        {
                                           attrs: {
-                                            min: 0,
-                                            max: t.coupon.limit,
+                                            "value-key": "id",
+                                            filterable: false,
+                                            multiple: "",
+                                            placeholder:
+                                            t.$root.labels.select_location,
+                                            "collapse-tags": "",
                                           },
                                           on: {
-                                            input: function (e) {
+                                            change: function (e) {
                                               return t.clearValidation();
                                             },
                                           },
                                           model: {
-                                            value: t.coupon.customerLimit,
+                                            value: t.coupon.locationList,
                                             callback: function (e) {
                                               t.$set(
                                                 t.coupon,
-                                                "customerLimit",
+                                                "locationList",
                                                 e
                                               );
                                             },
-                                            expression: "coupon.customerLimit",
+                                            expression: "coupon.locationList",
                                           },
-                                        }),
-                                      ],
-                                      1
-                                    )
-                                  : t._e(),
-                                t._v(" "),
-                                t.coupon.limit < 100
-                                  ? o(
-                                      "el-form-item",
-                                      { attrs: { label: "placeholder" } },
-                                      [
-                                        o(
-                                          "label",
-                                          {
-                                            attrs: { slot: "label" },
-                                            slot: "label",
-                                          },
-                                          [
-                                            t._v(
-                                              "\n              " +
-                                                t._s(
-                                                  t.$root.labels
-                                                    .usage_customer_limit
-                                                ) +
-                                                ":\n              "
-                                            ),
-                                            o(
-                                              "el-tooltip",
-                                              { attrs: { placement: "top" } },
-                                              [
-                                                o("div", {
-                                                  attrs: { slot: "content" },
-                                                  domProps: {
-                                                    innerHTML: t._s(
-                                                      t.$root.labels
-                                                        .usage_customer_limit_tooltip
-                                                    ),
-                                                  },
-                                                  slot: "content",
-                                                }),
-                                                t._v(" "),
-                                                o("i", {
-                                                  staticClass:
-                                                    "el-icon-question am-tooltip-icon",
-                                                }),
-                                              ]
-                                            ),
-                                          ],
-                                          1
-                                        ),
-                                        t._v(" "),
-                                        o(
-                                          "el-select",
-                                          {
-                                            model: {
-                                              value: t.coupon.customerLimit,
-                                              callback: function (e) {
-                                                t.$set(
-                                                  t.coupon,
-                                                  "customerLimit",
-                                                  e
-                                                );
+                                        },
+                                        [
+                                          o(
+                                            "div",
+                                            {
+                                              staticClass: "am-drop-parent",
+                                              on: {
+                                                click: t.allLocationsSelection,
                                               },
-                                              expression:
-                                                "coupon.customerLimit",
                                             },
-                                          },
-                                          [
-                                            o("el-option", {
-                                              key: 0,
+                                            [
+                                              o("span", [
+                                                t._v(
+                                                  t._s(
+                                                    "Select All Locations"
+                                                  )
+                                                ),
+                                              ]),
+                                            ]
+                                          ),
+                                          t._v(" "),
+                                          t._l(t.locations, function (t) {
+                                            return o("el-option", {
+                                              key: t.id,
                                               attrs: {
-                                                label: t.$root.labels.unlimited,
-                                                value: 0,
+                                                label: t.name,
+                                                value: t,
                                               },
-                                            }),
-                                            t._v(" "),
-                                            t._l(t.coupon.limit, function (t) {
-                                              return o("el-option", {
-                                                key: t,
-                                                attrs: { label: t, value: t },
-                                              });
-                                            }),
-                                          ],
-                                          2
-                                        ),
-                                      ],
-                                      1
-                                    )
+                                            });
+                                          }),
+                                        ],
+                                        2
+                                      ),
+                                    ],
+                                    1
+                                  )
                                   : t._e(),
                                 t._v(" "),
                                 t.services.length > 0
@@ -5388,6 +5412,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                 attrs: {
                                   coupon: e.coupon,
                                   services: e.options.entities.services,
+                                  locations: e.options.entities.locations,
                                   events: e.options.entities.events,
                                   couponFetched: e.couponFetched,
                                 },
