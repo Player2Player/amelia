@@ -36,6 +36,7 @@ class UpdateCouponController extends Controller
         'notificationRecurring',
         'services',
         'events',
+        'locations',
         'autoApply',
         'description',
         'appointmentsFree',

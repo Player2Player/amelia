@@ -109,11 +109,28 @@ class CouponApplicationService
         /** @var CouponServiceRepository $couponServiceRepository */
         $couponServiceRepository = $this->container->get('domain.coupon.service.repository');
 
+        /** @var CouponLocationRepository $couponLocationRepository */
+        $couponLocationRepository = $this->container->get('domain.coupon.location.repository');
+
         /** @var CouponEventRepository $couponEventRepository */
         $couponEventRepository = $this->container->get('domain.coupon.event.repository');
 
         $couponRepository->update($oldCoupon->getId()->getValue(), $newCoupon);
 
+        /** @var Location $newLocation */
+        foreach ($newCoupon->getLocationList()->getItems() as $key => $newLocation) {
+          if (!$oldCoupon->getLocationList()->keyExists($key)) {
+              $couponLocationRepository->add($newCoupon, $newLocation);
+          }
+        }
+
+        /** @var Location $oldLocation */
+        foreach ($oldCoupon->getLocationList()->getItems() as $key => $oldLocation) {
+            if (!$newCoupon->getLocationList()->keyExists($key)) {
+                $couponLocationRepository->deleteForLocation($oldCoupon->getId()->getValue(), $key);
+            }
+        }
+      
         /** @var Service $newService */
         foreach ($newCoupon->getServiceList()->getItems() as $key => $newService) {
             if (!$oldCoupon->getServiceList()->keyExists($key)) {

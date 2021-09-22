@@ -13,6 +13,7 @@ use AmeliaBooking\Application\Services\Coupon\CouponApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Bookable\Service\Service;
+use AmeliaBooking\Domain\Entity\Location\Location;
 use AmeliaBooking\Domain\Entity\Booking\Event\Event;
 use AmeliaBooking\Domain\Entity\Coupon\Coupon;
 use AmeliaBooking\Domain\Entity\Entities;
@@ -22,6 +23,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponRepository;
+use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
 use Interop\Container\Exception\ContainerException;
 use Slim\Exception\ContainerValueNotFoundException;
 
@@ -68,6 +70,8 @@ class UpdateCouponCommandHandler extends CommandHandler
         $serviceRepository = $this->container->get('domain.bookable.service.repository');
         /** @var EventRepository $eventRepository */
         $eventRepository = $this->container->get('domain.booking.event.repository');
+        /** @var LocationRepository $locationRepository */
+        $locationRepository = $this->container->get('domain.locations.repository');
 
         $result = new CommandResult();
 
@@ -81,6 +85,9 @@ class UpdateCouponCommandHandler extends CommandHandler
         /** @var Collection $allServices */
         $allServices = $serviceRepository->getAll();
 
+        /** @var Collection $allLocations */
+        $allLocations = $locationRepository->getAll();
+
         /** @var Collection $services */
         $services = new Collection();
 
@@ -88,6 +95,17 @@ class UpdateCouponCommandHandler extends CommandHandler
         foreach ($allServices->getItems() as $service) {
             if (in_array($service->getId()->getValue(), $command->getFields()['services'])) {
                 $services->addItem($service, $service->getId()->getValue());
+            }
+        }
+
+        /** @var Collection $locations */
+        $locations = new Collection();
+
+        /** @var Location $location */
+        foreach ($allLocations->getItems() as $location) {
+            $locationId = $location->getId()->getValue();
+            if (in_array($locationId, $command->getFields()['locations'])) {
+                $locations->addItem($location, $locationId);
             }
         }
 
@@ -107,7 +125,7 @@ class UpdateCouponCommandHandler extends CommandHandler
         $newCoupon = CouponFactory::create($command->getFields());
 
         $newCoupon->setServiceList($services);
-
+        $newCoupon->setLocationList($locations);
         $newCoupon->setEventList($events);
 
         if (!($newCoupon instanceof Coupon)) {
