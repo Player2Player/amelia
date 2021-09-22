@@ -34,6 +34,7 @@ class AddCouponController extends Controller
         'notificationInterval',
         'notificationRecurring',
         'services',
+        'locations',
         'events',
         'autoApply',
         'description',

@@ -96,6 +96,13 @@ $entries['domain.coupon.service.repository'] = function (Container $c) {
     );
 };
 
+$entries['domain.coupon.location.repository'] = function (Container $c) {
+  return new Repository\Coupon\CouponLocationRepository(
+      $c->getDatabaseConnection(),
+      DB\Coupon\CouponsToLocationsTable::getTableName()
+  );
+};
+
 $entries['domain.coupon.event.repository'] = function (Container $c) {
     return new Repository\Coupon\CouponEventRepository(
         $c->getDatabaseConnection(),

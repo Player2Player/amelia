@@ -21,6 +21,7 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponEventRepository;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponRepository;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponServiceRepository;
+use AmeliaBooking\Infrastructure\Repository\Coupon\CouponLocationRepository;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use Slim\Exception\ContainerValueNotFoundException;
 
@@ -65,9 +66,17 @@ class CouponApplicationService
         /** @var CouponEventRepository $couponEventRepo */
         $couponEventRepo = $this->container->get('domain.coupon.event.repository');
 
+        /** @var CouponLocationRepository $couponLocationRepository */
+        $couponLocationRepo = $this->container->get('domain.coupon.location.repository');
+
         $couponId = $couponRepository->add($coupon);
 
         $coupon->setId(new Id($couponId));
+
+        /** @var Service $service */
+        foreach ($coupon->getLocationList()->getItems() as $location) {
+          $couponLocationRepo->add($coupon, $location);
+        }
 
         /** @var Service $service */
         foreach ($coupon->getServiceList()->getItems() as $service) {

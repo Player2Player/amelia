@@ -275,6 +275,17 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
             $services = ' AND s.id IN (' . rtrim($services, ', ') . ')';
         }
 
+        $ids = '';
+        if (!empty($criteria['ids'])) {
+            foreach ((array)$criteria['ids'] as $index => $value) {
+                ++$index;
+                $ids .= ':id' . $index . ', ';
+                $params[':id' . $index] = $value;
+            }
+
+            $ids = ' AND l.id IN (' . rtrim($ids, ', ') . ')';
+        }
+
         $limit = $this->getLimit(
             !empty($criteria['page']) ? (int)$criteria['page'] : 0,
             (int)$itemsPerPage

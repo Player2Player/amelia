@@ -18,6 +18,7 @@ use AmeliaBooking\Domain\Factory\Coupon\CouponFactory;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Bookable\Service\ServiceRepository;
+use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponRepository;
 
@@ -65,6 +66,9 @@ class AddCouponCommandHandler extends CommandHandler
         /** @var EventRepository $eventRepository */
         $eventRepository = $this->container->get('domain.booking.event.repository');
 
+        /** @var LocationRepository $locationRepository */
+        $locationRepository = $this->container->get('domain.locations.repository');
+
         /** @var Collection $services */
         $services = $command->getFields()['services'] ? $serviceRepository->getByCriteria([
             'services' => $command->getFields()['services']
@@ -81,6 +85,13 @@ class AddCouponCommandHandler extends CommandHandler
         ]) : new Collection();
 
         $coupon->setEventList($events);
+
+        /** @var Collection $locations */
+        $locations = $command->getFields()['locations'] ? $locationRepository->getFiltered([
+          'ids' => $command->getFields()['locations']
+        ], 0) : new Collection();
+
+        $coupon->setLocationList($locations);
 
         if (!$coupon instanceof Coupon) {
             $result->setResult(CommandResult::RESULT_ERROR);

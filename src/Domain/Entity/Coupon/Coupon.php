@@ -102,12 +102,18 @@ class Coupon
     private $eventList;
 
     /**
+     * @var Collection 
+     * 
+     **/
+    private $locationList;
+
+    /**
      * Coupon constructor.
      *
      * @param CouponCode              $code
      * @param DiscountPercentageValue $discount
      * @param DiscountFixedValue      $deduction
-     * @param WholeNumber         $limit
+     * @param WholeNumber             $limit
      * @param Status                  $status
      */
     public function __construct(
@@ -510,6 +516,30 @@ class Coupon
     public function setNoLimit(BooleanValueObject $noLimit)
     {
         $this->noLimit = $noLimit;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of locationList
+     *
+     * @return  Collection
+     */ 
+    public function getLocationList()
+    {
+        return $this->locationList;
+    }
+
+    /**
+     * Set the value of locationList
+     *
+     * @param  Collection  $locationList
+     *
+     * @return  self
+     */ 
+    public function setLocationList(Collection $locationList)
+    {
+        $this->locationList = $locationList;
 
         return $this;
     }
