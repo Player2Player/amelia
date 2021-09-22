@@ -179,6 +179,9 @@ class CouponApplicationService
         /** @var CouponServiceRepository $couponServiceRepository */
         $couponServiceRepository = $this->container->get('domain.coupon.service.repository');
 
+        /** @var CouponLocationRepository $couponLocationRepository */
+        $couponLocationRepository = $this->container->get('domain.coupon.location.repository');
+
         /** @var CouponEventRepository $couponEventRepository */
         $couponEventRepository = $this->container->get('domain.coupon.event.repository');
 
@@ -186,6 +189,7 @@ class CouponApplicationService
         $customerBookingRepository = $this->container->get('domain.booking.customerBooking.repository');
 
         return $couponServiceRepository->deleteByEntityId($coupon->getId()->getValue(), 'couponId') &&
+            $couponLocationRepository->deleteByEntityId($coupon->getId()->getValue(), 'couponId') &&
             $couponEventRepository->deleteByEntityId($coupon->getId()->getValue(), 'couponId') &&
             $customerBookingRepository->updateByEntityId($coupon->getId()->getValue(), null, 'couponId') &&
             $couponRepository->delete($coupon->getId()->getValue());
