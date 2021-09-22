@@ -27,6 +27,12 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
     const FACTORY = CouponFactory::class;
 
     /** @var string */
+    protected $locationsTable;
+
+    /** @var string */
+    protected $couponToLocationsTable;
+
+    /** @var string */
     protected $servicesTable;
 
     /** @var string */
@@ -49,6 +55,8 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
      * @param string     $eventsTable
      * @param string     $couponToEventsTable
      * @param string     $bookingsTable
+     * @param string     $locationsTable,
+     * @param string     $couponToLocationsTable 
      */
     public function __construct(
         Connection $connection,
@@ -57,7 +65,9 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
         $couponToServicesTable,
         $eventsTable,
         $couponToEventsTable,
-        $bookingsTable
+        $bookingsTable,
+        $locationsTable,
+        $couponToLocationsTable
     ) {
         parent::__construct($connection, $table);
 
@@ -66,6 +76,8 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
         $this->eventsTable = $eventsTable;
         $this->couponToEventsTable = $couponToEventsTable;
         $this->bookingsTable = $bookingsTable;
+        $this->locationsTable = $locationsTable;
+        $this->couponToLocationsTable = $couponToLocationsTable;
     }
 
     /**
@@ -231,10 +243,14 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
                     s.duration AS service_duration,
                     e.id AS event_id,
                     e.price AS event_price,
-                    e.name AS event_name
+                    e.name AS event_name,
+                    l.id AS location_id,
+                    l.name AS location_name
                 FROM {$this->table} c
+                LEFT JOIN {$this->couponToLocationsTable} cl ON cl.couponId = c.id
                 LEFT JOIN {$this->couponToServicesTable} cs ON cs.couponId = c.id
                 LEFT JOIN {$this->couponToEventsTable} ce ON ce.couponId = c.id
+                LEFT JOIN {$this->locationsTable} l ON cl.locationId = l.id
                 LEFT JOIN {$this->servicesTable} s ON cs.serviceId = s.id
                 LEFT JOIN {$this->eventsTable} e ON ce.eventId = e.id
                 WHERE c.id = :couponId"
@@ -253,7 +269,8 @@ class CouponRepository extends AbstractRepository implements CouponRepositoryInt
             throw new NotFoundException('Data not found in ' . __CLASS__);
         }
 
-        return call_user_func([static::FACTORY, 'createCollection'], $rows)->getItem($id);
+        $coupon = call_user_func([static::FACTORY, 'createCollection'], $rows)->getItem($id);
+        return $coupon;
     }
 
     /**

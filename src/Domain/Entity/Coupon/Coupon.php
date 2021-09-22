@@ -571,6 +571,7 @@ class Coupon
             'validTo'               => $this->getValidTo() ? $this->getValidTo()->getValue()->format('c') : null,
             'noLimit'               => $this->getNoLimit() ? $this->getNoLimit()->getValue() : 0,
             'neverExpire'           => $this->getNeverExpire(),
+            'locationList'          => $this->getLocationList() ? $this->getLocationList()->toArray() : [],
         ];
     }
 

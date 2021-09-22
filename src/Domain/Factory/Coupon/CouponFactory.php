@@ -10,6 +10,7 @@ use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Entity\Coupon\Coupon;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Factory\Booking\Event\EventFactory;
+use AmeliaBooking\Domain\Factory\Location\LocationFactory;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\DateTime\DateTimeValue;
 use AmeliaBooking\Domain\ValueObjects\DiscountFixedValue;
@@ -70,6 +71,17 @@ class CouponFactory
             }
         }
 
+        $locationList = new Collection();
+
+        if (isset($data['locationList'])) {
+            foreach ((array)$data['locationList'] as $key => $value) {
+                $locationList->addItem(
+                    LocationFactory::create($value),
+                    $key
+                );
+            }
+        }
+
         if (isset($data['customerLimit'])) {
             $coupon->setCustomerLimit(new WholeNumber($data['customerLimit']));
         }
@@ -123,6 +135,7 @@ class CouponFactory
 
         $coupon->setServiceList($serviceList);
         $coupon->setEventList($eventList);
+        $coupon->setLocationList($locationList);
 
         return $coupon;
     }
@@ -140,6 +153,7 @@ class CouponFactory
         foreach ($rows as $row) {
             $couponId = $row['coupon_id'];
             $serviceId = isset($row['service_id']) ? $row['service_id'] : null;
+            $locationId = isset($row['location_id']) ? $row['location_id'] : null;
             $eventId = isset($row['event_id']) ? $row['event_id'] : null;
             $bookingId = isset($row['booking_id']) ? $row['booking_id'] : null;
 
@@ -193,6 +207,12 @@ class CouponFactory
                 $coupons[$couponId]['eventList'][$eventId]['name'] = $row['event_name'];
                 $coupons[$couponId]['eventList'][$eventId]['price'] = $row['event_price'];
             }
+  
+            if ($locationId) {
+              $coupons[$couponId]['locationList'][$locationId]['id'] = $locationId;
+              $coupons[$couponId]['locationList'][$locationId]['name'] = $row['location_name'];
+            }
+
         }
 
         $couponsCollection = new Collection();

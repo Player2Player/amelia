@@ -85,7 +85,9 @@ $entries['domain.coupon.repository'] = function (Container $c) {
         DB\Coupon\CouponsToServicesTable::getTableName(),
         DB\Booking\EventsTable::getTableName(),
         DB\Coupon\CouponsToEventsTable::getTableName(),
-        DB\Booking\CustomerBookingsTable::getTableName()
+        DB\Booking\CustomerBookingsTable::getTableName(),
+        DB\Location\LocationsTable::getTableName(),
+        DB\Coupon\CouponsToLocationsTable::getTableName(),
     );
 };
 
