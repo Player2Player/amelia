@@ -107,8 +107,7 @@ abstract class AbstractNotificationService
         /** @var BookingApplicationService $bookingAS */
         $bookingAS = $this->container->get('application.booking.booking.service');
 
-        $recurringPrefix = $this->type === NotificationType::EMAIL 
-          && array_key_exists('recurring', $appointmentArray)
+        $recurringPrefix = array_key_exists('recurring', $appointmentArray)
           && count($appointmentArray['recurring']) > 0 ? "_recurring" : "";
 
         // Notify provider
@@ -291,9 +290,13 @@ abstract class AbstractNotificationService
      */
     public function sendBookingAddedNotifications($appointmentArray, $bookingArray, $logNotification)
     {
-        /** @var Notification $customerNotification */
+      
+      $recurringPrefix = array_key_exists('recurring', $appointmentArray)
+        && count($appointmentArray['recurring']) > 0 ? "_recurring" : "";
+
+      /** @var Notification $customerNotification */
         $customerNotification = $this->getByNameAndType(
-            "customer_{$appointmentArray['type']}_{$appointmentArray['status']}",
+            "customer_{$appointmentArray['type']}_{$appointmentArray['status']}{$recurringPrefix}",
             $this->type
         );
 
@@ -310,7 +313,7 @@ abstract class AbstractNotificationService
         // Notify provider
         /** @var Notification $providerNotification */
         $providerNotification =
-            $this->getByNameAndType("provider_{$appointmentArray['type']}_{$appointmentArray['status']}", $this->type);
+            $this->getByNameAndType("provider_{$appointmentArray['type']}_{$appointmentArray['status']}{$recurringPrefix}", $this->type);
 
         if ($providerNotification && $providerNotification->getStatus()->getValue() === NotificationStatus::ENABLED) {
             $this->sendNotification(

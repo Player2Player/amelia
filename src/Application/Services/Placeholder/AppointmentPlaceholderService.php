@@ -409,17 +409,27 @@ class AppointmentPlaceholderService extends PlaceholderService
 
         $appointmentsSettings = $settingsService->getCategorySettings('appointments');
 
+        $isForCustomer =
+          $bookingKey !== null ||
+          (isset($appointment['isForCustomer']) && $appointment['isForCustomer']);
+
+        $placeholderString =
+          $placeholderType .
+          'Placeholders' .
+          ($isForCustomer && $placeholderType === 'package' ? 'Customer' : '') .
+          ($isForCustomer && $placeholderType === 'recurring' ? 'Customer' : '') .
+          ($type === 'email' ? '' : 'Sms');
+
         $recurringAppointmentDetails = [];
         if ($appointmentData) {
-          $recurringAppointmentDetails[] = $appointmentData;
+          $recurringAppointmentDetails[] = $placeholderService->applyPlaceholders(
+            $appointmentsSettings[$placeholderString],
+            $appointmentData
+          );
         }
-
+  
         foreach ($appointment['recurring'] as $recurringData) {
             $recurringBookingKey = null;
-
-            $isForCustomer =
-                $bookingKey !== null ||
-                (isset($appointment['isForCustomer']) && $appointment['isForCustomer']);
 
             if ($isForCustomer) {
                 foreach ($recurringData['appointment']['bookings'] as $key => $recurringBooking) {
@@ -466,13 +476,6 @@ class AppointmentPlaceholderService extends PlaceholderService
 
                 $recurringPlaceholders['zoom_host_url'] = '';
             }
-
-            $placeholderString =
-                $placeholderType .
-                'Placeholders' .
-                ($isForCustomer && $placeholderType === 'package' ? 'Customer' : '') .
-                ($isForCustomer && $placeholderType === 'recurring' ? 'Customer' : '') .
-                ($type === 'email' ? '' : 'Sms');
 
             /** @var HelperService $helperService */
             $helperService = $this->container->get('application.helper.service');

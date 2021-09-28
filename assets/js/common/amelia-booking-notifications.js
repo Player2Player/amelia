@@ -248,6 +248,13 @@ wpJsonpAmeliaBookingPlugin([9], {
           (this.usedLanguages = this.passedUsedLanguages);
       },
       methods: {
+        //p2p: get notification name
+        getNotificationName(notification) {
+          const name = notification.name;
+          return name && name.endsWith('_recurring')
+            ? this.$root.labels[name.replace('_recurring', '')] + ' Recurring'
+            : this.$root.labels[name];
+        },
         manageLanguages: function () {
           this.$emit("manageLanguages");
         },
@@ -15411,9 +15418,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                                                     e._v(
                                                       "\n                  " +
                                                         e._s(
-                                                          t.name && t.name.endsWith('_recurring')
-                                                            ? e.$root.labels[t.name.replace('_recurring', '')] + ' Recurring'
-                                                            : e.$root.labels[t.name]
+                                                          e.getNotificationName(t)
                                                         ) +
                                                         "\n                "
                                                     ),
@@ -15571,7 +15576,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                                                     e._v(
                                                       "\n                  " +
                                                         e._s(
-                                                          e.$root.labels[t.name]
+                                                          e.getNotificationName(t)
                                                         ) +
                                                         "\n                "
                                                     ),
@@ -15689,9 +15694,7 @@ wpJsonpAmeliaBookingPlugin([9], {
                                       n("h2", [
                                         e._v(
                                           e._s(
-                                            e.notification.name && e.notification.name.endsWith('_recurring')
-                                              ? e.$root.labels[e.notification.name.replace('_recurring', '')] + ' Recurring'
-                                              : e.$root.labels[e.notification.name]
+                                            e.getNotificationName(e.notification)
                                           )
                                         ),
                                       ]),
@@ -16251,14 +16254,10 @@ wpJsonpAmeliaBookingPlugin([9], {
                                 : e._e(),
                               e._v(" "), //p2p: add support for recurring templates
                               [
-                                "customer_appointment_approved",
                                 "customer_appointment_approved_recurring",
-                                "provider_appointment_approved",
                                 "provider_appointment_approved_recurring",
-                                "customer_appointment_pending",
                                 "customer_appointment_pending_recurring",
                                 "provider_appointment_pending_recurring",
-                                "provider_appointment_pending_recurring"
                               ].includes(e.notification.name)
                                 ? n(
                                     "el-row",
