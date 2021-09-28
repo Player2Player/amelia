@@ -731,11 +731,14 @@ class AppointmentReservationService extends AbstractReservationService
             $recurringBookable = $recurringReservation->getBookable();
 
             if ($index < $recurringBookable->getRecurringPayment()->getValue()) {
+                //p2p: new payment rule: only apply the discount to the parent lesson
+                /*  
                 $recurringPaymentAmount = $this->getPaymentAmount(
-                    $recurringReservation->getBooking(),
-                    $recurringBookable
-                );
-
+                      $recurringReservation->getBooking(),
+                      $recurringBookable
+                  );
+                */    
+                $recurringPaymentAmount = $recurringBookable->getPrice()->getValue();
                 if ($recurringReservation->getApplyDeposit()->getValue()) {
                     $recurringPaymentAmount = $this->calculateDepositAmount(
                         $recurringPaymentAmount,

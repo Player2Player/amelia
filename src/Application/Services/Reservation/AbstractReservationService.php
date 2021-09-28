@@ -81,6 +81,8 @@ abstract class AbstractReservationService implements ReservationServiceInterface
         $this->container = $container;
     }
 
+    abstract public function getReservationPaymentAmount($reservation);
+    
     /**
      * @param Reservation $reservation
      *
@@ -653,9 +655,11 @@ abstract class AbstractReservationService implements ReservationServiceInterface
         }
 
         if ($booking->getCoupon()) {
+            $coupon = $booking->getCoupon();
             $subtraction = $price / 100 *
-                ($booking->getCoupon()->getDiscount()->getValue() ?: 0) +
-                ($booking->getCoupon()->getDeduction()->getValue() ?: 0);
+                ($coupon->getDiscount()->getValue() ?: 0) +
+                ($coupon->getDeduction()->getValue() ?: 0) +
+                (($coupon->getAppointmentsFree()->getValue() ?: 0) * $price);
 
             return round($price - $subtraction, 2);
         }

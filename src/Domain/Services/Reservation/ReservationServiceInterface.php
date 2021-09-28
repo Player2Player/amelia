@@ -251,4 +251,6 @@ interface ReservationServiceInterface
      * @return Reservation
      */
     public function getNew($couponValidation, $customFieldsValidation, $availabilityValidation);
+
+    public function getReservationPaymentAmount($reservation);
 }
