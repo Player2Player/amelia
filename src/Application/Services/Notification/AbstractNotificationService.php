@@ -15,6 +15,7 @@ use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Notification\Notification;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\String\NotificationStatus;
+use AmeliaBooking\Domain\ValueObjects\String\NotificationType;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\NotFoundException;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
@@ -106,10 +107,14 @@ abstract class AbstractNotificationService
         /** @var BookingApplicationService $bookingAS */
         $bookingAS = $this->container->get('application.booking.booking.service');
 
+        $recurringPrefix = $this->type === NotificationType::EMAIL 
+          && array_key_exists('recurring', $appointmentArray)
+          && count($appointmentArray['recurring']) > 0 ? "_recurring" : "";
+
         // Notify provider
         /** @var Notification $providerNotification */
         $providerNotification = $this->getByNameAndType(
-            "provider_{$appointmentArray['type']}_{$appointmentArray['status']}",
+            "provider_{$appointmentArray['type']}_{$appointmentArray['status']}{$recurringPrefix}",
             $this->type
         );
 
@@ -126,7 +131,7 @@ abstract class AbstractNotificationService
 
             /** @var Notification $customerNotification */
             $customerNotification = $this->getByNameAndType(
-                "customer_{$appointmentArray['type']}_{$appointmentArray['status']}",
+                "customer_{$appointmentArray['type']}_{$appointmentArray['status']}{$recurringPrefix}",
                 $this->type
             );
 

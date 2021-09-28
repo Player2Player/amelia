@@ -116,11 +116,11 @@ class AppointmentPlaceholderService extends PlaceholderService
         $token = isset($token['token']) ? $token['token'] : null;
 
         $data = [];
-
-        $data = array_merge($data, $this->getAppointmentData($appointment, $bookingKey, $type));
+        $appointmentData = $this->getAppointmentData($appointment, $bookingKey, $type);
+        $data = array_merge($data, $appointmentData);
         $data = array_merge($data, $this->getServiceData($appointment, $bookingKey));
         $data = array_merge($data, $this->getEmployeeData($appointment));
-        $data = array_merge($data, $this->getRecurringAppointmentsData($appointment, $bookingKey, $type, 'recurring'));
+        $data = array_merge($data, $this->getRecurringAppointmentsData($appointment, $bookingKey, $type, 'recurring', $appointmentData));
         $data = array_merge($data, $this->getBookingData($appointment, $type, $bookingKey, $token, $data['deposit']));
         $data = array_merge($data, $this->getCompanyData());
         $data = array_merge($data, $this->getCustomersData($appointment, $type, $bookingKey, $customer));
@@ -380,7 +380,8 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @param int    $bookingKey
      * @param string $type
      * @param string $placeholderType
-     *
+     * @param array  $appointmentData  parent appointment data
+     * 
      * @return array
      *
      * @throws ContainerValueNotFoundException
@@ -389,7 +390,7 @@ class AppointmentPlaceholderService extends PlaceholderService
      * @throws ContainerException
      * @throws Exception
      */
-    public function getRecurringAppointmentsData($appointment, $bookingKey, $type, $placeholderType)
+    public function getRecurringAppointmentsData($appointment, $bookingKey, $type, $placeholderType, $appointmentData = null)
     {
         if (!array_key_exists('recurring', $appointment)) {
             return [
@@ -409,6 +410,9 @@ class AppointmentPlaceholderService extends PlaceholderService
         $appointmentsSettings = $settingsService->getCategorySettings('appointments');
 
         $recurringAppointmentDetails = [];
+        if ($appointmentData) {
+          $recurringAppointmentDetails[] = $appointmentData;
+        }
 
         foreach ($appointment['recurring'] as $recurringData) {
             $recurringBookingKey = null;
@@ -487,7 +491,7 @@ class AppointmentPlaceholderService extends PlaceholderService
 
         return [
             "{$placeholderType}_appointments_details" => $recurringAppointmentDetails ? implode(
-                $type === 'email' ? '<br>' : PHP_EOL,
+                $type === 'email' ? '<br/>' : PHP_EOL,
                 $recurringAppointmentDetails
             ) : ''
         ];
