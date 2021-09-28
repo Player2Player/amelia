@@ -15407,11 +15407,13 @@ wpJsonpAmeliaBookingPlugin([9], {
                                                       },
                                                     },
                                                   },
-                                                  [
+                                                  [ //p2p: add support for recurring templates
                                                     e._v(
                                                       "\n                  " +
                                                         e._s(
-                                                          e.$root.labels[t.name]
+                                                          t.name && t.name.endsWith('_recurring')
+                                                            ? e.$root.labels[t.name.replace('_recurring', '')] + ' Recurring'
+                                                            : e.$root.labels[t.name]
                                                         ) +
                                                         "\n                "
                                                     ),
@@ -15687,7 +15689,9 @@ wpJsonpAmeliaBookingPlugin([9], {
                                       n("h2", [
                                         e._v(
                                           e._s(
-                                            e.$root.labels[e.notification.name]
+                                            e.notification.name && e.notification.name.endsWith('_recurring')
+                                              ? e.$root.labels[e.notification.name.replace('_recurring', '')] + ' Recurring'
+                                              : e.$root.labels[e.notification.name]
                                           )
                                         ),
                                       ]),
@@ -16245,15 +16249,17 @@ wpJsonpAmeliaBookingPlugin([9], {
                                     1
                                   )
                                 : e._e(),
-                              e._v(" "),
-                              "customer_appointment_approved" ===
-                                e.notification.name ||
-                              "provider_appointment_approved" ===
-                                e.notification.name ||
-                              "customer_appointment_pending" ===
-                                e.notification.name ||
-                              "provider_appointment_pending" ===
-                                e.notification.name
+                              e._v(" "), //p2p: add support for recurring templates
+                              [
+                                "customer_appointment_approved",
+                                "customer_appointment_approved_recurring",
+                                "provider_appointment_approved",
+                                "provider_appointment_approved_recurring",
+                                "customer_appointment_pending",
+                                "customer_appointment_pending_recurring",
+                                "provider_appointment_pending_recurring",
+                                "provider_appointment_pending_recurring"
+                              ].includes(e.notification.name)
                                 ? n(
                                     "el-row",
                                     {
