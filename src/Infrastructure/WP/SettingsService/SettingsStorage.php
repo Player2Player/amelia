@@ -155,6 +155,7 @@ class SettingsStorage implements SettingsStorageInterface
                 'requiredPhoneNumberField'               => $this->getSetting('general', 'requiredPhoneNumberField'),
                 'requiredEmailField'                     => $this->getSetting('general', 'requiredEmailField'),
                 'numberOfDaysAvailableForBooking'        => $this->getSetting('general', 'numberOfDaysAvailableForBooking'),
+                'maximumLessonsForBooking'               => $this->getSetting('general', 'maximumLessonsForBooking'),
                 'minimumTimeRequirementPriorToBooking'   =>
                     $this->getSetting('general', 'minimumTimeRequirementPriorToBooking'),
                 'minimumTimeRequirementPriorToCanceling' =>

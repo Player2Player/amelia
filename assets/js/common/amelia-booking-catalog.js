@@ -8415,6 +8415,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             })[0]
           );
         },
+        //p2p: validate maximum recurring appointments
         confirmRecurringSetup: function () {
           var e = this;
           this.setRecurringValues("date"),
@@ -9086,6 +9087,17 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                           ],
                           1
                         )
+                      : e._e(),
+                    e._v(" "), //p2p: add alert for maximum lessons allowed
+                    e.isFrontend
+                      ? i("el-alert",
+                        {
+                          attrs: {
+                            title: `You are able to bookings until ${e.$root.settings.general.maximumLessonsForBooking} lessons`,
+                            type: "warning",
+                            effect: "dark"
+                          },
+                        })
                       : e._e(),
                   ],
                   1
