@@ -8417,11 +8417,18 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
         },
         //p2p: validate maximum recurring appointments
         confirmRecurringSetup: function () {
-          var e = this;
-          this.setRecurringValues("date"),
-            setTimeout(function () {
-              e.$emit("confirmRecurringSetup");
-            }, 500);
+          this.setRecurringValues("date");
+          if (this.recurringData.dates.length > this.$root.settings.general.maximumLessonsForBooking) {
+            this.recurringData.dates.splice(this.$root.settings.general.maximumLessonsForBooking);
+            this.recurringData.pagination.count = this.recurringData.dates.length;
+            this.recurringData.pageRecurringDates = this.recurringData.dates.slice(
+              0,
+              this.recurringData.pagination.show
+            );
+          }
+          setTimeout(() => {
+            this.$emit("confirmRecurringSetup");
+          }, 500);
         },
         cancelRecurringSetup: function () {
           this.$emit("cancelRecurringSetup");
@@ -9031,7 +9038,13 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                     e.isFrontend
                       ? i(
                           "div",
-                          { staticClass: "am-button-wrapper" },
+                          {
+                            staticClass: "am-button-wrapper",
+                            staticStyle: {
+                              marginTop: "1px !important",
+                              marginBottom: "10px !important"
+                            }
+                          },
                           [
                             i(
                               "transition",
@@ -9092,10 +9105,15 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                     e.isFrontend
                       ? i("el-alert",
                         {
+                          staticStyle: {
+                            marginBottom: "10px",
+                          },
                           attrs: {
-                            title: `You are able to bookings until ${e.$root.settings.general.maximumLessonsForBooking} lessons`,
-                            type: "warning",
-                            effect: "dark"
+                            title: `You are able to booking until ${e.$root.settings.general.maximumLessonsForBooking} lessons`,
+                            type: "info",
+                            effect: "dark",
+                            closable: false,
+                            "show-icon": true,
                           },
                         })
                       : e._e(),
