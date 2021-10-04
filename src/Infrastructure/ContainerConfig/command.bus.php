@@ -181,6 +181,7 @@ $entries['command.bus'] = function ($c) {
             User\Provider\GetProvidersCommand::class                  => new User\Provider\GetProvidersCommandHandler($c),
             User\Provider\UpdateProviderCommand::class                => new User\Provider\UpdateProviderCommandHandler($c),
             User\Provider\UpdateProviderStatusCommand::class          => new User\Provider\UpdateProviderStatusCommandHandler($c),
+            User\Provider\UpdateProviderPictureCommand::class         => new User\Provider\UpdateProviderPictureCommandHandler($c),
             // Zoom
             Zoom\GetUsersCommand::class                               => new Zoom\GetUsersCommandHandler($c),
         ]

@@ -21,6 +21,7 @@ use AmeliaBooking\Application\Controller\User\Provider\GetProviderController;
 use AmeliaBooking\Application\Controller\User\Provider\GetProvidersController;
 use AmeliaBooking\Application\Controller\User\Provider\AddProviderController;
 use AmeliaBooking\Application\Controller\User\Provider\UpdateProviderController;
+use AmeliaBooking\Application\Controller\User\Provider\UpdateProviderPictureController;
 use Slim\App;
 
 /**
@@ -68,6 +69,8 @@ class User
         $app->post('/users/providers/delete/{id:[0-9]+}', DeleteUserController::class);
 
         $app->get('/users/providers/effect/{id:[0-9]+}', GetUserDeleteEffectController::class);
+        
+        $app->post('/users/providers/picture/{id:[0-9]+}', UpdateProviderPictureController::class);
 
         // Current User
         $app->get('/users/current', GetCurrentUserController::class);

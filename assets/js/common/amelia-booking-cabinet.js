@@ -10587,8 +10587,18 @@ wpJsonpAmeliaBookingPlugin([1], {
                       [
                         n("div", [
                           n(
-                            "div",
-                            { staticClass: "am-cabinet-details-picture" },
+                            "el-upload",
+                            {
+                              staticClass: "am-cabinet-details-picture",
+                              attrs: {
+                                action: t.$root.getAjaxUrl +
+                                  "/users/" +
+                                  t.state.cabinetType +
+                                  "s/picture/" +
+                                  t.state.profile.id,
+                                "show-file-list": false,
+                              },
+                            },
                             [
                               n("img", {
                                 attrs: { src: t.getPictureSrc(), alt: "" },
