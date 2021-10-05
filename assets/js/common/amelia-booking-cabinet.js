@@ -10219,7 +10219,16 @@ wpJsonpAmeliaBookingPlugin([1], {
       data: function () {
         //P2P: Set required email and phone number
         return {
+          validAvatarTypes: [
+            'image/bmp',
+            'image/gif',
+            'image/jpeg',
+            'image/png',
+          ],
+          mainHeader: null,
           countryPhoneIsoValue: null,
+          coachAvatar: null,
+          loadingAvatar: false,
           profileRules: {
             firstName: [
               {
@@ -10519,6 +10528,38 @@ wpJsonpAmeliaBookingPlugin([1], {
                 ((this.responsiveGrid.cabinetForm = 15),
                 t.classList.remove("mobile")));
         },
+        //p2p: replace coach avatar
+        handleCoachAvatarSuccess(res, file) {
+          this.coachAvatar = URL.createObjectURL(file.raw);
+          this.loadingAvatar = false;
+        },
+        addFixedHeader() {
+          if (this.mainHeader && !this.mainHeader.classList.contains("et-fixed-header")) {
+            this.mainHeader.classList.add("et-fixed-header");
+          }
+        },
+        handleErrorCoachAvatarUpload() {
+          this.addFixedHeader();
+          this.notify("Error", "Error uploading avatar picture", "error");
+          this.loadingAvatar = false;
+        },
+        beforeCoachAvatarUpload(file) {
+          const isValidType = this.validAvatarTypes.includes(file.type);
+          const isLt2M = file.size / 1024 / 1024 <= 2;
+          if (!isValidType) {
+            this.addFixedHeader();
+            this.notify("Error", "Avatar picture must be an image format!", "error");
+          }
+          if (!isLt2M) {
+            this.addFixedHeader();
+            this.notify("Error", "Avatar picture size can not exceed 2MB!", "error");
+          }
+          if (isValidType && isLt2M) {
+            this.loadingAvatar = true;
+            return true;
+          }
+          return false;
+        },
       },
       created: function () {
         "provider" === this.state.cabinetType &&
@@ -10548,6 +10589,7 @@ wpJsonpAmeliaBookingPlugin([1], {
       },
       mounted: function () {
         this.handleResize();
+        this.mainHeader = document.getElementById("main-header");
       },
     };
   },
@@ -10585,11 +10627,17 @@ wpJsonpAmeliaBookingPlugin([1], {
                         attrs: { span: t.responsiveGrid.profileInfo },
                       },
                       [
-                        n("div", [
+                        n("div", {
+                          directives: [{
+                            name: 'loading',
+                            rawName: 'v-loading',
+                            value: t.loadingAvatar,
+                            expression: 'loadingAvatar',
+                          }],
+                        }, [
                           n(
-                            "el-upload",
+                            "el-upload", //p2p: Allow coaches upload an avatar picture
                             {
-                              staticClass: "am-cabinet-details-picture",
                               attrs: {
                                 action: t.$root.getAjaxUrl +
                                   "/users/" +
@@ -10597,11 +10645,20 @@ wpJsonpAmeliaBookingPlugin([1], {
                                   "s/picture/" +
                                   t.state.profile.id,
                                 "show-file-list": false,
+                                "on-success": t.handleCoachAvatarSuccess,
+                                "on-error": t.handleErrorCoachAvatarUpload,
+                                "before-upload": t.beforeCoachAvatarUpload,
                               },
                             },
                             [
                               n("img", {
-                                attrs: { src: t.getPictureSrc(), alt: "" },
+                                attrs: { src: t.coachAvatar || t.getPictureSrc(), alt: "" },
+                                staticStyle: {
+                                  width: "150px !important",
+                                  height: "150px !important",
+                                  "object-fit": "cover !important",
+                                  "border-radius": "50%",
+                                }
                               }),
                             ]
                           ),
