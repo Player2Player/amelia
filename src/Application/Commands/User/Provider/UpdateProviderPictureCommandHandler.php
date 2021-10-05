@@ -7,6 +7,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Application\Commands\CommandResult;
 use AmeliaBooking\Application\Commands\CommandHandler;
+use AmeliaBooking\Domain\ValueObjects\Picture;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 
@@ -50,18 +51,16 @@ class UpdateProviderPictureCommandHandler extends CommandHandler
         $providerRepository = $this->container->get('domain.users.providers.repository');
 
         $attachId = $this->insertAttachment($file);
-        //$providerRepository->updateFieldById($command->getArg('id'), $command->getField('status'), 'status');
         
         $thumbnailImageUrl = wp_get_attachment_image_src($attachId);
         $fullImageUrl = wp_get_attachment_image_src($attachId, 'full');
+
+        $avatarPicture = new Picture($fullImageUrl[0], $thumbnailImageUrl[0]);
+        $providerRepository->updateAvatar($providerId, $avatarPicture);
         
         $result->setResult(CommandResult::RESULT_SUCCESS);
         $result->setMessage('Successfully updated picture profile');
-        $result->setData([
-          "providerId" => $providerId,
-          "thumbnail" => $thumbnailImageUrl,
-          "fullImageUrl" => $fullImageUrl,
-        ]);
+        $result->setData(true);
 
         return $result;
     }

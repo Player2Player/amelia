@@ -3,6 +3,7 @@
 namespace AmeliaBooking\Domain\Repository\User;
 
 use AmeliaBooking\Domain\Repository\BaseRepositoryInterface;
+use AmeliaBooking\Domain\ValueObjects\Picture;
 
 /**
  * Interface UserRepositoryInterface
@@ -31,4 +32,6 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return mixed
      */
     public function getAllByType($type);
+
+    public function updateAvatar($userId, Picture $avatar);
 }

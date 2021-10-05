@@ -12,6 +12,7 @@ use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
 use AmeliaBooking\Domain\Repository\User\UserRepositoryInterface;
 use AmeliaBooking\Domain\ValueObjects\Json;
+use AmeliaBooking\Domain\ValueObjects\Picture;
 use AmeliaBooking\Domain\ValueObjects\String\Password;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
@@ -169,6 +170,35 @@ class UserRepository extends AbstractRepository implements UserRepositoryInterfa
         } catch (\Exception $e) {
             throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
         }
+    }
+
+    public function updateAvatar($userId, Picture $avatar) {
+      $params = [
+        ':pictureFullPath'  => null !== $avatar ? $avatar->getFullPath() : null,
+        ':pictureThumbPath' => null !== $avatar ? $avatar->getThumbPath() : null,
+        ':id'               => $userId,
+      ];
+
+      try {
+        $statement = $this->connection->prepare(
+            "UPDATE {$this->table}
+            SET
+            `pictureFullPath`  = :pictureFullPath,
+            `pictureThumbPath` = :pictureThumbPath
+            WHERE 
+            id = :id"
+        );
+
+        $res = $statement->execute($params);
+
+        if (!$res) {
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
+        }
+
+        return $res;
+      } catch (\Exception $e) {
+          throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+      }
     }
 
     /**
