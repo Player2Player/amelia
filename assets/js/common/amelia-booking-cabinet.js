@@ -11459,6 +11459,43 @@ wpJsonpAmeliaBookingPlugin([1], {
                               1
                             )
                           : t._e(),
+                        t._v(" "), //p2p add key accomplishment
+                        "provider" === t.state.cabinetType
+                        ? n(
+                            "el-col",
+                            {
+                              attrs: { span: 24 },
+                            },
+                            [
+                              n(
+                                "el-form-item",
+                                {
+                                  attrs: {
+                                    label: "Key accomplishment: ",
+                                    prop: "note",
+                                  },
+                                },
+                                [
+                                  n("el-input", {
+                                    attrs: {
+                                      value: t.state.profile.note,
+                                      type: "textarea",
+                                      rows: 3,
+                                    },
+                                    on: {
+                                      input: function (e) {
+                                        return t.$store.commit(
+                                          "cabinet/setProfileProperty",
+                                          { property: "note", value: e }
+                                        );
+                                      },
+                                    },
+                                  }),
+                                ]
+                              ),
+                            ]
+                          )
+                          : t._e(),
                       ],
                       1
                     ),
