@@ -293,6 +293,42 @@ class AbstractRepository
     }
 
     /**
+     * @param int    $entityId
+     * @param string $entityColumnName
+     * @param mixed  $fieldValue
+     * @param string $fieldName
+     *
+     * @return mixed
+     * @throws QueryExecutionException
+     */
+    public function updateFieldByEntityId($entityId, $entityColumnName, $fieldValue, $fieldName)
+    {
+        $params = [
+            ":$entityColumnName" => $entityId,
+            ":$fieldName"        => $fieldValue
+        ];
+
+        try {
+            $statement = $this->connection->prepare(
+                "UPDATE {$this->table}
+                SET
+                `$fieldName` = :$fieldName
+                WHERE `$entityColumnName` = :$entityColumnName"
+            );
+
+            $res = $statement->execute($params);
+
+            if (!$res) {
+                throw new QueryExecutionException('Unable to save data in ' . __CLASS__);
+            }
+
+            return $res;
+        } catch (\Exception $e) {
+            throw new QueryExecutionException('Unable to save data in ' . __CLASS__, $e->getCode(), $e);
+        }
+    }
+
+    /**
      * @return string
      */
     protected function selectQuery()

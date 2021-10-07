@@ -21,6 +21,7 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingR
 use AmeliaBooking\Infrastructure\WP\Translations\BackendStrings;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
+use AmeliaBooking\Domain\ValueObjects\String\PaymentStatus;
 use Interop\Container\Exception\ContainerException;
 
 /**

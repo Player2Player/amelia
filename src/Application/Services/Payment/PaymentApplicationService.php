@@ -298,32 +298,50 @@ class PaymentApplicationService
       Stripe::setApiKey(
         $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
       );
-      $paymentData = $payment->getData()->getValue();
-      $gateway = $payment->getGateway()->getName()->getValue();
+      $paymentData = null;      
+      $paymentParent = $payment;
+      $parentId = $payment->getId()->getValue();
+      $paymentParentId = $payment->getParentId();
+      if ($paymentParentId) {
+        $parentId = $paymentParentId->getValue();        
+        /** @var Payment $paymentParent  */
+        $paymentParent = $paymentRepository->getById($parentId);
+        $paymentData = $paymentParent->getData() ? $paymentParent->getData()->getValue() : null;         
+      }
+      else {
+        $paymentData = $payment->getData() ? $payment->getData()->getValue() : null;
+      }
+
       if (!$paymentData || empty($paymentData)) {
          return false;
       }
+
       $intentData = json_decode($paymentData);
-      switch ($gateway) {
-        case 'stripe':           
-          if ($intentData->paymentStatus === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
-            /** @var PaymentIntent $intent */    
-            $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
-            $intent->capture();
-            $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
-            $payment->setData(new PaymentData(json_encode($intentData)));
-            $payment->setStatus(new PaymentStatus(PaymentStatus::PAID));
-            $paymentRepository->update($payment->getId()->getValue(), $payment);            
-          }
-          return true;
-        case 'payPal':
-          // TODO: Implement for paypal
-          return true;
-        case 'onSite':
-        case 'wc':
-        case 'mollie':
-          return true;
+      if ($intentData->paymentStatus === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+        /** @var PaymentIntent $intent */    
+        $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
+        $intent->capture();
+        $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
+        
+        $paymentRepository->beginTransaction();
+
+        try {
+          $paymentParent->setData(new PaymentData(json_encode($intentData)));
+          $paymentParent->setStatus(new PaymentStatus(PaymentStatus::PAID));
+          $paymentRepository->update($parentId, $paymentParent);
+          
+          //Update payment children status to PAID
+          $paymentRepository->updateFieldByEntityId($parentId, 'parentId', PaymentStatus::PAID, 'status');
+        }
+        catch (QueryExecutionException $e) {
+          $paymentRepository->rollback();
+          throw $e;
+        }
+        
+        $paymentRepository->commit();
       }
+
+      return true;
     }    
 
     /**
