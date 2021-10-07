@@ -9457,6 +9457,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
             files: {},
           },
           fetchingCoupon: false,
+          couponInvalid: false,
           fetched: !0,
           paid: !1,
           headerErrorMessage: "",
@@ -9530,12 +9531,14 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                             : 1,
                         })
                         .then(function (t) {
+                          e.couponInvalid = false;
                           (e.coupon = t.data.data.coupon),
                             (e.couponLimit = t.data.data.limit),
                             void 0 !== o && (o.style.visibility = "visible"),
                             a();
                         })
                         .catch(function (t) {
+                          e.couponInvalid = true;
                           e.coupon.discount = 0;
                           e.coupon.deduction = 0;
                           e.coupon.appointmentsFree = 0;
@@ -9944,6 +9947,8 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                         var i = t.getRequestData(!1, {
                           paymentMethodId: e.paymentMethod.id,
                         });
+                        if (t.couponInvalid)
+                          i.data.couponCode = null;
                         t.$http
                           .post(
                             t.$root.getAjaxUrl + "/bookings",

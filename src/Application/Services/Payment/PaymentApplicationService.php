@@ -22,6 +22,7 @@ use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\String\BookingType;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentData;
+use AmeliaBooking\Domain\ValueObjects\String\PaymentStatus;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
@@ -311,6 +312,7 @@ class PaymentApplicationService
             $intent->capture();
             $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
             $payment->setData(new PaymentData(json_encode($intentData)));
+            $payment->setStatus(new PaymentStatus(PaymentStatus::PAID));
             $paymentRepository->update($payment->getId()->getValue(), $payment);            
           }
           return true;

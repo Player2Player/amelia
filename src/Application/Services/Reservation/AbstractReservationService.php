@@ -363,14 +363,15 @@ abstract class AbstractReservationService implements ReservationServiceInterface
 
                         break;
                 }
-
+                $countLessons = count($appointmentData['recurring']) + 1;
                 $coupon = $couponAS->processCoupon(
                     $appointmentData['couponCode'],
                     $entityId,
                     $appointmentData['type'],
                     ($user && $user->getId()) ?
                         $user->getId()->getValue() : $appointmentData['bookings'][0]['customer']['id'],
-                    $reservation->hasCouponValidation()->getValue()
+                    $reservation->hasCouponValidation()->getValue(),
+                    $countLessons
                 );
 
                 if (isset($appointmentData['recurring']) && $reservation->hasCouponValidation()->getValue()) {
@@ -695,7 +696,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
             case (PaymentType::MOLLIE):
             case (PaymentType::PAY_PAL):
             case (PaymentType::STRIPE):
-                $paymentStatus = PaymentStatus::PAID;
+                $paymentStatus = PaymentStatus::PENDING;
                 break;
         }
 
