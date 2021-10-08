@@ -59,6 +59,17 @@ class UpdateProviderCommandHandler extends CommandHandler
         /** @var AbstractUser $currentUser */
         $currentUser = $this->container->get('logged.in.user');
 
+        if (!$currentUser) {
+          $result->setResult(CommandResult::RESULT_ERROR);
+          $result->setMessage('Could not retrieve user');
+          $result->setData(
+              [
+                  'reauthorize' => true
+              ]
+          );
+          return $result;
+        }
+
         /** @var UserApplicationService $userAS */
         $userAS = $this->getContainer()->get('application.user.service');
 

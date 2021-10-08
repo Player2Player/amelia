@@ -322,23 +322,13 @@ class PaymentApplicationService
         $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
         $intent->capture();
         $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
+        $paymentParent->setData(new PaymentData(json_encode($intentData)));
+        $paymentParent->setStatus(new PaymentStatus(PaymentStatus::PAID));
         
-        $paymentRepository->beginTransaction();
-
-        try {
-          $paymentParent->setData(new PaymentData(json_encode($intentData)));
-          $paymentParent->setStatus(new PaymentStatus(PaymentStatus::PAID));
-          $paymentRepository->update($parentId, $paymentParent);
-          
-          //Update payment children status to PAID
-          $paymentRepository->updateFieldByEntityId($parentId, 'parentId', PaymentStatus::PAID, 'status');
-        }
-        catch (QueryExecutionException $e) {
-          $paymentRepository->rollback();
-          throw $e;
-        }
+        $paymentRepository->update($parentId, $paymentParent);
         
-        $paymentRepository->commit();
+        //Update payment children status to PAID
+        $paymentRepository->updateFieldByEntityId($parentId, 'parentId', PaymentStatus::PAID, 'status');      
       }
 
       return true;

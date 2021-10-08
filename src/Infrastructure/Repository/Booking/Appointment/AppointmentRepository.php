@@ -144,6 +144,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     cbe.aggregatedPrice AS bookingExtra_aggregatedPrice,
                     
                     p.id AS payment_id,
+                    p.parentId AS payment_parentId,
                     p.packageCustomerId AS payment_packageCustomerId,
                     p.amount AS payment_amount,
                     p.dateTime AS payment_dateTime,

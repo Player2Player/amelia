@@ -214,6 +214,7 @@ class AppointmentFactory
                         'gatewayTitle'      => $row['payment_gatewayTitle'],
                         'amount'            => $row['payment_amount'],
                         'data'              => $row['payment_data'],
+                        'parentId'          => !empty($row['payment_parentId']) ? $row['payment_parentId'] : null,
                     ];
             }
 
