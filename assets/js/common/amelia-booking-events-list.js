@@ -24,6 +24,9 @@ wpJsonpAmeliaBookingPlugin([20], {
       mixins: [n.a, u.a, y.a, s.a, l.a, c.a, p.a, h.a, f.a, v.a, r.a],
       data: function () {
         return {
+          coupon: {
+            id: null, description: "",
+          },
           tags: [],
           pagination: {
             show: this.$root.settings.general.itemsPerPage,
@@ -102,8 +105,27 @@ wpJsonpAmeliaBookingPlugin([20], {
           this.$root.shortcodeData.booking.eventId &&
           0 === this.$root.shortcodeData.booking.eventRecurring;
         this.getEvents(e);
+        this.getAutoApplyCoupon();
       },
       methods: {
+        //p2p: get auto apply coupon
+        getAutoApplyCoupon() {
+          const eventId = this.$root.shortcodeData.booking.eventId;
+          if (!eventId) return;
+
+          this.$http
+            .post(this.$root.getAjaxUrl + "/coupons/auto-apply", {
+              id: eventId,
+              type: "event",
+              count: "0",
+            })
+            .then(response => {
+              this.coupon = response.data.data.coupon;
+            })
+            .catch(() => {
+              this.coupon = { id: null, description: "" };
+            });
+        },
         runCacheAction: function () {
           var e = this;
           if (this.loadingCacheBookingData) {
@@ -646,6 +668,29 @@ wpJsonpAmeliaBookingPlugin([20], {
                           attrs: { id: "am-event-" + t.id },
                         },
                         [
+                          o("div",
+                            {
+                              staticStyle: { "margin-bottom": "20px" },
+                              directives: [
+                                {
+                                  name: "show",
+                                  rawName: "v-show",
+                                  value: e.coupon.id !== null,
+                                  expression: "coupon.id !== null",
+                                },
+                              ],
+                            },
+                            [
+                              o('el-alert', //p2p: display autoApply coupon
+                                {
+                                  attrs: {
+                                    title: e.coupon.description,
+                                    type: "success",
+                                    "show-icon": true,
+                                  },
+                                }),
+                            ]),
+                          e._v(" "),
                           o(
                             "div",
                             {
@@ -900,6 +945,10 @@ wpJsonpAmeliaBookingPlugin([20], {
                                     "div",
                                     {
                                       staticClass: "am-event-price",
+                                      staticStyle: { //p2p: add this if has autoApply coupon
+                                        "top": "25px !important",
+                                        "margin-right": "15px !important",
+                                      },
                                       style: e.getBookableColor(t, !0),
                                     },
                                     [
@@ -1214,10 +1263,10 @@ wpJsonpAmeliaBookingPlugin([20], {
                                         {
                                           attrs: {
                                             visible: t.showEventBooking,
-                                            dialogClass:
-                                              "am-confirm-booking-events-list",
+                                            dialogClass: "am-confirm-booking-events-list",
                                             "form-type": "eventListForm",
                                             "forms-data": e.forms.eventListForm,
+                                            couponCode: e.coupon.code,
                                           },
                                           on: {
                                             "update:visible": function (o) {
@@ -7010,6 +7059,7 @@ wpJsonpAmeliaBookingPlugin([20], {
           hoverCancel: !1,
           columnsLg: 12,
           couponLimit: 0,
+          couponNoValid: false,
           coupon: { code: "", discount: 0, deduction: 0 },
           clearValidate: !0,
           errors: {
@@ -7091,12 +7141,14 @@ wpJsonpAmeliaBookingPlugin([20], {
                             : 1,
                         })
                         .then(function (t) {
+                          e.couponNoValid = false;
                           (e.coupon = t.data.data.coupon),
                             (e.couponLimit = t.data.data.limit),
                             void 0 !== i && (i.style.visibility = "visible"),
                             a();
                         })
                         .catch(function (t) {
+                          e.couponNoValid = true;
                           (e.coupon.discount = 0),
                             (e.coupon.deduction = 0),
                             !0 === t.response.data.data.couponUnknown
@@ -7506,6 +7558,8 @@ wpJsonpAmeliaBookingPlugin([20], {
                         var o = t.getRequestData(!1, {
                           paymentMethodId: e.paymentMethod.id,
                         });
+                        if (t.couponNoValid)
+                          o.data.couponCode = null;
                         t.$http
                           .post(
                             t.$root.getAjaxUrl + "/bookings",
@@ -7635,7 +7689,8 @@ wpJsonpAmeliaBookingPlugin([20], {
             o = this.getExtrasPrice(1),
             a = { instant: 0, postponed: 0 },
             i = this.couponLimit;
-          if (i) {
+          //p2p: check if coupon has no limit
+          if (i || this.coupon.noLimit) {
             var n = this.basePriceMultipleValue * this.bookable.price + o,
               s = (n / 100) * this.coupon.discount + this.coupon.deduction;
             (a.instant = s),
