@@ -1,5 +1,18 @@
 !(function (e) {
+
+  function getVersion() {
+    const ameliaScript = document.getElementById('amelia_booking_scripts-js');
+
+    if (!ameliaScript) new Date().getTime();
+
+    const index = ameliaScript.src.indexOf('ver=');
+    if (index < 0) new Date().getTime();
+
+    return ameliaScript.src.substr(index + 4);
+  }
+
   var t = window.wpJsonpAmeliaBookingPlugin;
+
   window.wpJsonpAmeliaBookingPlugin = function (n, r, a) {
     for (var o, s, l = 0, u = []; l < n.length; l++)
       (s = n[l]), i[s] && u.push(i[s][0]), (i[s] = 0);
@@ -45,7 +58,7 @@
           15: "events-calendar",
           20: "events-list",
         }[e] || e) +
-        "-e062ce735147150ae069.js?t=" + new Date().getTime());
+        "-e062ce735147150ae069.js?t=" + getVersion());
     var s = setTimeout(l, 12e4);
     function l() {
       (o.onerror = o.onload = null), clearTimeout(s);
