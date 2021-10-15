@@ -3,10 +3,12 @@
   function getVersion() {
     const ameliaScript = document.getElementById('amelia_booking_scripts-js');
 
-    if (!ameliaScript) new Date().getTime();
+    if (!ameliaScript) return new Date().getTime();
+
+    if (ameliaScript.src.includes('staging')) return new Date().getTime();
 
     const index = ameliaScript.src.indexOf('ver=');
-    if (index < 0) new Date().getTime();
+    if (index < 0) return new Date().getTime();
 
     return ameliaScript.src.substr(index + 4);
   }
