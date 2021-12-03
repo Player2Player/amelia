@@ -10,6 +10,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Address;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\GeoTag;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
 use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
@@ -71,6 +72,10 @@ class LocationFactory
 
         if (isset($data['pin'])) {
             $location->setPin(new Url($data['pin']));
+        }
+
+        if (isset($data['locationCategoryId'])) {
+            $location->setLocationCategoryId(new PositiveInteger($data['locationCategoryId']));
         }
 
         return $location;

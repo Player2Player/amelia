@@ -12,6 +12,7 @@ use AmeliaBooking\Domain\ValueObjects\String\Name;
 use AmeliaBooking\Domain\ValueObjects\String\Phone;
 use AmeliaBooking\Domain\ValueObjects\String\Url;
 use AmeliaBooking\Domain\ValueObjects\String\Slug;
+use AmeliaBooking\Domain\ValueObjects\Number\Integer\PositiveInteger;
 
 /**
  * Class Location
@@ -49,6 +50,9 @@ class Location
 
     /** @var Url */
     private $pin;
+
+    /** @var PositiveInteger */
+    private $locationCategoryId;
 
     /**
      * @return Id
@@ -211,6 +215,21 @@ class Location
     }
 
     /**
+     * 
+     * @param PositiveInteger $locationCategoryId
+     */
+    public function setLocationCategoryId(PositiveInteger $locationCategoryId) {
+        $this->locationCategoryId = $locationCategoryId;
+    }
+
+    /**
+     * @return PositiveInteger
+     */ 
+    public function getLocationCategoryId() {
+        return $this->locationCategoryId;
+    }
+
+    /**
      * @return array
      */
     public function toArray()
@@ -228,6 +247,7 @@ class Location
             'pictureFullPath'  => null !== $this->getPicture() ? $this->getPicture()->getFullPath() : null,
             'pictureThumbPath' => null !== $this->getPicture() ? $this->getPicture()->getThumbPath() : null,
             'pin'              => null !== $this->getPin() ? $this->getPin()->getValue() : null,
+            'locationCategoryId'  => null !== $this->getLocationCategoryId() ? $this->getLocationCategoryId()->getValue() : null,
         ];
     }
 }

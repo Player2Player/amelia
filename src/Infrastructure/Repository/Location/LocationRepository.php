@@ -304,7 +304,8 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                   l.longitude,
                   l.pictureFullPath,
                   l.pictureThumbPath,
-                  l.pin
+                  l.pin,
+                  l.locationCategoryId
                 FROM {$this->table} l
                 LEFT JOIN {$this->providerLocationTable} pl ON pl.locationId = l.id
                 LEFT JOIN {$this->providerServicesTable}  ps ON ps.userId = pl.userId
