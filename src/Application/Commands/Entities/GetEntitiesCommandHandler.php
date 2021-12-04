@@ -33,6 +33,7 @@ use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventTagsRepository;
 use AmeliaBooking\Infrastructure\Repository\Coupon\CouponRepository;
 use AmeliaBooking\Infrastructure\Repository\CustomField\CustomFieldRepository;
 use AmeliaBooking\Infrastructure\Repository\Location\LocationRepository;
+use AmeliaBooking\Infrastructure\Repository\Location\LocationCategoryRepository;
 use AmeliaBooking\Infrastructure\Repository\User\ProviderRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use Interop\Container\Exception\ContainerException;
@@ -123,6 +124,17 @@ class GetEntitiesCommandHandler extends CommandHandler
             $locations = $locationRepository->getAllOrderedByName();
 
             $resultData['locations'] = $locations->toArray();
+        }
+
+        /** LocationsCategories */
+        if (in_array(Entities::LOCATIONS_CATEGORIES, $params['types'], true)) {
+            /** @var LocationCategoryRepository $locationCategoryRepository */
+            $locationCategoryRepository = $this->getContainer()->get('domain.locationsCategories.repository');
+
+            /** @var Collection $locationsCategories */
+            $locationsCategories = $locationCategoryRepository->getAllOrderedByName();
+
+            $resultData['locationsCategories'] = $locationsCategories->toArray();
         }
 
         /** Categories */

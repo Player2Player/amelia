@@ -36,6 +36,7 @@ class Entities
     const FINANCE = 'finance';
     const LOCATION = 'location';
     const LOCATIONS = 'locations';
+    const LOCATIONS_CATEGORIES = 'locationsCategories';
     const NOTIFICATION = 'notification';
     const NOTIFICATIONS = 'notifications';
     const PACKAGE = 'package';

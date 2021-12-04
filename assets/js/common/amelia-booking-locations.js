@@ -20,8 +20,10 @@ wpJsonpAmeliaBookingPlugin([19], {
           fetched: !1,
           filterFields: !0,
           locations: [],
+          locationsCategories: [],
           options: {
             categorized: [],
+            locationsCategories: [],
             countFiltered: 0,
             fetched: !1,
             sort: [
@@ -77,11 +79,12 @@ wpJsonpAmeliaBookingPlugin([19], {
           var e = this;
           this.$http
             .get(this.$root.getAjaxUrl + "/entities", {
-              params: { types: ["categories"] },
+              params: { types: ["categories", "locationsCategories"] },
             })
             .then(function (t) {
-              (e.options.categorized = t.data.data.categories),
-                (e.options.fetched = !0);
+              e.options.categorized = t.data.data.categories;
+              e.options.locationsCategories = t.data.data.locationsCategories;
+              e.options.fetched = true;
             })
             .catch(function (t) {
               console.log(t.message), (e.options.fetched = !0);
@@ -98,7 +101,9 @@ wpJsonpAmeliaBookingPlugin([19], {
             (this.dialogLocation = !0);
         },
         showDialogEditLocation: function (e) {
-          (this.location = this.locations[e]), (this.dialogLocation = !0);
+          this.locationsCategories = this.options.locationsCategories;
+          this.location = this.locations[e];
+          this.dialogLocation = true;
         },
         duplicateLocationCallback: function (e) {
           var t = this;
@@ -178,7 +183,7 @@ wpJsonpAmeliaBookingPlugin([19], {
       p = o(686);
     t.default = {
       mixins: [d.a, m.a, p.a],
-      props: { location: null },
+      props: { location: null, locationsCategories: [] },
       data: function () {
         return {
           showLatLng: !1,
@@ -449,7 +454,7 @@ wpJsonpAmeliaBookingPlugin([19], {
                               expression: "location.locationCategoryId",
                             },
                           },
-                          e._l([{id: 1, name: "Frisco"},{id: 2, name: "Leander"}], function (t) {
+                          e._l(e.locationsCategories, function (t) {
                             return o(
                               "el-option",
                               {
@@ -1425,7 +1430,7 @@ wpJsonpAmeliaBookingPlugin([19], {
                         },
                         [
                           o("dialog-location", {
-                            attrs: { location: e.location },
+                            attrs: { location: e.location, locationsCategories: e.locationsCategories },
                             on: {
                               saveCallback: e.filterData,
                               duplicateCallback: e.duplicateLocationCallback,

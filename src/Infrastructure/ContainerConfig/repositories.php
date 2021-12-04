@@ -123,6 +123,13 @@ $entries['domain.locations.repository'] = function (Container $c) {
     );
 };
 
+$entries['domain.locationsCategories.repository'] = function (Container $c) {
+    return new Repository\Location\LocationCategoryRepository(
+        $c->getDatabaseConnection(),
+        DB\Location\LocationsCategoryTable::getTableName(),
+    );
+};
+
 $entries['domain.notification.repository'] = function (Container $c) {
     return new Repository\Notification\NotificationRepository(
         $c->getDatabaseConnection(),
