@@ -31,6 +31,7 @@ class UpdateLocationController extends Controller
         'pictureFullPath',
         'pictureThumbPath',
         'pin',
+        'locationCategoryId'
     ];
 
     /**

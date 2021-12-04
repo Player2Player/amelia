@@ -31,6 +31,7 @@ class AddLocationController extends Controller
         'pictureFullPath',
         'pictureThumbPath',
         'pin',
+        'locationCategoryId'
     ];
 
     /**

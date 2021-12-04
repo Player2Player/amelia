@@ -97,8 +97,9 @@ wpJsonpAmeliaBookingPlugin([19], {
           this.filterFields = window.innerWidth >= 768;
         },
         showDialogNewLocation: function () {
-          (this.location = this.getInitLocationObject()),
-            (this.dialogLocation = !0);
+          this.locationsCategories = this.options.locationsCategories;
+          this.location = this.getInitLocationObject();
+          this.dialogLocation = true;
         },
         showDialogEditLocation: function (e) {
           this.locationsCategories = this.options.locationsCategories;

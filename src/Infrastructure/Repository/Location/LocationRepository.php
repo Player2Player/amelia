@@ -88,6 +88,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
             ':pictureThumbPath' => $data['pictureThumbPath'],
             ':pin'              => $data['pin'],
             ':slug'             => $data['slug'],
+            ':locationCategoryId' => $data['locationCategoryId']
         ];
 
         try {
@@ -104,7 +105,8 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                 `pictureFullPath`,
                 `pictureThumbPath`,
                 `pin`,
-                `slug`
+                `slug`,
+                `locationCategoryId`
                 )
                  VALUES (
                  :status,
@@ -117,7 +119,8 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                  :pictureFullPath,
                  :pictureThumbPath,
                  :pin,
-                 :slug
+                 :slug,
+                 :locationCategoryId
                  )"
             );
 
@@ -155,6 +158,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
             ':pictureFullPath'  => $data['pictureFullPath'],
             ':pictureThumbPath' => $data['pictureThumbPath'],
             ':pin'              => $data['pin'],
+            ':locationCategoryId' => $data['locationCategoryId'],
             ':id'               => $id
         ];
 
@@ -164,7 +168,7 @@ class LocationRepository extends AbstractRepository implements LocationRepositor
                 SET `status` = :status, `name` = :name, `description` = :description, `address` = :address,
                 `phone` = :phone, `latitude` = :latitude, `longitude` = :longitude,
                 `pictureFullPath` = :pictureFullPath, `pictureThumbPath` = :pictureThumbPath,
-                `pin` = :pin, `slug` = :slug
+                `pin` = :pin, `slug` = :slug, `locationCategoryId` = :locationCategoryId
                 WHERE id = :id"
             );
 
