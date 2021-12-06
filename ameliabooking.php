@@ -97,7 +97,7 @@ if (!defined('AMELIA_LOGIN_URL')) {
 
 // Const for Amelia version
 if (!defined('AMELIA_VERSION')) {
-    define('AMELIA_VERSION', '4.0.1.18');
+    define('AMELIA_VERSION', '4.0.1.20');
 }
 
 // Const for site URL
