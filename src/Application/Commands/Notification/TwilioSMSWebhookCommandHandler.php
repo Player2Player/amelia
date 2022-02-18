@@ -105,6 +105,8 @@ class TwilioSMSWebhookCommandHandler extends CommandHandler
         $message = $requestedStatus === BookingStatus::APPROVED 
           ? 'Your appointment has been approved'
           : 'Your appointment has been rejected';
+        
+        $this->container->getEventBus()->emit('AppointmentStatusUpdated', $appointmentResult);  
       }
     }
 

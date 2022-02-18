@@ -4,6 +4,7 @@ namespace AmeliaBooking\Domain\Factory\User;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
+use AmeliaBooking\Domain\Entity\User\Provider;
 
 /**
  * Class ProviderFactory
@@ -30,13 +31,19 @@ class ProviderFactory extends UserFactory
             if ($providersServices && array_key_exists($providerKey, $providersServices)) {
                 foreach ((array)$providersServices[$providerKey] as $serviceKey => $providerService) {
                     if (array_key_exists($serviceKey, $services)) {
-                      $providersCollection->getItem($providerKey)->getServiceList()->addItem(
-                          ServiceFactory::create(array_merge(
-                              $services[$serviceKey],
-                              $providerService
-                          )),
-                          $serviceKey
-                      );
+                        $providerModel = $providersCollection->getItem($providerKey);
+                        if ($providerModel instanceof Provider) {
+                            $providerModel->getServiceList()->addItem(
+                              ServiceFactory::create(array_merge(
+                                $services[$serviceKey],
+                                $providerService
+                              )),
+                              $serviceKey
+                            );
+                       }
+                       else {
+                            $providersCollection->deleteItem($providerKey);
+                       }
                     }
                 }
             }
