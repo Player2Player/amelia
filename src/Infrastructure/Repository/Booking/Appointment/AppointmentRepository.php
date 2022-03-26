@@ -1220,6 +1220,12 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
             $params[':providerId'] = $criteria['providerId'];
         }
 
+        // p2p: add locationId filter
+        if (isset($criteria['locationId'])) {
+            $where[] = 'a.locationId = :locationId';
+            $params[':locationId'] = $criteria['locationId'];
+        }
+
         if (array_key_exists('status', $criteria)) {
             $where[] = 'a.status = :status';
 
@@ -1358,6 +1364,12 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
         if (isset($criteria['providerId'])) {
             $where[] = 'a.providerId = :providerId';
             $params[':providerId'] = $criteria['providerId'];
+        }
+
+        // p2p: add filter by locationId
+        if (isset($criteria['locationId'])) {
+            $where[] = 'a.locationId = :locationId';
+            $params[':locationId'] = $criteria['locationId'];
         }
 
         if (array_key_exists('status', $criteria)) {
