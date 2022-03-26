@@ -64,6 +64,7 @@ wpJsonpAmeliaBookingPlugin([11], {
             status: "",
             services: [],
             customerId: "",
+            locationId: "",
           },
           selectedPaymentModalData: {
             paymentId: null,
@@ -725,7 +726,7 @@ wpJsonpAmeliaBookingPlugin([11], {
                                       "el-col",
                                       {
                                         staticClass: "v-calendar-column",
-                                        attrs: { sm: 24, md: 24, lg: 5 },
+                                        attrs: { sm: 4, md: 4, lg: 4 },
                                       },
                                       [
                                         a(
@@ -767,7 +768,7 @@ wpJsonpAmeliaBookingPlugin([11], {
                                     t._v(" "),
                                     a(
                                       "el-col",
-                                      { attrs: { sm: 6, md: 6, lg: 5 } },
+                                      { attrs: { sm: 4, md: 4, lg: 4 } },
                                       [
                                         a(
                                           "el-form-item",
@@ -823,7 +824,7 @@ wpJsonpAmeliaBookingPlugin([11], {
                                     t._v(" "),
                                     a(
                                       "el-col",
-                                      { attrs: { sm: 6, md: 6, lg: 5 } },
+                                      { attrs: { sm: 4, md: 4, lg: 4 } },
                                       [
                                         a(
                                           "el-form-item",
@@ -884,7 +885,7 @@ wpJsonpAmeliaBookingPlugin([11], {
                                     t._v(" "),
                                     a(
                                       "el-col",
-                                      { attrs: { sm: 6, md: 6, lg: 5 } },
+                                      { attrs: { sm: 4, md: 4, lg: 4 } },
                                       [
                                         a(
                                           "el-form-item",
@@ -972,9 +973,57 @@ wpJsonpAmeliaBookingPlugin([11], {
                                       1
                                     ),
                                     t._v(" "),
+                                    a( //p2p: add location filter
+                                      "el-col",
+                                      { attrs: { sm: 4, md: 4, lg: 4 } },
+                                      [
+                                        a(
+                                          "el-form-item",
+                                          [
+                                            a(
+                                              "el-select",
+                                              {
+                                                attrs: {
+                                                  placeholder:
+                                                    t.$root.labels
+                                                      .location,
+                                                  clearable: "",
+                                                },
+                                                on: { change: t.changeFilter },
+                                                model: {
+                                                  value: t.params.locationId,
+                                                  callback: function (e) {
+                                                    t.$set(
+                                                        t.params,
+                                                        "locationId",
+                                                        e
+                                                    );
+                                                  },
+                                                  expression:
+                                                      "params.locationId",
+                                                },
+                                              },
+                                              t._l(t.options.entities.locations, function(loc) {
+                                                return a(
+                                                  "el-option",
+                                                  {
+                                                    key: loc.id,
+                                                    attrs: {
+                                                      label: loc.name,
+                                                      value: loc.id,
+                                                    },
+                                                  }
+                                                );
+                                              }),
+                                            ),
+                                          ]
+                                        ),
+                                      ]
+                                    ),
+                                    t._v(" "),
                                     a(
                                       "el-col",
-                                      { attrs: { sm: 6, md: 6, lg: 4 } },
+                                      { attrs: { sm: 4, md: 4, lg: 4 } },
                                       [
                                         a(
                                           "el-form-item",
