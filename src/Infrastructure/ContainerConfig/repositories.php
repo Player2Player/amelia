@@ -137,6 +137,14 @@ $entries['domain.notification.repository'] = function (Container $c) {
     );
 };
 
+$entries['domain.notificationAdmin.repository'] = function (Container $c) {
+    return new Repository\Notification\NotificationAdminRepository(
+        $c->getDatabaseConnection(),
+        DB\Notification\NotificationsAdminTable::getTableName(),
+        DB\User\WPUsersTable::getTableName()
+    );
+};
+
 $entries['domain.notificationLog.repository'] = function (Container $c) {
     return new Repository\Notification\NotificationLogRepository(
         $c->getDatabaseConnection(),

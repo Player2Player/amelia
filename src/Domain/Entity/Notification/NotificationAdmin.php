@@ -4,6 +4,7 @@ namespace AmeliaBooking\Domain\Entity\Notification;
 
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
+use AmeliaBooking\Domain\ValueObjects\String\Email;
 
 /**
  * Class Notification 
@@ -33,6 +34,11 @@ class NotificationAdmin {
      * @var BooleanValueObject 
     */
     private $isAdmin;
+
+    /** 
+     * @var Email $wpUserEmail
+    */
+    private $wpUserEmail;
 
     /**
      * Get the value of id
@@ -130,12 +136,37 @@ class NotificationAdmin {
         return $this;
     }
 
+    /**
+     * Get $wpUserEmail
+     *
+     * @return  Email
+     */ 
+    public function getWpUserEmail()
+    {
+        return $this->wpUserEmail;
+    }
+
+    /**
+     * Set $wpUserEmail
+     *
+     * @param  Email  $wpUserEmail  $wpUserEmail
+     *
+     * @return  self
+     */ 
+    public function setWpUserEmail(Email $wpUserEmail)
+    {
+        $this->wpUserEmail = $wpUserEmail;
+
+        return $this;
+    }
+
     public function toArray() {
         return [
             'id'           => null !== $this->getId() ? $this->getId()->getValue() : null,
             'locationId'   => $this->getLocationId() !== null ? $this->getLocationId()->getValue() : null,
             'wpUserId'     => $this->getWpUserId()->getValue(),
             'isAdmin'      => $this->getIsAdmin()->getValue(),
+            'wpUserEmail'   => $this->getWpUserEmail() !== null ? $this->getWpUserEmail()->getValue() : null,
         ];
     }
 

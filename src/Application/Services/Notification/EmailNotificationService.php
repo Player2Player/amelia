@@ -11,12 +11,14 @@ use AmeliaBooking\Application\Services\Placeholder\PlaceholderService;
 use AmeliaBooking\Application\Services\Settings\SettingsService;
 use AmeliaBooking\Domain\Entity\Entities;
 use AmeliaBooking\Domain\Entity\Notification\Notification;
+use AmeliaBooking\Domain\Entity\Notification\NotificationAdmin;
 use AmeliaBooking\Domain\Entity\User\Customer;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\String\NotificationStatus;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Notification\NotificationLogRepository;
+use AmeliaBooking\Infrastructure\Repository\Notification\NotificationAdminRepository;
 use AmeliaBooking\Infrastructure\Repository\User\UserRepository;
 use AmeliaBooking\Infrastructure\Services\Notification\MailgunService;
 use AmeliaBooking\Infrastructure\Services\Notification\PHPMailService;
@@ -54,6 +56,9 @@ class EmailNotificationService extends AbstractNotificationService
     ) {
         /** @var NotificationLogRepository $notificationLogRepo */
         $notificationLogRepo = $this->container->get('domain.notificationLog.repository');
+
+        /** @var NotificationAdminRepository $notificationAdminRepo */
+        $notificationAdminRepo = $this->container->get('domain.notificationAdmin.repository');
 
         /** @var UserRepository $userRepository */
         $userRepository = $this->container->get('domain.users.repository');
@@ -123,6 +128,11 @@ class EmailNotificationService extends AbstractNotificationService
             $data
         );
 
+        $notificationAdmins = $notificationAdminRepo->getByLocation($appointmentArray['locationId'])->getItems();
+        $bccEmails = array_map(function(NotificationAdmin $item) { 
+            return $item->getWpUserEmail()->getValue();  
+        }, $notificationAdmins);
+
         foreach ($users as $user) {
             try {
                 if ($user['email']) {
@@ -141,7 +151,7 @@ class EmailNotificationService extends AbstractNotificationService
                         $user['email'],
                         $reParsedData['subject'],
                         $this->getParsedBody($reParsedData['body']),
-                        $settingsAS->getBccEmails(),
+                        $bccEmails, // $settingsAS->getBccEmails(),
                         !empty($icsFiles) ? $icsFiles : []
                     );
 

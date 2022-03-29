@@ -7,6 +7,7 @@ use AmeliaBooking\Domain\Factory\Notification\NotificationAdminFactory;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\AbstractRepository;
 use AmeliaBooking\Domain\Collection\Collection;
+use AmeliaBooking\Infrastructure\Connection;
 
 /**
  * Class NotificationAdminRepository
@@ -17,6 +18,22 @@ class NotificationAdminRepository extends AbstractRepository
 {
 
     const FACTORY = NotificationAdminFactory::class;
+
+    /**
+     * @var string $wpUserTable
+     */
+    protected $wpUserTable;
+
+
+    public function __construct(
+        Connection $connection,
+        string $table,
+        string $wpUserTable
+    ) {
+        parent::__construct($connection, $table);
+
+        $this->wpUserTable = $wpUserTable;
+    }
 
     /**
      * @param NotificationAdmin $entity
@@ -101,11 +118,16 @@ class NotificationAdminRepository extends AbstractRepository
     {
         try {
             $statement = $this->connection->prepare(
-                $this->selectQuery() . " WHERE {$this->table}.locationId = :locationId"
+                "SELECT *, wpu.user_email as wpUserEmail FROM {$this->table}  
+                    INNER JOIN {$this->wpUserTable} wpu ON 
+                        {$this->table}.wpUserId = wpu.ID
+                    WHERE {$this->table}.locationId = :locationId OR {$this->table}.isAdmin = :isAdmin
+                "
             );
 
             $params = [
                 ':locationId' => $locationId,
+                ':isAdmin' => 1
             ];
 
             $statement->execute($params);
@@ -116,7 +138,7 @@ class NotificationAdminRepository extends AbstractRepository
         }
 
         if (!$rows) {
-            return null;
+            return new Collection();
         }
 
         $items = [];

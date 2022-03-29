@@ -6,6 +6,7 @@ use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Entity\Notification\NotificationAdmin;
 use AmeliaBooking\Domain\ValueObjects\BooleanValueObject;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\String\Email;
 
 /**
  * Class NotificationAdminFactory
@@ -38,6 +39,10 @@ class NotificationAdminFactory
 
         if (isset($data['isAdmin'])) {
             $notification->setIsAdmin(new BooleanValueObject($data['isAdmin']));
+        }
+
+        if (isset($data['wpUserEmail'])) {
+            $notification->setWpUserEmail(new Email($data['wpUserEmail']));
         }
 
         return $notification;
