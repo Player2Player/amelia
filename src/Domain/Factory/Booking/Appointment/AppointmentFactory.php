@@ -8,6 +8,7 @@ namespace AmeliaBooking\Domain\Factory\Booking\Appointment;
 
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
+use AmeliaBooking\Domain\Entity\Location\Location;
 use AmeliaBooking\Domain\Entity\Booking\Appointment\Appointment;
 use AmeliaBooking\Domain\Factory\Bookable\Service\ServiceFactory;
 use AmeliaBooking\Domain\Factory\User\UserFactory;
@@ -19,6 +20,7 @@ use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
 use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Domain\ValueObjects\String\Description;
 use AmeliaBooking\Domain\ValueObjects\String\Token;
+use AmeliaBooking\Domain\ValueObjects\String\Name;
 
 /**
  * Class AppointmentFactory
@@ -54,6 +56,13 @@ class AppointmentFactory
 
         if (isset($data['locationId'])) {
             $appointment->setLocationId(new Id($data['locationId']));
+        }
+
+        if (isset($data['locationName'])) {
+            $location = new Location();
+            $location->setId(new Id($data['locationId']));
+            $location->setName(new Name($data['locationName']));
+            $appointment->setLocation($location);
         }
 
         if (isset($data['internalNotes'])) {
@@ -148,6 +157,8 @@ class AppointmentFactory
                     'providerId'             => $row['appointment_providerId'],
                     'locationId'             => isset($row['appointment_locationId']) ?
                         $row['appointment_locationId'] : null,
+                    'locationName'           => isset($row['location_name']) ?
+                        $row['location_name'] : null,
                     'internalNotes'          => isset($row['appointment_internalNotes']) ?
                         $row['appointment_internalNotes'] : null,
                     'status'                 => $row['appointment_status'],

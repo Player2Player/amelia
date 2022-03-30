@@ -326,7 +326,8 @@ $entries['domain.booking.appointment.repository'] = function (Container $c) {
         DB\User\Provider\ProvidersLocationTable::getTableName(),
         DB\User\Provider\ProvidersServiceTable::getTableName(),
         DB\Bookable\PackagesCustomersTable::getTableName(),
-        DB\Bookable\PackagesCustomersServicesTable::getTableName()
+        DB\Bookable\PackagesCustomersServicesTable::getTableName(),
+        DB\Location\LocationsTable::getTableName()
     );
 };
 

@@ -55,6 +55,9 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
     /** @var string */
     protected $packagesCustomersServicesTable;
 
+    /** @var string */
+    protected $locationsTable;
+
     /**
      * @param Connection $connection
      * @param string     $table
@@ -69,6 +72,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
      * @param string     $providerServicesTable
      * @param string     $packagesCustomersTable
      * @param string     $packagesCustomersServicesTable
+     * @param string     $locationsTable
      */
     public function __construct(
         Connection $connection,
@@ -83,7 +87,8 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
         $providersLocationTable,
         $providerServicesTable,
         $packagesCustomersTable,
-        $packagesCustomersServicesTable
+        $packagesCustomersServicesTable,
+        $locationsTable
     ) {
         parent::__construct($connection, $table);
 
@@ -98,6 +103,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
         $this->providerServicesTable = $providerServicesTable;
         $this->packagesCustomersTable = $packagesCustomersTable;
         $this->packagesCustomersServicesTable = $packagesCustomersServicesTable;
+        $this->locationsTable = $locationsTable;
     }
 
     /**
@@ -1068,6 +1074,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     {$paymentsFields}
                     {$couponsFields}
                     
+                    loc.name AS location_name,
                     cb.id AS booking_id,
                     cb.customerId AS booking_customerId,
                     cb.status AS booking_status,
@@ -1079,6 +1086,7 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                     cb.packageCustomerServiceId AS booking_packageCustomerServiceId
                     
                 FROM {$this->table} a
+                INNER JOIN {$this->locationsTable} loc ON a.locationId = loc.id
                 INNER JOIN {$this->bookingsTable} cb ON cb.appointmentId = a.id
                 {$customersJoin}
                 {$providersJoin}
