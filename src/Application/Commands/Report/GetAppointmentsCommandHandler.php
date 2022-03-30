@@ -96,7 +96,15 @@ class GetAppointmentsCommandHandler extends CommandHandler
             ];
 
             foreach ((array)$appointment['bookings'] as $booking) {
-                $numberOfPersonsData[AbstractUser::USER_ROLE_PROVIDER][$booking['status']] += $booking['persons'];
+                $extras = 0;
+                if ($booking['extras']) {
+                    foreach ((array)$booking['extras'] as $extra) {
+                       if ($extra['quantity']) {
+                           $extras += $extra['quantity'];
+                       }
+                    }
+                }
+                $numberOfPersonsData[AbstractUser::USER_ROLE_PROVIDER][$booking['status']] += $booking['persons'] + $extras;
             }
 
             $numberOfPersons = [];

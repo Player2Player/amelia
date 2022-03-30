@@ -15621,6 +15621,11 @@ wpJsonpAmeliaBookingPlugin([11], {
                 value: "employee",
                 checked: !0,
               },
+              { // p2p: add location checkbox for exporting available fields
+                label: this.$root.labels.location,
+                value: "location",
+                checked: !0,
+              },
               {
                 label: this.$root.labels.service,
                 value: "service",
