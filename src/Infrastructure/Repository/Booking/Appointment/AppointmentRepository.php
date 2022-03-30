@@ -869,6 +869,11 @@ class AppointmentRepository extends AbstractRepository implements AppointmentRep
                 $params[':providerId'] = $criteria['providerId'];
             }
 
+            if (isset($criteria['locationId'])) {
+                $where[] = 'a.locationId = :locationId';
+                $params[':locationId'] = $criteria['locationId'];
+            }
+
             if (array_key_exists('status', $criteria)) {
                 $where[] = 'a.status = :status';
 
