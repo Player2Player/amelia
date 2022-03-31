@@ -222,9 +222,9 @@ class GetAppointmentsCommandHandler extends CommandHandler
             $row[BackendStrings::getCommonStrings()['service']] = $appointment['service']['name'];
         }
 
-        if (in_array('location', $params['fields'], true)) {
+        // if (in_array('location', $params['fields'], true)) {
             $row[BackendStrings::getCommonStrings()['location']] = $appointment['location']['name'];
-        }
+        // }
 
         if (in_array('startTime', $params['fields'], true)) {
             $row[BackendStrings::getAppointmentStrings()['start_time']] =

@@ -15641,12 +15641,12 @@ wpJsonpAmeliaBookingPlugin([11], {
                 value: "endTime",
                 checked: !0,
               },
-              { label: this.$root.labels.note, value: "note", checked: !0 },
+              { label: this.$root.labels.note, value: "note", checked: false },
               { label: this.$root.labels.status, value: "status", checked: !0 },
               {
                 label: this.$root.labels.custom_fields,
                 value: "customFields",
-                checked: !0,
+                checked: false,
               },
               {
                 label: this.$root.labels.ph_booking_number_of_persons,
