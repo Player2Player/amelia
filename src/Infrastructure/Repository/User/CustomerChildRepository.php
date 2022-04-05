@@ -243,7 +243,7 @@ class CustomerChildRepository extends AbstractRepository implements CustomerChil
     $criteria = ['customerId' => $customerId];
     $customers = $this->getCustomersChildren($criteria);
 
-    return $customers[$customerId];
+    return $customers[$customerId] ?? new Collection();
   }
 
   /**
