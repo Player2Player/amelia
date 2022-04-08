@@ -301,7 +301,7 @@ class TimeSlotService
         $requiredTime = $appointmentApplicationService->getAppointmentRequiredTime($service, $extras, $selectedExtras);
 
         // Get free slots for providers
-        return $timeSlotService->getAppointmentFreeSlots(
+        $freeSlots = $timeSlotService->getAppointmentFreeSlots(
             $service,
             $requiredTime,
             $freeIntervals,
@@ -311,6 +311,28 @@ class TimeSlotService
             $settingsDomainService->getSetting('general', 'bufferTimeInSlot'),
             true
         );
+
+        $breakInMinutes = $settingsDomainService->getSetting('p2p', 'appointments')['breakInMinutes'];
+        // Remove before and after time slots if the coach have appointments
+        /** @var Appointment $futureAppointment */
+        foreach($futureAppointmentsFiltered->getItems() as $futureAppointment) {
+            $bookingEnd = $futureAppointment->getBookingEnd()->getValue();
+            $dateKey = $bookingEnd->format('Y-m-d');
+            $timeKey = $bookingEnd->format('H:i');
+            if ($freeSlots[$dateKey] && $freeSlots[$dateKey][$timeKey]) {
+                unset($freeSlots[$dateKey][$timeKey]);
+            }
+
+            $bookingStart = $futureAppointment->getBookingStart()->getValue();
+            $bookingStart->sub(new \DateInterval('PT1H'));
+            $dateKey = $bookingStart->format('Y-m-d');
+            $timeKey = $bookingStart->format('H:i');
+            if ($freeSlots[$dateKey] && $freeSlots[$dateKey][$timeKey]) {
+                unset($freeSlots[$dateKey][$timeKey]);
+            }
+        }
+
+        return $freeSlots;
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection */
