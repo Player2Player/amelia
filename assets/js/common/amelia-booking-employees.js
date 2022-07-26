@@ -11426,6 +11426,7 @@ wpJsonpAmeliaBookingPlugin([14], {
                       "",
                     ]
                   : ["", ""],
+              formatTime: ["", ""], //p2p add formatTime custom format field
               id: null,
               locationId: null,
               serviceIds: [],
@@ -11447,6 +11448,7 @@ wpJsonpAmeliaBookingPlugin([14], {
               e.form.isNew || (e.breaks[e.form.index] = e.form.oldData);
           }
         },
+        //p2p add formatTime custom format field
         saveHoursForm: function (e) {
           this.$refs.workDay[0].validate(function (t) {
             if (!t) return !1;
@@ -11459,6 +11461,7 @@ wpJsonpAmeliaBookingPlugin([14], {
                       serviceIds: e.form.data.serviceIds,
                       locationId: e.form.data.locationId,
                       periodServiceList: e.form.data.periodServiceList,
+                      formatTime: e.form.data.formatTime,
                     })
                   : (e.periods[e.form.index] = e.form.data);
                 break;
