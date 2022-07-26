@@ -39981,6 +39981,7 @@ wpJsonpAmeliaBookingPlugin([1], {
               e.breaks.splice(i, 1);
           }
         },
+        // p2p: add formatTime property for formatting change
         showNewHoursForm: function (e) {
           (e.form = {
             data: {
@@ -39993,6 +39994,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                       "",
                     ]
                   : ["", ""],
+              formatTime: ["", ""],
               id: null,
               locationId: null,
               serviceIds: [],
@@ -40014,6 +40016,7 @@ wpJsonpAmeliaBookingPlugin([1], {
               e.form.isNew || (e.breaks[e.form.index] = e.form.oldData);
           }
         },
+        // p2p: add formatTime property for formatting change
         saveHoursForm: function (e) {
           this.$refs.workDay[0].validate(function (t) {
             if (!t) return !1;
@@ -40025,6 +40028,7 @@ wpJsonpAmeliaBookingPlugin([1], {
                       time: e.form.data.time,
                       serviceIds: e.form.data.serviceIds,
                       locationId: e.form.data.locationId,
+                      formatTime: e.form.data.formatTime,
                       periodServiceList: e.form.data.periodServiceList,
                     })
                   : (e.periods[e.form.index] = e.form.data);
