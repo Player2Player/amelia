@@ -13,6 +13,10 @@ final class PaymentStatus
 
     const PENDING = 'pending';
 
+    const CANCELED = 'canceled';
+
+    const REFUNDED = 'refunded';
+
     const PARTIALLY_PAID = 'partiallyPaid';
 
     /**

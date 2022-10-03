@@ -686,6 +686,9 @@ abstract class AbstractReservationService implements ReservationServiceInterface
     {
         /** @var PaymentRepository $paymentRepository */
         $paymentRepository = $this->container->get('domain.payment.repository');
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+        $options = $settingsService->getSetting('p2p', 'stripe');   
 
         $paymentStatus = PaymentStatus::PENDING;
 
@@ -695,8 +698,10 @@ abstract class AbstractReservationService implements ReservationServiceInterface
                 break;
             case (PaymentType::MOLLIE):
             case (PaymentType::PAY_PAL):
+                $paymentStatus = PaymentStatus::PAID;
+                break;
             case (PaymentType::STRIPE):
-                $paymentStatus = PaymentStatus::PENDING;
+                $paymentStatus = $options['manualCapture'] === true ? PaymentStatus::PENDING : PaymentStatus::PAID;
                 break;
         }
 

@@ -116,13 +116,7 @@ class UpdateAppointmentStatusCommandHandler extends CommandHandler
         try {
             $bookingRepository->updateStatusByAppointmentId($appointmentId, $requestedStatus);
             $appointmentRepo->updateStatusById($appointmentId, $requestedStatus);
-
-            if ($oldStatus === BookingStatus::PENDING && $requestedStatus === BookingStatus::APPROVED) {
-              /** @var Payment $payment */ 
-              foreach($payments as $payment){
-                $paymentAS->processPaymentCapture($payment);    
-              }
-            }
+            $paymentAS->processPaymentsIntent($payments, $appointment, $oldStatus, $requestedStatus);
         } catch (QueryExecutionException $e) {
             $appointmentRepo->rollback();
             throw $e;

@@ -9,6 +9,7 @@ use AmeliaBooking\Application\Services\Bookable\BookableApplicationService;
 use AmeliaBooking\Application\Services\Booking\AppointmentApplicationService;
 use AmeliaBooking\Application\Services\Booking\BookingApplicationService;
 use AmeliaBooking\Application\Services\CustomField\CustomFieldApplicationService;
+use AmeliaBooking\Application\Services\Payment\PaymentApplicationService;
 use AmeliaBooking\Application\Services\User\UserApplicationService;
 use AmeliaBooking\Domain\Collection\Collection;
 use AmeliaBooking\Domain\Common\Exceptions\AuthorizationException;
@@ -82,6 +83,8 @@ class UpdateAppointmentCommandHandler extends CommandHandler
         $userAS = $this->getContainer()->get('application.user.service');
         /** @var SettingsService $settingsDS */
         $settingsDS = $this->container->get('domain.settings.service');
+        /** @var PaymentApplicationService $paymentAS */
+        $paymentAS = $this->container->get('application.payment.service');
         /** @var ProviderRepository $providerRepository */
         $providerRepository = $this->container->get('domain.users.providers.repository');
 
@@ -122,10 +125,16 @@ class UpdateAppointmentCommandHandler extends CommandHandler
         /** @var Appointment $oldAppointment */
         $oldAppointment = $appointmentRepo->getById($appointment->getId()->getValue());
 
+        $payments = [];
         /** @var CustomerBooking $newBooking */
         foreach ($appointment->getBookings()->getItems() as $newBooking) {
             /** @var CustomerBooking $oldBooking */
             foreach ($oldAppointment->getBookings()->getItems() as $oldBooking) {
+                foreach($oldBooking->getPayments()->getItems() as $key => $payment) {
+                    if (!array_key_exists($key, $payments)) {
+                      $payments += [ $key => $payment];
+                    }
+                }    
                 if ($newBooking->getId() &&
                     $newBooking->getId()->getValue() === $oldBooking->getId()->getValue()
                 ) {
@@ -224,6 +233,7 @@ class UpdateAppointmentCommandHandler extends CommandHandler
                 $service,
                 $command->getField('payment')
             );
+            $paymentAS->processPaymentsIntent($payments, $oldAppointment, $oldAppointment->getStatus()->getValue(), $appointment->getStatus()->getValue());
         } catch (QueryExecutionException $e) {
             $appointmentRepo->rollback();
             throw $e;

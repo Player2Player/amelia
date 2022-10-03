@@ -18,11 +18,13 @@ use AmeliaBooking\Domain\Entity\User\AbstractUser;
 use AmeliaBooking\Domain\Entity\User\Provider;
 use AmeliaBooking\Domain\Services\Reservation\ReservationServiceInterface;
 use AmeliaBooking\Domain\Services\Settings\SettingsService;
+use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\Number\Float\Price;
 use AmeliaBooking\Domain\ValueObjects\String\BookingType;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentType;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentData;
 use AmeliaBooking\Domain\ValueObjects\String\PaymentStatus;
+use AmeliaBooking\Domain\ValueObjects\String\BookingStatus;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Infrastructure\Repository\Booking\Event\EventRepository;
@@ -33,6 +35,7 @@ use AmeliaBooking\Infrastructure\Services\Payment\PayPalService;
 use AmeliaBooking\Infrastructure\Services\Payment\StripeService;
 use AmeliaStripe\PaymentIntent;
 use AmeliaStripe\Customer;
+use AmeliaStripe\Refund;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use AmeliaStripe\Stripe;
 use Exception;
@@ -145,6 +148,9 @@ class PaymentApplicationService
 
         /** @var ReservationServiceInterface $reservationService */
         $reservationService = $this->container->get('application.reservation.service')->get($bookingTypeValue);
+        /** @var SettingsService $settingsService */
+        $settingsService = $this->container->get('domain.settings.service');
+        $options = $settingsService->getSetting('p2p', 'stripe');
 
         $paymentAmount = $reservationService->getReservationPaymentAmount($reservation);
 
@@ -215,7 +221,7 @@ class PaymentApplicationService
                         'amount'          => $currencyService->getAmountInFractionalUnit(new Price($paymentAmount)),
                         'metaData'        => $additionalInformation['metaData'],
                         'description'     => $additionalInformation['description'],
-                        'manualCapture'   => $bookingTypeValue === BookingType::APPOINTMENT
+                        'manualCapture'   => $options['manualCapture'] === true && $bookingTypeValue === BookingType::APPOINTMENT
                     ];
                     if ($customerData['email']) {
                         $stripeParams['customer'] = $this->createStripeCustomer($customerData);
@@ -291,10 +297,134 @@ class PaymentApplicationService
     }
 
     /**
+     * @param mixed $intentData
      * @param Payment $payment
+     * @param Payment $paymentParent
+     * @param Appointment $appointment
+     * @param string $newStatus
+     */
+    public function processCapture($intentData, $payment, $paymentParent, $appointment, $newStatus) {
+        /** @var PaymentRepository $paymentRepository */
+        $paymentRepository = $this->container->get('domain.payment.repository');
+
+        if ($intentData && $intentData->paymentStatus === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+            $paymentForUpdate = $paymentParent ? $paymentParent : $payment;
+            /** @var PaymentIntent $intent */    
+            $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
+            $intent->capture();
+            $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
+            $paymentForUpdate->setData(new PaymentData(json_encode($intentData)));
+            $paymentForUpdate->setStatus(new PaymentStatus(PaymentStatus::PAID));
+            
+            $paymentRepository->update($paymentForUpdate->getId()->getValue(), $paymentForUpdate);
+            
+            if ($paymentParent) {
+                //Update payment children status to PAID
+                $paymentRepository->updateFieldByEntityId($paymentParent->getId()->getValue(), 'parentId', PaymentStatus::PAID, 'status');      
+            }
+        }
+    }
+
+    /**
+     * @param mixed $intentData
+     * @param Payment $payment
+     * @param Payment $paymentParent 
+     * @param Appointment $appointment
+     * @param string $newStatus
+     */
+    public function processCancel($intentData, $payment, $paymentParent, $appointment, $newStatus) {
+        /** @var PaymentRepository $paymentRepository */
+        $paymentRepository = $this->container->get('domain.payment.repository');
+
+        if ($intentData && $intentData->paymentStatus === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
+            $paymentForUpdate = $paymentParent ? $paymentParent : $payment;            
+            /** @var PaymentIntent $intent */    
+            $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
+            $intent->cancel();
+            $intentData->paymentStatus = PaymentIntent::STATUS_CANCELED;
+            $paymentForUpdate->setData(new PaymentData(json_encode($intentData)));
+            $paymentForUpdate->setStatus(new PaymentStatus(PaymentStatus::CANCELED));
+            
+            $paymentRepository->update($paymentForUpdate->getId()->getValue(), $paymentForUpdate);
+            
+            if ($paymentParent) {
+                //Update payment children status to CANCELED
+                $paymentRepository->updateFieldByEntityId($paymentParent->getId()->getValue(), 'parentId', PaymentStatus::CANCELED, 'status');      
+            }
+        }
+    }
+
+    /**
+     * @param mixed $intentData
+     * @param Payment $payment
+     * @param Payment $paymentParent 
+     * @param Appointment $appointment
+     * @param string $newStatus
+     */
+    public function processRefund($intentData, $payment, $paymentParent, $appointment, $newStatus) {
+
+        if (!$intentData) return;
+
+        /** @var PaymentRepository $paymentRepository */
+        $paymentRepository = $this->container->get('domain.payment.repository');
+        $now = DateTimeService::getNowDateTimeObject();
+        $diff = $now->diff($appointment->getBookingStart()->getValue());
+        /** @var int $hours */
+        $hours = $diff->h;
+        $hours = $hours + ($diff->days*24);
+        $appointmentId = $appointment->getId()->getValue();
+        $paymentId = $payment->getId()->getValue();
+        $customerBookingId = $payment->getCustomerBookingId()->getValue();
+        $amount = $payment->getAmount()->getValue();
+        $refundAmount = 0;
+        if ($newStatus === BookingStatus::REJECTED) {
+            $refundAmount = round($amount, 2) * 100;
+        }
+        elseif ($newStatus === BookingStatus::CANCELED) {
+            if ($hours < 24) {
+                $refundAmount = 0;
+            }
+            elseif ($hours < 48) {
+                $refundAmount = round($amount - 10, 2) * 100;
+            }
+            else {
+                $refundAmount = round($amount, 2) * 100;
+            }
+        }
+
+        $paymentStatus = "";
+        if ($refundAmount === 0) {
+            $intentData->paymentStatus = PaymentIntent::STATUS_CANCELED;
+            $paymentStatus = PaymentStatus::CANCELED;
+        }
+        else {
+            $intentData->paymentStatus = 'refunded';
+            $paymentStatus = PaymentStatus::REFUNDED;
+            Refund::create([
+                'payment_intent' => $intentData->paymentIntentId,
+                'amount' => $refundAmount,
+                'metadata' => [
+                    'appointmentId' => $appointmentId,
+                    'paymentId' => $paymentId,
+                    'customerBookingId' => $customerBookingId,
+                    'hours' => $hours,
+                ],
+            ]);    
+        }
+        $paymentForUpdate = $paymentParent ? $paymentParent : $payment;            
+
+        $paymentRepository->updateFieldById($paymentForUpdate->getId()->getValue(), json_encode($intentData), 'data');
+        $paymentRepository->updateFieldById($paymentId, $paymentStatus, 'status');
+    }    
+
+    /**
+     * @param Payment $payment
+     * @param Appointment $appointment
+     * @param string $newStatus
+     * @param string $action
      * @return bool
      */
-    public function processPaymentCapture($payment) 
+    public function processStripePayment($payment, $appointment, $newStatus, $action) 
     {
       /** @var PaymentRepository $paymentRepository */
       $paymentRepository = $this->container->get('domain.payment.repository');
@@ -303,12 +433,11 @@ class PaymentApplicationService
         $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
       );
       $paymentData = null;      
-      $paymentParent = $payment;
-      $parentId = $payment->getId()->getValue();
+      /** @var Payment $paymentParent  */
+      $paymentParent = null;
       $paymentParentId = $payment->getParentId();
       if ($paymentParentId) {
-        $parentId = $paymentParentId->getValue();        
-        /** @var Payment $paymentParent  */
+        $parentId = $paymentParentId->getValue();
         $paymentParent = $paymentRepository->getById($parentId);
         $paymentData = $paymentParent->getData() ? $paymentParent->getData()->getValue() : null;         
       }
@@ -316,26 +445,44 @@ class PaymentApplicationService
         $paymentData = $payment->getData() ? $payment->getData()->getValue() : null;
       }
 
-      if (!$paymentData || empty($paymentData)) {
-         return false;
+      $intentData = null;
+      if ($paymentData) {
+        $intentData = json_decode($paymentData);
       }
 
-      $intentData = json_decode($paymentData);
-      if ($intentData->paymentStatus === PaymentIntent::STATUS_REQUIRES_CAPTURE) {
-        /** @var PaymentIntent $intent */    
-        $intent = PaymentIntent::retrieve($intentData->paymentIntentId);
-        $intent->capture();
-        $intentData->paymentStatus = PaymentIntent::STATUS_SUCCEEDED;
-        $paymentParent->setData(new PaymentData(json_encode($intentData)));
-        $paymentParent->setStatus(new PaymentStatus(PaymentStatus::PAID));
-        
-        $paymentRepository->update($parentId, $paymentParent);
-        
-        //Update payment children status to PAID
-        $paymentRepository->updateFieldByEntityId($parentId, 'parentId', PaymentStatus::PAID, 'status');      
-      }
-
+      
+      $this->{"process$action"}($intentData, $payment, $paymentParent, $appointment, $newStatus);      
+      
       return true;
+    }
+    
+    /**
+     * @param array $payments
+     * @param Appointment $appointment
+     * @param string $oldStatus
+     * @param string $newStatus
+     */
+    public function processPaymentsIntent($payments, $appointment, $oldStatus, $newStatus) {
+        $action = null;
+        if ($oldStatus === BookingStatus::APPROVED &&
+            ($newStatus === BookingStatus::REJECTED || $newStatus === BookingStatus::CANCELED)
+         ) {
+            $action = 'Refund';
+        }
+        elseif ($oldStatus === BookingStatus::PENDING) {        
+            if ($newStatus === BookingStatus::APPROVED) {
+                $action = 'Capture';
+            }
+            elseif ($newStatus === BookingStatus::REJECTED || $newStatus === BookingStatus::CANCELED) {
+                $action = 'Refund';
+            }
+        }
+        if (!$action) return;
+        
+        /** @var Payment $payment */ 
+        foreach($payments as $payment) {
+            $this->processStripePayment($payment, $appointment, $newStatus, $action);    
+        }
     }    
 
     /**
