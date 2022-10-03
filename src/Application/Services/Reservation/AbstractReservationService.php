@@ -203,7 +203,7 @@ abstract class AbstractReservationService implements ReservationServiceInterface
         $paymentAS = $this->container->get('application.payment.service');
 
         $paymentCompleted = empty($data['bookings'][0]['packageCustomerService']['id']) ?
-            $paymentAS->processPayment($result, $data['payment'], $reservation, new BookingType($type)) : true;
+            $paymentAS->processPayment($result, $data['payment'], $data['bookings'][0]['customer'], $reservation, new BookingType($type)) : true;
 
         // set payment data returning for the payment gateway
         $intentId = isset($result->getData()['paymentIntentId']) ? $result->getData()['paymentIntentId'] : null;

@@ -32,6 +32,7 @@ use AmeliaBooking\Infrastructure\Services\Payment\CurrencyService;
 use AmeliaBooking\Infrastructure\Services\Payment\PayPalService;
 use AmeliaBooking\Infrastructure\Services\Payment\StripeService;
 use AmeliaStripe\PaymentIntent;
+use AmeliaStripe\Customer;
 use AmeliaBooking\Infrastructure\WP\Translations\FrontendStrings;
 use AmeliaStripe\Stripe;
 use Exception;
@@ -128,6 +129,7 @@ class PaymentApplicationService
     /**
      * @param CommandResult $result
      * @param array         $paymentData
+     * @param array         $customerData
      * @param Reservation   $reservation
      * @param BookingType   $bookingType
      *
@@ -137,7 +139,7 @@ class PaymentApplicationService
      * @throws Exception
      * @throws \Interop\Container\Exception\ContainerException
      */
-    public function processPayment($result, $paymentData, $reservation, $bookingType)
+    public function processPayment($result, $paymentData, $customerData, $reservation, $bookingType)
     {
         $bookingTypeValue = $bookingType->getValue();  
 
@@ -205,18 +207,20 @@ class PaymentApplicationService
                 );
 
                 try {
-                    $response = $paymentService->execute(
-                        [
-                            'paymentMethodId' => !empty($paymentData['data']['paymentMethodId']) ?
-                                $paymentData['data']['paymentMethodId'] : null,
-                            'paymentIntentId' => !empty($paymentData['data']['paymentIntentId']) ?
-                                $paymentData['data']['paymentIntentId'] : null,
-                            'amount'          => $currencyService->getAmountInFractionalUnit(new Price($paymentAmount)),
-                            'metaData'        => $additionalInformation['metaData'],
-                            'description'     => $additionalInformation['description'],
-                            'manualCapture'   => $bookingTypeValue === BookingType::APPOINTMENT
-                        ]
-                    );
+                    $stripeParams = [
+                        'paymentMethodId' => !empty($paymentData['data']['paymentMethodId']) ?
+                            $paymentData['data']['paymentMethodId'] : null,
+                        'paymentIntentId' => !empty($paymentData['data']['paymentIntentId']) ?
+                            $paymentData['data']['paymentIntentId'] : null,
+                        'amount'          => $currencyService->getAmountInFractionalUnit(new Price($paymentAmount)),
+                        'metaData'        => $additionalInformation['metaData'],
+                        'description'     => $additionalInformation['description'],
+                        'manualCapture'   => $bookingTypeValue === BookingType::APPOINTMENT
+                    ];
+                    if ($customerData['email']) {
+                        $stripeParams['customer'] = $this->createStripeCustomer($customerData);
+                    }                    
+                    $response = $paymentService->execute($stripeParams);
                 } catch (Exception $e) {
                     $result->setResult(CommandResult::RESULT_ERROR);
                     $result->setMessage(FrontendStrings::getCommonStrings()['payment_error']);
@@ -548,4 +552,29 @@ class PaymentApplicationService
 
         return true;
     }
+
+    /**
+     * @param array $customer
+     */
+    public function createStripeCustomer($customer) {
+        $stripeSettings = $this->container->get('domain.settings.service')->getSetting('payments', 'stripe');
+        Stripe::setApiKey(
+            $stripeSettings['testMode'] === true ? $stripeSettings['testSecretKey'] : $stripeSettings['liveSecretKey']
+        );
+        $response = Customer::all([
+            'email' => $customer['email'],
+            'limit' => 1
+        ]);
+        if ($response->data && count($response->data) > 0) {
+            return $response->data[0]->id;
+        }
+
+        /** @var Customer $stripeCustomer */
+        $stripeCustomer = Customer::create([
+            'email' => $customer['email'],
+            'name' => $customer['firstName'] . ' ' . $customer['lastName'],
+        ]);
+        return $stripeCustomer->id;        
+    }
+
 }

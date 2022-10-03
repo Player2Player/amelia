@@ -56,6 +56,10 @@ class StripeService extends AbstractPaymentService implements PaymentServiceInte
                 $stripeData['description'] = $data['description'];
             }
 
+            if ($data['customer']) {
+                $stripeData['customer'] = $data['customer'];
+            }            
+
             $intent = PaymentIntent::create($stripeData);
         }
 
