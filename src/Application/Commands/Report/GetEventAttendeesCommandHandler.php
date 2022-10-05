@@ -114,9 +114,13 @@ class GetEventAttendeesCommandHandler extends CommandHandler
                     foreach ($customFiled['value'] as $customFiledValue) {
                         $customFieldsValues[] =  $customFiledValue;
                     }
-                    $customFields[] = $customFiled['label'] . ': ' . implode('|', $customFieldsValues);
+                    // remove custom field name
+                    // $customFields[] = $customFiled['label'] . ': ' . implode('|', $customFieldsValues);
+                    $customFields[] = implode('|', $customFieldsValues);
                 } else {
-                    $customFields[] = $customFiled['label'] . ': ' . $customFiled['value'];
+                    // remove custom field name
+                    // $customFields[] = $customFiled['label'] . ': ' . $customFiled['value'];
+                    $customFields[] = $customFiled['value'];
                 }
             }
 
@@ -166,7 +170,12 @@ class GetEventAttendeesCommandHandler extends CommandHandler
             }
 
             if (in_array('customFields', $params['fields'], true)) {
-                $row[BackendStrings::getSettingsStrings()['custom_fields']] = implode(', ', $customFields);
+                $colNumber = 1;
+                foreach ($customFields as $customField) {
+                    $row[BackendStrings::getSettingsStrings()['custom_fields'] . " $colNumber"] = $customField;
+                    $colNumber++;
+                }
+                // $row[BackendStrings::getSettingsStrings()['custom_fields']] = implode(', ', $customFields);
             }
 
             $rows[] = $row;
