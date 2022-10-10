@@ -378,17 +378,17 @@ class PaymentApplicationService
         $amount = $payment->getAmount()->getValue();
         $refundAmount = 0;
         if ($newStatus === BookingStatus::REJECTED) {
-            $refundAmount = round($amount, 2) * 100;
+            $refundAmount = round($amount, 2);
         }
         elseif ($newStatus === BookingStatus::CANCELED) {
             if ($hours < 24) {
                 $refundAmount = 0;
             }
             elseif ($hours < 48) {
-                $refundAmount = round($amount - 10, 2) * 100;
+                $refundAmount = round($amount - 10, 2);
             }
             else {
-                $refundAmount = round($amount, 2) * 100;
+                $refundAmount = round($amount, 2);
             }
         }
 
@@ -402,7 +402,7 @@ class PaymentApplicationService
             $paymentStatus = PaymentStatus::REFUNDED;
             Refund::create([
                 'payment_intent' => $intentData->paymentIntentId,
-                'amount' => $refundAmount,
+                'amount' => $refundAmount * 100,
                 'metadata' => [
                     'appointmentId' => $appointmentId,
                     'paymentId' => $paymentId,
@@ -411,9 +411,11 @@ class PaymentApplicationService
                 ],
             ]);    
         }
-        $paymentForUpdate = $paymentParent ? $paymentParent : $payment;            
+        $paymentForUpdate = $paymentParent ? $paymentParent : $payment;      
+        $paymentForUpdateId = $paymentForUpdate->getId()->getValue();
 
-        $paymentRepository->updateFieldById($paymentForUpdate->getId()->getValue(), json_encode($intentData), 'data');
+        $paymentRepository->updateFieldById($paymentForUpdateId, json_encode($intentData), 'data');
+        $paymentRepository->updateFieldById($paymentForUpdateId, $refundAmount, 'amountRefund');
         $paymentRepository->updateFieldById($paymentId, $paymentStatus, 'status');
     }    
 

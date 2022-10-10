@@ -35,6 +35,9 @@ class Payment
     /** @var  Price */
     private $amount;
 
+    /** @var  Price */
+    private $amountRefund;
+
     /** @var  DateTimeValue */
     private $dateTime;
 
@@ -71,6 +74,8 @@ class Payment
         $this->customerBookingId = $customerBookingId;
 
         $this->amount = $amount;
+
+        $this->amountRefund = new Price(0);
 
         $this->dateTime = $dateTime;
 
@@ -159,6 +164,21 @@ class Payment
     public function setAmount($amount)
     {
         $this->amount = $amount;
+    }
+
+    /**
+     * @param Price $amountRefund
+     */
+    public function setAmountRefund($amountRefund)
+    {
+        $this->amountRefund = $amountRefund;
+    }
+
+    /**
+     * @return Price
+     */
+    public function getAmountRefund() {
+        return $this->amountRefund;
     }
 
     /**
@@ -252,6 +272,7 @@ class Payment
             'packageCustomerId' => $this->packageCustomerId ? $this->packageCustomerId->getValue() : null,
             'parentId'          => $this->getParentId() ? $this->getParentId()->getValue() : null,
             'amount'            => $this->amount->getValue(),
+            'amountRefund'      => $this->amountRefund->getValue(),
             'gateway'           => $this->gateway->getName()->getValue(),
             'gatewayTitle'      => null !== $this->getGatewayTitle() ? $this->getGatewayTitle()->getValue() : '',
             'dateTime'          => null !== $this->dateTime ? $this->dateTime->getValue()->format('Y-m-d H:i:s') : null,
