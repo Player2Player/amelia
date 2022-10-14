@@ -9542,7 +9542,7 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
                           e.coupon.discount = 0;
                           e.coupon.deduction = 0;
                           e.coupon.appointmentsFree = 0;
-                          a(new Error(t.response.data.message));
+                          a(new Error(t.response.data.data.coupon || t.response.data.message));
                           void 0 !== o && (o.style.visibility = "hidden");
                         })
                         .finally(() => {
@@ -10074,12 +10074,10 @@ wpJsonpAmeliaBookingPlugin([2, 3, 4, 5, 6], {
           );
         },
         getDiscountData: function (e) {
-          var t = this,
-            i = this.getExtrasPrice(1),
-            a = { instant: 0, postponed: 0 },
-            o = this.couponLimit;
+          var a = { instant: 0, postponed: 0 },
+              o = this.couponLimit;
           if (o || this.coupon.noLimit) {
-            var n = this.basePriceMultipleValue * this.bookable.price + i,
+            var n = this.getSubtotalPrice(),
               s = (n / 100) * this.coupon.discount + this.coupon.deduction + this.coupon.appointmentsFree * this.bookable.price;
             a.instant = s;
           }

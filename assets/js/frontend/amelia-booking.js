@@ -60,7 +60,7 @@
           15: "events-calendar",
           20: "events-list",
         }[e] || e) +
-        "-e062ce735147150ae069.js?t=" + getVersion());
+        "-e062ce735147150ae069.js?t=" + Date.now());
     var s = setTimeout(l, 12e4);
     function l() {
       (o.onerror = o.onload = null), clearTimeout(s);

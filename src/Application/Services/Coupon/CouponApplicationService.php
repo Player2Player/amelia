@@ -298,6 +298,7 @@ class CouponApplicationService
                 break;
         }
         
+        /*
         if ($inspectCoupon && $coupon && ( $coupon->getStatus()->getValue() === 'hidden' ||
               ( !$coupon->getNoLimit()->getValue() &&
                 $coupon->getUsed()->getValue() >= $coupon->getLimit()->getValue()
@@ -307,6 +308,7 @@ class CouponApplicationService
         {
             throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
         }
+        */
 
         //p2p: validate appointmentsMin and appointmentsMax
         if ($inspectCoupon && $coupon && $count > 0) {
@@ -320,12 +322,14 @@ class CouponApplicationService
 
           if ($max > 0 && ($count < $min || $count > $max))  {
             $exc = new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
-            $exc->setCouponDescription("For appying must booking from $min and to $max lessons");
+            $exc->setCouponDescription("Must book between $min and $max lessons to apply");
             throw $exc;
           }
         }
 
+
         //p2p: Validate by validFrom and validTo props
+        /*
         if ($inspectCoupon && $coupon && !$coupon->getNeverExpire())
         {
           $now = DateTimeService::getNowDateTimeObjectInUtc();
@@ -336,7 +340,7 @@ class CouponApplicationService
           if ($now < $fromDateTime || $now > $toDateTime)
             throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
         }
-
+        */    
         if ($inspectCoupon && $userId && $coupon->getCustomerLimit()->getValue() > 0 &&
             $this->getCustomerCouponUsedCount($coupon->getId()->getValue(), $userId) >=
             $coupon->getCustomerLimit()->getValue()
