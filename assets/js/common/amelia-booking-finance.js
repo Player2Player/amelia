@@ -915,6 +915,8 @@ wpJsonpAmeliaBookingPlugin([17], {
                                   ]
                                 ),
                                 t._v(" "), //p2p: Add new input for autoApply
+                                
+                                /*
                                 o(
                                   "el-form-item",
                                   {
@@ -980,6 +982,8 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                   ]
                                 ),
+                                */
+
                                 t._v(" "), //p2p: Add new input for description
                                 o(
                                   "el-form-item",
@@ -1131,6 +1135,8 @@ wpJsonpAmeliaBookingPlugin([17], {
                                   ]
                                 ),
                                 t._v(" "), //p2p: add appointmentsFree property
+                                
+                                /*
                                 o(
                                   "el-form-item",
                                   {
@@ -1193,6 +1199,8 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     }),
                                   ]
                                 ),
+                                */
+
                                 t._v(" "), //p2p: add appointmentsMin & max property
                                 o("el-row",
                                   {
@@ -1341,6 +1349,8 @@ wpJsonpAmeliaBookingPlugin([17], {
                                   ]
                                 ),
                                 t._v(" "), //p2p: Add new input for neverExpire
+                                
+                                /*
                                 o(
                                   "el-form-item",
                                   {
@@ -1408,7 +1418,11 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                   ]
                                 ),
+                                */
+
                                 t._v(" "), //p2p: add validFrom & validTo property
+                                
+                                /*
                                 o(
                                   "el-row",
                                   { attrs: { gutter: 20 } },
@@ -1514,7 +1528,11 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                   ]
                                 ),
+                                */
+                                
                                 t._v(" "), //p2p: Add new input for noLimit
+
+                                /*  
                                 o(
                                   "el-form-item",
                                   {
@@ -1580,6 +1598,8 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                   ]
                                 ),
+                                */
+
                                 t._v(" "),
                                 o(
                                   "el-form-item",
