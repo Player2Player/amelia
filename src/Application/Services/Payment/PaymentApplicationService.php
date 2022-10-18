@@ -381,7 +381,11 @@ class PaymentApplicationService
             $refundAmount = round($amount, 2);
         }
         elseif ($newStatus === BookingStatus::CANCELED) {
-            if ($hours < 24) {
+            // if the diff is negative then the refundAmount should be 0
+            if ($diff->invert === 1) {
+                $refundAmount = 0;
+            }
+            else if ($hours < 24) {
                 $refundAmount = 0;
             }
             elseif ($hours < 48) {
@@ -402,7 +406,7 @@ class PaymentApplicationService
             $paymentStatus = PaymentStatus::REFUNDED;
             Refund::create([
                 'payment_intent' => $intentData->paymentIntentId,
-                'amount' => $refundAmount * 100,
+                'amount' => round($refundAmount * 100),
                 'metadata' => [
                     'appointmentId' => $appointmentId,
                     'paymentId' => $paymentId,
