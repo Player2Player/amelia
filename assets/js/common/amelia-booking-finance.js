@@ -1350,7 +1350,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                 ),
                                 t._v(" "), //p2p: Add new input for neverExpire
                                 
-                                /*
+                                
                                 o(
                                   "el-form-item",
                                   {
@@ -1418,11 +1418,11 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                   ]
                                 ),
-                                */
+                                
 
                                 t._v(" "), //p2p: add validFrom & validTo property
                                 
-                                /*
+                                
                                 o(
                                   "el-row",
                                   { attrs: { gutter: 20 } },
@@ -1518,6 +1518,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                                     "dateRange",
                                                     val
                                                   );
+                                                  t.$forceUpdate();
                                                 },
                                                 expression: "coupon.dateRange",
                                               },
@@ -1528,7 +1529,7 @@ wpJsonpAmeliaBookingPlugin([17], {
                                     ),
                                   ]
                                 ),
-                                */
+                                
                                 
                                 t._v(" "), //p2p: Add new input for noLimit
 

@@ -15,6 +15,7 @@ use AmeliaBooking\Infrastructure\Common\Exceptions\QueryExecutionException;
 use AmeliaBooking\Domain\Common\Exceptions\InvalidArgumentException;
 use AmeliaBooking\Domain\Services\DateTime\DateTimeService;
 use AmeliaBooking\Domain\ValueObjects\Number\Integer\Id;
+use AmeliaBooking\Domain\ValueObjects\String\Status;
 use AmeliaBooking\Infrastructure\Common\Container;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\AppointmentRepository;
 use AmeliaBooking\Infrastructure\Repository\Booking\Appointment\CustomerBookingRepository;
@@ -297,6 +298,24 @@ class CouponApplicationService
 
                 break;
         }
+
+        if ($inspectCoupon && $coupon && $coupon->getStatus()->getValue() === Status::HIDDEN)
+        {
+            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+        }
+
+        //p2p: Validate by validFrom and validTo props
+        if ($inspectCoupon && $coupon && !$coupon->getNeverExpire())
+        {
+          $now = DateTimeService::getNowDateTimeObject();
+          $validFrom = $coupon->getValidFrom()->getValue()->setTime(0, 0, 0);  
+          $validTo = $coupon->getValidTo()->getValue()->setTime(23, 59, 59);
+          if ($now < $validFrom || $now > $validTo) {
+            $exc = new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
+            $exc->setCouponDescription("The coupon has expired");
+            throw $exc;
+          }
+        }
         
         /*
         if ($inspectCoupon && $coupon && ( $coupon->getStatus()->getValue() === 'hidden' ||
@@ -327,20 +346,6 @@ class CouponApplicationService
           }
         }
 
-
-        //p2p: Validate by validFrom and validTo props
-        /*
-        if ($inspectCoupon && $coupon && !$coupon->getNeverExpire())
-        {
-          $now = DateTimeService::getNowDateTimeObjectInUtc();
-          $validFrom = $coupon->getValidFrom()->getValue()->format('Y-m-d') . ' 00:00:00';  
-          $validTo = $coupon->getValidTo()->getValue()->format('Y-m-d') . ' 23:59:00';
-          $fromDateTime = DateTimeService::getCustomDateTimeObjectInUtc($validFrom);
-          $toDateTime = DateTimeService::getCustomDateTimeObjectInUtc($validTo);
-          if ($now < $fromDateTime || $now > $toDateTime)
-            throw new CouponInvalidException(FrontendStrings::getCommonStrings()['coupon_invalid']);
-        }
-        */    
         if ($inspectCoupon && $userId && $coupon->getCustomerLimit()->getValue() > 0 &&
             $this->getCustomerCouponUsedCount($coupon->getId()->getValue(), $userId) >=
             $coupon->getCustomerLimit()->getValue()
